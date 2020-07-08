@@ -1,0 +1,11 @@
+Validaciones para retornar DATA:
+	1.- La columna "LPATTR_PER_RES" debe ser igual al ingresado por el usuario
+	2.- La columna "TIPO" == "FUGA" y la columna "CONSIDERAR_FUGA" <> "NO"
+	3.- La columna "LPATTR_COD_STAT" == "NVIG" y la columna "CONSIDERAR_FUGA" <> "NO"
+	4.- La columna "RUT_CRO" <> "None"
+
+Validaciones de entradas al proceso:
+	1.- Validar que el proceso ingresado exista
+	2.- Validar que se ingresaron los parametros que el proceso necesita
+	2.- Validar la fecha ingresada sea correcta
+	3.- Validar que el archivo de donde se extrae la informacion exista
