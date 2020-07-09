@@ -1,7 +1,7 @@
 Validaciones para retornar DATA:
 	1.- La columna "LPATTR_PER_RES" debe ser igual al ingresado por el usuario
-	2.- La columna "TIPO" == "FUGA" y la columna "CONSIDERAR_FUGA" <> "NO"
-	3.- La columna "LPATTR_COD_STAT" == "NVIG" y la columna "CONSIDERAR_FUGA" <> "NO"
+	2.- La columna "TIPO" == "FUGA" y la columna "CONSIDERAR_FUGA" <> "NO" (0,1)
+	3.- La columna "LPATTR_COD_STAT" <> "NVIG" o "CONSIDERAR_FUGA" == "NO" (0,1)
 	4.- La columna "RUT_CRO" <> "None"
 
 Validaciones de entradas al proceso:

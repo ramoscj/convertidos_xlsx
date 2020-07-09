@@ -20,7 +20,7 @@ if proceso.upper() in procesos:
                 print("Archivo: %s encontrado." % archivo)
                 print("Iniciando Lectura...")
                 data_txt, encabezado = archivo_fuga(archivo, fecha_x)
-                if archivo_txt(salida_txt, data_txt, encabezado):
+                if data_txt and archivo_txt(salida_txt, data_txt, encabezado):
                     print("Archivo Creado !!")
                 else:
                     print("Error!!")
