@@ -1,11 +1,32 @@
 from openpyxl import load_workbook
 from tqdm import tqdm
 
-def archivo_fuga(archivo, periodo):
+def validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut):
+    rutNuevo = dict()
+    rutNuevo["CRR"] = correlativo
+    if tipo == 'FUGA' and  considerarFuga != 'NO':
+        rutNuevo["FUGA"] = 1
+    else:
+        rutNuevo["FUGA"] = 0
+    if  lpattrCodStat != 'NVIG' or considerarFuga == 'NO':
+        rutNuevo["STOCK"] = 1
+    else:
+        rutNuevo["STOCK"] = 0
+    rutNuevo["RUT"] = rut
+    return rutNuevo
+
+def existeFugaStock(tipo, lpattrCodStat, considerarFuga, rutExistente):
+    if tipo == 'FUGA' and  considerarFuga != 'NO':
+        rutExistente["FUGA"] += 1
+    elif  lpattrCodStat != 'NVIG' or considerarFuga == 'NO':
+        rutExistente["STOCK"] += 1
+    return rutExistente
+
+def leerArchivoFuga(archivo, periodo):
     try:
-        data_txt = []
-        encabezado = ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'RUT_CRO', 'NOMBRE_CRO', 'FECHAPROCESO', 'CONSIDERAR_FUGA']
-        encabezado_txt = ['CRR', 'FUGA', 'STOCK', 'RUT']
+        arregloSalidaTxt = []
+        encabezadoXls = ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'RUT_CRO', 'NOMBRE_CRO', 'FECHAPROCESO', 'CONSIDERAR_FUGA']
+        encabezadoTxt = ['CRR', 'FUGA', 'STOCK', 'RUT']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
@@ -13,7 +34,7 @@ def archivo_fuga(archivo, periodo):
         archivo_correcto = False
         for fila in hoja['A1:M1']:
             for celda in fila:
-                if str(celda.value).upper() == encabezado[i]:
+                if str(celda.value).upper() == encabezadoXls[i]:
                     archivo_correcto = True
                 else:
                     print('Error columna: %s' % i)
@@ -21,24 +42,26 @@ def archivo_fuga(archivo, periodo):
                 i += 1
         if archivo_correcto:
             i = 1
-            for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo DATA' , unit='Row'):
-                data_xls = []
+            filaSalidaXls = dict()
+            for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo DATA' , unit=' Fila'):
+            # for fila in hoja.rows:
+                rutExiste = False
                 if periodo == str(fila[0].value) and fila[9].value is not None:
-                    data_xls.append(i)
-                    if str(fila[4].value).upper() == 'FUGA' and str(fila[12].value).upper() != 'NO':
-                        data_xls.append(1)
+
+                    rutMantisa, separador, dv = str(fila[9].value).partition("-")
+                    rut = '%s%s' % (rutMantisa, dv)
+                    tipo = str(fila[4].value).upper()
+                    considerarFuga = str(fila[12].value).upper()
+                    lpattrCodStat = str(fila[5].value).upper()
+
+                    if filaSalidaXls.get(rut):
+                        filaSalidaXls[rut] = existeFugaStock(tipo, lpattrCodStat, considerarFuga, filaSalidaXls[rut])
                     else:
-                        data_xls.append(0)
-                    if str(fila[5].value).upper() != 'NVIG' or str(fila[12].value).upper() == 'NO':
-                        data_xls.append(1)
-                    else:
-                        data_xls.append(0)
-                    numero_1, separador, numero_2 = str(fila[9].value).partition("-")
-                    data_xls.append('%s%s' % (numero_1, numero_2))
-                if len(data_xls) > 0:
-                    data_txt.append(data_xls)
-                    i += 1
-            return data_txt, encabezado_txt
+                        filaSalidaXls[rut] = validarFugaStock(i, tipo, lpattrCodStat, considerarFuga, rut)
+                        rutExiste = False
+                        i += 1
+
+            return filaSalidaXls, encabezadoTxt
         else:
             print('Error el archivo presenta incosistencias en el encabezado')
             return False, False
