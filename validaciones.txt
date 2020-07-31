@@ -1,3 +1,5 @@
+Archivo FUGA:
+
 Validaciones para retornar DATA:
 	1.- La columna "LPATTR_PER_RES" debe ser igual al ingresado por el usuario
 	2.- La columna "TIPO" == "FUGA" y la columna "CONSIDERAR_FUGA" <> "NO" (0,1)
@@ -9,3 +11,13 @@ Validaciones de entradas al proceso:
 	2.- Validar que se ingresaron los parametros que el proceso necesita
 	2.- Validar la fecha ingresada sea correcta
 	3.- Validar que el archivo de donde se extrae la informacion exista
+
+Archivo Gestion: CRR;ESTADO;ESTADO_UT;RUT;CAMPAÑA
+
+Validaciones:
+	1.- "Fecha de creación" == Fecha ingresada por el usuario
+	2.- "Nombre de campaña" != "Inbound CRO" and "Ultima modificación" <= Fecha ingresada por el usuario
+	3.- ICRO no se considera en la suma si ESTADO == "Sin Gestion"
+	4.- ESTADO = columna "Estado" (“Estado” 0: Sin Gestion, 1: Pendiente, 2: Terminado con Exito, 3: Terminado sin Exito). Si ESTADO == "Terminado con Exito" se considera siempre CONTACTADO_CAMPAÑA y ESTADO = 0
+	5.- ESTADO_UT = “Estado de Última Tarea”, si se cumple ESTADO == 1 (Pendiente) or ESTADO == 3 (Terminado sin Éxito)
+	6.- CAMPAÑA = "Miembro de campaña id"
