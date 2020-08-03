@@ -10,4 +10,4 @@ def salidaArchivoTxt(ArchivoSalidaTxt, dataXlsx, encabezadoXlsx):
                 writer.writerow(x.values())
         return True
     except Exception as e:
-        print('Error al escribir archivo: %s | %s' % (ArchivoSalidaTxt, e))
+        raise Exception('Error al escribir archivo: %s | %s' % (ArchivoSalidaTxt, e))
