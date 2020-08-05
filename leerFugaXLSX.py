@@ -2,6 +2,7 @@ from openpyxl import load_workbook
 from tqdm import tqdm
 
 from validaciones_texto import formatearRut, validarEncabezadoXlsx
+from config_xlsx import FUGA_CONFIG_XLSX, PATH_XLSX
 
 def validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut):
     rutNuevo = dict()
@@ -26,8 +27,9 @@ def existeRut(tipo, lpattrCodStat, considerarFuga, rutExistente):
 
 def leerArchivoFuga(archivo, periodo):
     try:
-        encabezadoXls = ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'RUT_CRO', 'NOMBRE_CRO', 'FECHAPROCESO', 'CONSIDERAR_FUGA']
-        encabezadoTxt = ['CRR', 'FUGA', 'STOCK_PROXIMO_MES', 'RUT']
+        encabezadoXls = FUGA_CONFIG_XLSX['ENCABEZADO_XLSX']
+        encabezadoTxt = FUGA_CONFIG_XLSX['ENCABEZADO_TXT']
+        columna = FUGA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
@@ -37,12 +39,12 @@ def leerArchivoFuga(archivo, periodo):
             filaSalidaXls = dict()
             for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo FugaCRO' , unit=' Fila'):
             # for fila in hoja.rows:
-                if periodo == str(fila[0].value) and fila[9].value is not None:
+                if periodo == str(fila[columna['LPATTR_PER_RES']].value) and fila[columna['RUT_CRO']].value is not None:
 
-                    rut = rut = formatearRut(str(fila[9].value))
-                    tipo = str(fila[4].value).upper()
-                    considerarFuga = str(fila[12].value).upper()
-                    lpattrCodStat = str(fila[5].value).upper()
+                    rut = formatearRut(str(fila[columna['RUT_CRO']].value))
+                    tipo = str(fila[columna['TIPO']].value).upper()
+                    considerarFuga = str(fila[columna['CONSIDERAR_FUGA']].value).upper()
+                    lpattrCodStat = str(fila[columna['LPATTR_COD_STAT']].value).upper()
 
                     if filaSalidaXls.get(rut):
                         filaSalidaXls[rut] = existeRut(tipo, lpattrCodStat, considerarFuga, filaSalidaXls[rut])

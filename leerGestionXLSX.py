@@ -1,61 +1,71 @@
 from openpyxl import load_workbook
 from conexio_db import conectorDB
 from tqdm import tqdm
+import datetime
+import sys;
 
-from validaciones_texto import setearFechaInput, validarEncabezadoXlsx
+from validaciones_texto import setearFechaInput, validarEncabezadoXlsx, setearCelda, setearFechaCelda
 from diccionariosDB import buscarCamphnasDb, buscarEjecutivosDb
+from config_xlsx import GESTION_CONFIG_XLSX, PATH_XLSX
+
+from escribir_txt import salidaArchivoTxt
+
+CAPTURADOR_ERRORES = dict()
 
 def extraerPropietariosCro():
-    archivo = 'Propietarios CRO.xlsx'
+    # pathXlsxEntrada = 'test_xls/'
+    pathXlsxEntrada = PATH_XLSX
+    archivo = '%s%s.xlsx' % (pathXlsxEntrada, GESTION_CONFIG_XLSX['ENTRADA_PROPIETARIOS_XLSX'])
     try:
-        encabezadoXls = ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'FECHA DE LA ÚLTIMA MODIFICACIÓN', 'DUEÑO: NOMBRE COMPLETO', 'ASIGNADO A: NOMBRE COMPLETO', 'CUENTA: PROPIETARIO DEL CLIENTE: NOMBRE COMPLETO']
+        encabezadoXls = GESTION_CONFIG_XLSX['ENCABEZADO_PROPIETARIOS_XLSX']
+        celda = GESTION_CONFIG_XLSX['COLUMNAS_PROPIETARIOS_XLSX']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
         propietariosCro = dict()
-        validarArchivo = validarEncabezadoXlsx(hoja['A1:G1'], encabezadoXls)
-        if validarArchivo:
+        validarArchivo = validarEncabezadoXlsx(hoja['A1:G1'], encabezadoXls, archivo)
+        if type(validarArchivo) is not dict:
             for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo PropietariosCRO' , unit=' Fila'):
-                campahnaId = str(fila[0].value)
+                campahnaId = str(fila[celda['CAMPAÑA_ID']].value)
                 if not propietariosCro.get(campahnaId):
-                    nombreUno = str(fila[4].value).lower()
-                    if fila[5].value is None:
-                        nombreDos = None
+                    nombreIBCRO = str(fila[celda['DUEÑO_NOMBRE_COMPLETO']].value).lower()
+                    if fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value is None:
+                        nombreNoIBCRO = str(fila[celda['CUENTA_NOMBRE_COMPLETO']].value).lower()
                     else:
-                        nombreDos = str(fila[5].value).lower()
-                    nombreTres = str(fila[6].value).lower()
-                    propietariosCro[campahnaId] = {'NOMBRE_UNO': nombreUno , 'NOMBRE_DOS': nombreDos, 'NOMBRE_TRES': nombreTres}
+                        nombreNoIBCRO = str(fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value).lower()
+                    propietariosCro[campahnaId] = {'NOMBRE_IBCRO': nombreIBCRO , 'NOMBRE_NO_IBCRO': nombreNoIBCRO}
+            CAPTURADOR_ERRORES.setdefault(len(CAPTURADOR_ERRORES)+1 , {'ENCABEZADO_PROPIETARIOSCRO': 'Encabezado del archivo de Prpietarios OK'})
             return propietariosCro
         else:
-            raise Exception('Error el archivo de PROPIETARIOS presenta incosistencias en el encabezado')
+            CAPTURADOR_ERRORES.setdefault('ENCABEZADO_PROPIETARIOSCRO', validarArchivo)
+            raise
     except Exception as e:
-        raise Exception('Error al leer archivo: %s | %s' % (archivo, e))
+        errorMsg = 'Error al leer archivo: %s | %s' % (archivo, e)
+        CAPTURADOR_ERRORES.setdefault(len(CAPTURADOR_ERRORES)+1 , {'LECTURA_PROPIETARIOSCRO': errorMsg})
+        raise
 
-def DefinirEstado(estadoXlsx, coordenadaFila):
-    columnasError = []
+def getEstado(celdaFila):
     listaEstado = {'Pendiente': 1, 'Terminado con Exito': 2, 'Terminado sin Exito': 3}
-    if listaEstado.get(estadoXlsx):
-        return listaEstado[estadoXlsx]
-    elif estadoXlsx == 'Sin Gestion':
+    if listaEstado.get(celdaFila.value):
+        return listaEstado[celdaFila.value]
+    elif celdaFila.value == 'Sin Gestion':
         return 0
     else:
-        resto, separador, celdaN = coordenadaFila.partition(".")
-        error = 'Error estado <%s: %s' % (celdaN, estadoXlsx)
-        columnasError.append(error)
-        print(error)
+        celdaCoordenada = setearCelda(celdaFila)
+        error = 'Celda%s - No existe estado: %s' % (celdaCoordenada, celdaFila.value)
+        return error
 
-def DefinirEstadoUt(estadoUtXlsx, coordenadaFila):
+def getEstadoUt(celdaFila):
     columnasError = []
     listaEstadoUt = {'Campaña exitosa': 1, 'Teléfono ocupado': 2, 'Sin respuesta': 3, 'Campaña completada con 5 intentos': 4, 'Buzón de voz': 5, 'Llamado reprogramado': 6, 'Contacto por correo': 7, 'Teléfono apagado': 8, 'Número equivocado': 9, 'Numero invalido': 10, 'Solicita renuncia': 11, 'No quiere escuchar': 12, 'Cliente desconoce venta': 13, 'Temporalmente fuera de servicio': 14, 'Cliente vive en el extranjero': 15, 'Sin teléfono registrado': 16, 'Cliente no retenido': 17, 'No contesta': 18, 'Pendiente de envío de Póliza': 19}
-    if listaEstadoUt.get(estadoUtXlsx):
-        return listaEstadoUt[estadoUtXlsx]
-    elif estadoUtXlsx is None:
+    if listaEstadoUt.get(celdaFila.value):
+        return listaEstadoUt[celdaFila.value]
+    elif celdaFila.value is None:
         return 0
     else:
-        resto, separador, celdaN = coordenadaFila.partition(".")
-        error = 'Error estadoUT <%s: %s' % (celdaN, estadoUtXlsx)
-        columnasError.append(error)
-        print(error)
+        celdaCoordenada = setearCelda(celdaFila)
+        error = 'Celda%s - No existe estadoUt: %s' % (celdaCoordenada, celdaFila.value)
+        return error
 
 def insertarCamphnaCro(nombreCampahna):
     try:
@@ -75,30 +85,48 @@ def insertarCamphnaCro(nombreCampahna):
         
 def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
     try:
-        encabezadoXls = ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'ESTADO DE ÚLTIMA TAREA', 'ESTADO', 'FECHA DE LA ÚLTIMA MODIFICACIÓN', 'DUEÑO: NOMBRE COMPLETO']
-        encabezadoTxt = ['CRR', 'ESTADO', 'ESTADO_UT', 'RUT', 'ID_CAMPANHA', 'CDG_CAMPANHA']
+        # pathXlsxEntrada = PATH_XLSX
+        # archivo = '%s%s' % (pathXlsxEntrada, archivo)
+        encabezadoXls = GESTION_CONFIG_XLSX['ENCABEZADO_XLSX']
+        encabezadoTxt = GESTION_CONFIG_XLSX['ENCABEZADO_TXT']
+        columna = GESTION_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
-        i = 0
-        j = 1
-        archivo_correcto = validarEncabezadoXlsx(hoja['A1:G1'], encabezadoXls)
-        if archivo_correcto:
+        correlativo = 1
+
+        archivo_correcto = validarEncabezadoXlsx(hoja['A1:G1'], encabezadoXls, archivo)
+        if type(archivo_correcto) is not dict:
+            CAPTURADOR_ERRORES.setdefault('ENCABEZADO_GESTION', {len(CAPTURADOR_ERRORES)+1: 'Encabezado del archivo de Gestion OK'})
             filaSalidaXls = dict()
             propietarioCro = extraerPropietariosCro()
+            CAPTURADOR_ERRORES.setdefault('LECTURA_PROPIETARIOS', {len(CAPTURADOR_ERRORES)+1: 'Lectura del archivo de PROPIETARIOS_CRO OK'})
             campahnasExistentesDb = buscarCamphnasDb()
             ejecutivosExistentesDb = buscarEjecutivosDb()
+            # rutNoExisten = []
+            i = 0
             for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo GestiónCRO' , unit=' Fila'):
             # for fila in hoja.iter_rows(min_row=3, min_col=1):
-                if str(fila[1].value).upper() != encabezadoXls[1]:
-                    fechaCreacion = setearFechaInput(str(fila[1].value), str(fila[1]))
-                    fechaRangoUno = setearFechaInput(str(fechaRangoUno), 'FechaUno')
-                    fechaRangoDos = setearFechaInput(str(fechaRangoDos), 'FechaDos')
-                    if fila[1].value is not None and fechaCreacion >= fechaRangoUno and fechaCreacion <= fechaRangoDos:
-                        estadoUt = DefinirEstadoUt(fila[3].value, str(fila[3]))
-                        estado = DefinirEstado(fila[4].value, str(fila[4]))
-                        campanhaId = str(fila[0].value)
-                        nombreCampahna = str(fila[2].value)
+                if i >= 1:
+                    fechaCreacion = setearFechaCelda(fila[columna['FECHA_DE_CREACION']])
+                    fechaUno = setearFechaInput(fechaRangoUno)
+                    fechaDos = setearFechaInput(fechaRangoDos)
+
+                    if type(fechaCreacion) is not datetime.date:
+                        CAPTURADOR_ERRORES.setdefault('FECHA_CREACION', {len(CAPTURADOR_ERRORES)+1: fechaCreacion})
+                        continue
+                    if fechaCreacion >= fechaUno and fechaCreacion <= fechaDos:
+                        campanhaId = str(fila[columna['CAMPAÑA_ID']].value)
+                        nombreCampahna = str(fila[columna['NOMBRE_DE_CAMPAÑA']].value)
+                        estadoUt = getEstadoUt(fila[columna['ESTADO_UT']])
+                        estado = getEstado(fila[columna['ESTADO']])
+                        
+                        if type(estadoUt) is not int:
+                            CAPTURADOR_ERRORES.setdefault('ERROR_ESTADOUT', {len(CAPTURADOR_ERRORES)+1: estadoUt})
+                            continue
+                        if type(estado) is not int:
+                            CAPTURADOR_ERRORES.setdefault('ERROR_ESTADO', {len(CAPTURADOR_ERRORES)+1: estado})
+                            continue
                         if campahnasExistentesDb.get(nombreCampahna):
                             codigoCampahnaDb = campahnasExistentesDb[nombreCampahna]['CODIGO']
                         else:
@@ -106,41 +134,35 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
                             campahnasExistentesDb = buscarCamphnasDb()
                             if campahnasExistentesDb.get(nombreCampahna):
                                 codigoCampahnaDb = campahnasExistentesDb[nombreCampahna]['CODIGO']
-                        if propietarioCro.get(campanhaId):
-                            if nombreCampahna == 'Inbound CRO':
-                                if ejecutivosExistentesDb.get(propietarioCro[campanhaId]['NOMBRE_UNO']):
-                                    rut = ejecutivosExistentesDb[propietarioCro[campanhaId]['NOMBRE_UNO']]['RUT']
-                                    filaSalidaXls[i] = {'CRR': j, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': rut}
-                                else:
-                                    filaSalidaXls[i] = {'CRR': j, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': 'No existe %s Celda: - %s' % (propietarioCro[campanhaId]['NOMBRE_UNO'], str(fila[0]))}
-                            else:
-                                if propietarioCro[campanhaId]['NOMBRE_DOS'] is not None:
-                                    if ejecutivosExistentesDb.get(propietarioCro[campanhaId]['NOMBRE_DOS']):
-                                        rut = ejecutivosExistentesDb[propietarioCro[campanhaId]['NOMBRE_DOS']]['RUT']
-                                        filaSalidaXls[i] = {'CRR': j, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': rut}
-                                    else:
-                                        filaSalidaXls[i] = {'CRR': j, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': 'No existe %s Celda: %s' % (propietarioCro[campanhaId]['NOMBRE_DOS'], str(fila[0]))}
-                                else:
-                                    if ejecutivosExistentesDb.get(propietarioCro[campanhaId]['NOMBRE_TRES']):
-                                        rut = ejecutivosExistentesDb[propietarioCro[campanhaId]['NOMBRE_TRES']]['RUT']
-                                        filaSalidaXls[i] = {'CRR': j, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': rut}
-                                    else:
-                                        filaSalidaXls[i] = {'CRR': j, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': 'No existe %s Celda: %s' % (propietarioCro[campanhaId]['NOMBRE_TRES'], str(fila[0]))}
-                        j += 1
-                        # print(j)
+
+                        if nombreCampahna == 'Inbound CRO':
+                            nombre_ejecutivo = propietarioCro[campanhaId]['NOMBRE_IBCRO']
+                        else:
+                            nombre_ejecutivo = propietarioCro[campanhaId]['NOMBRE_NO_IBCRO']
+                        if ejecutivosExistentesDb.get(nombre_ejecutivo):
+                            rut = ejecutivosExistentesDb[nombre_ejecutivo]['RUT']
+                            filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': rut}
+                            correlativo += 1
+                        else:
+                            celda = str(fila[columna['CAMPAÑA_ID']])
+                            errorRut = ('Celda%s - No existe Ejecutivo: %s' % (setearCelda(celda), nombre_ejecutivo))
+                            CAPTURADOR_ERRORES.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(CAPTURADOR_ERRORES)+1: errorRut})
                     else:
-                        print('Fecha: %s no esta en el rago %s - %s' % (fechaCreacion, fechaRangoUno, fechaRangoDos))
-                    i += 1
+                        celdaCoordenada = setearCelda(fila[columna['FECHA_DE_CREACION']])
+                        errorMsg = '%s: %s no esta en el rago %s - %s' % (celdaCoordenada, fechaCreacion, fechaRangoUno, fechaRangoDos)
+                        CAPTURADOR_ERRORES.setdefault('RANGO_FECHA_CREACION', {len(CAPTURADOR_ERRORES)+1: errorMsg})
+                i += 1
+            CAPTURADOR_ERRORES.setdefault('PROCESO_GESTION', {len(CAPTURADOR_ERRORES)+1: 'Proceso del Archivo de Gestion Finalizado'})
             return filaSalidaXls, encabezadoTxt
         else:
-            print('Error el archivo de GESTION presenta incosistencias en el encabezado')
-            return False, False
+            CAPTURADOR_ERRORES.setdefault('ENCABEZADO_GESTION', archivo_correcto)
+            CAPTURADOR_ERRORES.setdefault('PROCESO_GESTION', {len(CAPTURADOR_ERRORES)+1: 'Error al procesar Archivo de Gestion'})
+            raise
     except Exception as e:
-        print('Error al leer archivo: %s | %s' % (archivo, e))
+        errorMsg = 'Error: %s | %s' % (archivo, e)
+        CAPTURADOR_ERRORES.setdefault('LECTURA_ARCHIVO', {len(CAPTURADOR_ERRORES)+1: errorMsg})
+        CAPTURADOR_ERRORES.setdefault('PROCESO_GESTION', {len(CAPTURADOR_ERRORES)+1: 'Error al procesar Archivo de Gestion'})
+        return False, False
 
-# leerArchivoGestion('Gestión CRO - copia.xlsx', '202003', '20200101', '20200131')
-# print(DefinirEstado('Sin Gestion', 'AA15'))
-# print(buscarCamphnasDb())
-# x = extraerPropietariosCro()
-# if x['a5e1V000000ktfX']['NOMBRE_DOS'] is None:
-#     print('estoy vacio')
+# leerArchivoGestion('Gestión CRO.xlsx', '202003', '20200101', '20200131')
+# print(CAPTURADOR_ERRORES)

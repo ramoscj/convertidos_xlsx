@@ -11,7 +11,7 @@ def buscarEjecutivosDb():
             ejecutivos[nombre] = {'RUT': rut, 'NOMBRE': nombre}
         return ejecutivos
     except Exception as e:
-        raise Exception('Error al consultar ejecutivos: %s' % e)
+        raise Exception('Error buscarEjecutivosDb: %s' % e)
     finally:
         cursor.close()
         db.close()
@@ -27,7 +27,7 @@ def buscarCamphnasDb():
             campanhas[nombre] = {'CODIGO': codigo, 'NOMBRE': nombre}
         return campanhas
     except Exception as e:
-        raise Exception('Error al consultar campanha: %s' % e)
+        raise Exception('Error buscarCamphnasDb: %s' % e)
     finally:
         cursor.close()
         db.close()
@@ -43,7 +43,7 @@ def buscarRutEjecutivosDb():
             ejecutivos[rut] = {'RUT': rut, 'NOMBRE': nombre}
         return ejecutivos
     except Exception as e:
-        raise Exception('Error al consultar ejecutivos: %s' % e)
+        raise Exception('Error buscarRutEjecutivosDb: %s' % e)
     finally:
         cursor.close()
         db.close()

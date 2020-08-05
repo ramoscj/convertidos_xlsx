@@ -3,17 +3,22 @@ import sys
 
 from leerFugaXLSX import leerArchivoFuga
 from leerAsistenciaXLSX import leerArchivoAsistencia
-from leerGestionXLSX import leerArchivoGestion
+from leerGestionXLSX import leerArchivoGestion, CAPTURADOR_ERRORES
 from leerCampanhasEspecialesXLSX import leerArchivoCampanhasEsp
-from escribir_txt import salidaArchivoTxt
+
+from escribir_txt import salidaArchivoTxt, salidaLogTxt
 from validaciones_texto import validaFechaInput
+
+from config_xlsx import PATH_XLSX, PATH_TXT, PATH_LOG
 
 def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
     fechaYear = fechaInput[0:4]
     fechaMonth = fechaInput[4:6]
+    pathTxtSalida = PATH_TXT
+    pathXlsxEntrada = PATH_XLSX
     if validaFechaInput(fechaYear, fechaMonth, fechaInput):
-        archivoXlsx = '%s%s.xlsx' % (fechaInput, archivoXlsxInput)
-        archivoTxtOutput = '%s%s.txt' % (archivoTxt, fechaInput)
+        archivoXlsx = '%s%s%s.xlsx' % (pathXlsxEntrada, fechaInput, archivoXlsxInput)
+        archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, archivoTxt, fechaInput)
         if os.path.isfile(archivoXlsx):
             print("Archivo: %s encontrado." % archivoXlsx)
             print("Iniciando Lectura...")
@@ -24,7 +29,7 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
                     dataXlsx, encabezadoXlsx = leerArchivoAsistencia(archivoXlsx, fechaInput)
                 if procesoInput == 'CAMPANHA_ESPECIAL':
                     dataXlsx, encabezadoXlsx = leerArchivoCampanhasEsp(archivoXlsx, fechaInput)
-                if salidaArchivoTxt(archivoTxtOutput, dataXlsx, encabezadoXlsx):
+                if dataXlsx and salidaArchivoTxt(archivoTxtOutput, dataXlsx, encabezadoXlsx):
                     print("Archivo: %s Creado !!" % archivoTxtOutput)
             except Exception as e:
                 print(e)
@@ -33,10 +38,11 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
 
 procesos = {'FUGA': {'argumentos': 2, 'archivoLecturaXls': '_FUGA_AGENCIA', 'archivoSalidaTxt': 'FUGA'}, 
             'ASISTENCIA': {'argumentos': 2, 'archivoLecturaXls': '_Asistencia_CRO', 'archivoSalidaTxt': 'ASISTENCIA'},
-            'GESTION': {'argumentos': 4, 'archivoLecturaXls': 'Gestión CRO.xlsx', 'archivoSalidaTxt': 'GESTION'},
+            'GESTION': {'argumentos': 4, 'archivoLecturaXls': 'Gestión CRO', 'archivoSalidaTxt': 'GESTION'},
             'CAMPANHA_ESPECIAL': {'argumentos': 2, 'archivoLecturaXls': '_CampañasEspeciales_CRO', 'archivoSalidaTxt': 'PILOTO'}
             }
 procesoInput = str(sys.argv[1]).upper()
+
 if procesos.get(procesoInput):
     if len(sys.argv) == procesos[procesoInput]['argumentos'] + 1:
         if procesoInput == 'FUGA' or procesoInput == 'ASISTENCIA' or procesoInput == 'CAMPANHA_ESPECIAL':
@@ -48,14 +54,21 @@ if procesos.get(procesoInput):
             fechaEntrada = str(sys.argv[2])
             fechaRangoUno = str(sys.argv[3])
             fechaRangoDos = str(sys.argv[4])
-            archivoXls = procesos[procesoInput]['archivoLecturaXls']
+            # pathXlsxEntrada = 'test_xls/'
+            pathXlsxEntrada = PATH_XLSX
+            archivoXls = ('%s%s.xlsx') % (pathXlsxEntrada, procesos[procesoInput]['archivoLecturaXls'])
             if os.path.isfile(archivoXls):
                 print("Archivo: %s encontrado." % archivoXls)
                 print("Iniciando Lectura...")
-                archivoTxt = ('%s%s.txt') % (procesos[procesoInput]['archivoSalidaTxt'], fechaEntrada)
+                pathTxtSalida = PATH_TXT
+                pathLogSalida = ('%s%s') % (PATH_LOG, 'log_generarTxt.txt')
+                archivoTxt = ('%s%s%s.txt') % (pathTxtSalida, procesos[procesoInput]['archivoSalidaTxt'], fechaEntrada)
+                erroresProceso = CAPTURADOR_ERRORES
                 dataXlsx, encabezadoXlsx = leerArchivoGestion(archivoXls, fechaEntrada, fechaRangoUno, fechaRangoDos)
-                if salidaArchivoTxt(archivoTxt, dataXlsx, encabezadoXlsx):
+                if dataXlsx and salidaArchivoTxt(archivoTxt, dataXlsx, encabezadoXlsx):
                     print("Archivo: GESTION Creado !!")
+                if salidaLogTxt(pathLogSalida, erroresProceso):
+                    print("Archivo log_generarTxt.txt Creado !!")
             else:
                 print('Error: Archivo %s no encontrado' % archivoXls)
     else:

@@ -1,0 +1,10 @@
+Encabezado del archivo de Gestion OK
+Encabezado del archivo de Prpietarios OK
+Lectura del archivo de PROPIETARIOS_CRO OK
+Celda<B2> - Fecha incorrecta: aa | invalid literal for int() with base 10: 'aa'
+Celda<D3> - No existe estadoUt: Campaña exitosaa
+Celda<A4> - No existe Ejecutivo: marcelo ibarra valenci
+Celda<E5> - No existe estado: Terminado con Exitoo
+Celda<A6> - No existe Ejecutivo: marcelo ibarra valenci
+Celda<A7> - No existe Ejecutivo: marcelo ibarra valenci
+Proceso del Archivo de Gestion Finalizado
