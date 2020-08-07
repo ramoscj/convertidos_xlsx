@@ -10,12 +10,13 @@ from config_xlsx import GESTION_CONFIG_XLSX, PATH_XLSX
 
 from escribir_txt import salidaArchivoTxt
 
-CAPTURADOR_ERRORES = dict()
+LOG_PROCESO_GESTION = dict()
 
 def extraerPropietariosCro():
     # pathXlsxEntrada = 'test_xls/'
     pathXlsxEntrada = PATH_XLSX
     archivo = '%s%s.xlsx' % (pathXlsxEntrada, GESTION_CONFIG_XLSX['ENTRADA_PROPIETARIOS_XLSX'])
+    LOG_PROCESO_GESTION.setdefault('INICIO_LECTURA_PROPIETARIOS', {len(LOG_PROCESO_GESTION)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
     try:
         encabezadoXls = GESTION_CONFIG_XLSX['ENCABEZADO_PROPIETARIOS_XLSX']
         celda = GESTION_CONFIG_XLSX['COLUMNAS_PROPIETARIOS_XLSX']
@@ -25,7 +26,7 @@ def extraerPropietariosCro():
         propietariosCro = dict()
         validarArchivo = validarEncabezadoXlsx(hoja['A1:G1'], encabezadoXls, archivo)
         if type(validarArchivo) is not dict:
-            for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo PropietariosCRO' , unit=' Fila'):
+            for fila in tqdm(iterable=hoja.rows, total= len(tuple(hoja.rows)), desc= 'Leyendo PropietariosCRO' , unit=' Fila'):
                 campahnaId = str(fila[celda['CAMPAÑA_ID']].value)
                 if not propietariosCro.get(campahnaId):
                     nombreIBCRO = str(fila[celda['DUEÑO_NOMBRE_COMPLETO']].value).lower()
@@ -34,14 +35,15 @@ def extraerPropietariosCro():
                     else:
                         nombreNoIBCRO = str(fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value).lower()
                     propietariosCro[campahnaId] = {'NOMBRE_IBCRO': nombreIBCRO , 'NOMBRE_NO_IBCRO': nombreNoIBCRO}
-            CAPTURADOR_ERRORES.setdefault(len(CAPTURADOR_ERRORES)+1 , {'ENCABEZADO_PROPIETARIOSCRO': 'Encabezado del archivo de Prpietarios OK'})
+            LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1 , {'ENCABEZADO_PROPIETARIOSCRO': 'Encabezado del Archivo: %s OK' % archivo})
+            LOG_PROCESO_GESTION.setdefault('LECTURA_PROPIETARIOS', {len(LOG_PROCESO_GESTION)+1: 'Lectura del Archivo: %s Finalizado' % archivo})
             return propietariosCro
         else:
-            CAPTURADOR_ERRORES.setdefault('ENCABEZADO_PROPIETARIOSCRO', validarArchivo)
+            LOG_PROCESO_GESTION.setdefault('ENCABEZADO_PROPIETARIOSCRO', validarArchivo)
             raise
     except Exception as e:
         errorMsg = 'Error al leer archivo: %s | %s' % (archivo, e)
-        CAPTURADOR_ERRORES.setdefault(len(CAPTURADOR_ERRORES)+1 , {'LECTURA_PROPIETARIOSCRO': errorMsg})
+        LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1 , {'LECTURA_PROPIETARIOSCRO': errorMsg})
         raise
 
 def getEstado(celdaFila):
@@ -85,26 +87,24 @@ def insertarCamphnaCro(nombreCampahna):
         
 def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
     try:
-        # pathXlsxEntrada = PATH_XLSX
-        # archivo = '%s%s' % (pathXlsxEntrada, archivo)
+        LOG_PROCESO_GESTION.setdefault('INICIO_LECTURA_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
         encabezadoXls = GESTION_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = GESTION_CONFIG_XLSX['ENCABEZADO_TXT']
         columna = GESTION_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
-        correlativo = 1
 
         archivo_correcto = validarEncabezadoXlsx(hoja['A1:G1'], encabezadoXls, archivo)
         if type(archivo_correcto) is not dict:
-            CAPTURADOR_ERRORES.setdefault('ENCABEZADO_GESTION', {len(CAPTURADOR_ERRORES)+1: 'Encabezado del archivo de Gestion OK'})
+            LOG_PROCESO_GESTION.setdefault('ENCABEZADO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Encabezado del Archivo: %s OK' % archivo})
             filaSalidaXls = dict()
             propietarioCro = extraerPropietariosCro()
-            CAPTURADOR_ERRORES.setdefault('LECTURA_PROPIETARIOS', {len(CAPTURADOR_ERRORES)+1: 'Lectura del archivo de PROPIETARIOS_CRO OK'})
             campahnasExistentesDb = buscarCamphnasDb()
             ejecutivosExistentesDb = buscarEjecutivosDb()
-            # rutNoExisten = []
             i = 0
+            correlativo = 1
+            LOG_PROCESO_GESTION.setdefault('INICIO_CELDAS_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
             for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo GestiónCRO' , unit=' Fila'):
             # for fila in hoja.iter_rows(min_row=3, min_col=1):
                 if i >= 1:
@@ -113,7 +113,7 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
                     fechaDos = setearFechaInput(fechaRangoDos)
 
                     if type(fechaCreacion) is not datetime.date:
-                        CAPTURADOR_ERRORES.setdefault('FECHA_CREACION', {len(CAPTURADOR_ERRORES)+1: fechaCreacion})
+                        LOG_PROCESO_GESTION.setdefault('FECHA_CREACION', {len(LOG_PROCESO_GESTION)+1: fechaCreacion})
                         continue
                     if fechaCreacion >= fechaUno and fechaCreacion <= fechaDos:
                         campanhaId = str(fila[columna['CAMPAÑA_ID']].value)
@@ -122,10 +122,10 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
                         estado = getEstado(fila[columna['ESTADO']])
                         
                         if type(estadoUt) is not int:
-                            CAPTURADOR_ERRORES.setdefault('ERROR_ESTADOUT', {len(CAPTURADOR_ERRORES)+1: estadoUt})
+                            LOG_PROCESO_GESTION.setdefault('ERROR_ESTADOUT', {len(LOG_PROCESO_GESTION)+1: estadoUt})
                             continue
                         if type(estado) is not int:
-                            CAPTURADOR_ERRORES.setdefault('ERROR_ESTADO', {len(CAPTURADOR_ERRORES)+1: estado})
+                            LOG_PROCESO_GESTION.setdefault('ERROR_ESTADO', {len(LOG_PROCESO_GESTION)+1: estado})
                             continue
                         if campahnasExistentesDb.get(nombreCampahna):
                             codigoCampahnaDb = campahnasExistentesDb[nombreCampahna]['CODIGO']
@@ -144,24 +144,23 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
                             filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': rut}
                             correlativo += 1
                         else:
-                            celda = str(fila[columna['CAMPAÑA_ID']])
-                            errorRut = ('Celda%s - No existe Ejecutivo: %s' % (setearCelda(celda), nombre_ejecutivo))
-                            CAPTURADOR_ERRORES.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(CAPTURADOR_ERRORES)+1: errorRut})
+                            errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), nombre_ejecutivo)
+                            LOG_PROCESO_GESTION.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorRut})
                     else:
                         celdaCoordenada = setearCelda(fila[columna['FECHA_DE_CREACION']])
                         errorMsg = '%s: %s no esta en el rago %s - %s' % (celdaCoordenada, fechaCreacion, fechaRangoUno, fechaRangoDos)
-                        CAPTURADOR_ERRORES.setdefault('RANGO_FECHA_CREACION', {len(CAPTURADOR_ERRORES)+1: errorMsg})
+                        LOG_PROCESO_GESTION.setdefault('RANGO_FECHA_CREACION', {len(LOG_PROCESO_GESTION)+1: errorMsg})
                 i += 1
-            CAPTURADOR_ERRORES.setdefault('PROCESO_GESTION', {len(CAPTURADOR_ERRORES)+1: 'Proceso del Archivo de Gestion Finalizado'})
+            LOG_PROCESO_GESTION.setdefault('FIN_CELDAS_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
+            LOG_PROCESO_GESTION.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
             return filaSalidaXls, encabezadoTxt
         else:
-            CAPTURADOR_ERRORES.setdefault('ENCABEZADO_GESTION', archivo_correcto)
-            CAPTURADOR_ERRORES.setdefault('PROCESO_GESTION', {len(CAPTURADOR_ERRORES)+1: 'Error al procesar Archivo de Gestion'})
+            LOG_PROCESO_GESTION.setdefault('ENCABEZADO_GESTION', archivo_correcto)
             raise
     except Exception as e:
         errorMsg = 'Error: %s | %s' % (archivo, e)
-        CAPTURADOR_ERRORES.setdefault('LECTURA_ARCHIVO', {len(CAPTURADOR_ERRORES)+1: errorMsg})
-        CAPTURADOR_ERRORES.setdefault('PROCESO_GESTION', {len(CAPTURADOR_ERRORES)+1: 'Error al procesar Archivo de Gestion'})
+        LOG_PROCESO_GESTION.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_GESTION)+1: errorMsg})
+        LOG_PROCESO_GESTION.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Error al procesar Archivo: %s' % archivo})
         return False, False
 
 # leerArchivoGestion('Gestión CRO.xlsx', '202003', '20200101', '20200131')

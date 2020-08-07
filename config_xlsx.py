@@ -55,7 +55,7 @@ GESTION_CONFIG_XLSX = {
     # Nombre de las columnas del encabezado que tendra el archivo de PropietariosCRO (se usa para validar que el archivo este correcto) 
     'ENCABEZADO_PROPIETARIOS_XLSX': ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'FECHA DE LA ÚLTIMA MODIFICACIÓN', 'DUEÑO: NOMBRE COMPLETO', 'ASIGNADO A: NOMBRE COMPLETO', 'CUENTA: PROPIETARIO DEL CLIENTE: NOMBRE COMPLETO'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'ESTADO', 'ESTADO_UT', 'RUT', 'ID_CAMPANHA', 'CDG_CAMPANHA'],
+    'ENCABEZADO_TXT': ['CRR', 'ESTADO', 'ESTADO_UT', 'ID_CAMPANHA', 'CDG_CAMPANHA', 'RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'CAMPAÑA_ID': 0, 'FECHA_DE_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'ESTADO_UT': 3, 'ESTADO': 4},
     # Columnas que se utilizaran durante el procesamiento del archivo PropietariosCRO XLSX

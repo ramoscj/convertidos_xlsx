@@ -1,4 +1,0 @@
-Encabezado del archivo de Gestion OK
-Error al leer archivo: INPUTS/Propietarios CROp.xlsx | [Errno 2] No such file or directory: 'INPUTS/Propietarios CROp.xlsx'
-Error: INPUTS/Gestión CRO.xlsx | [Errno 2] No such file or directory: 'INPUTS/Propietarios CROp.xlsx'
-Error al procesar Archivo de Gestion

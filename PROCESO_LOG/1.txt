@@ -1,6 +1,0 @@
-Encabezado del archivo de Gestion OK
-Encabezado del archivo de Prpietarios OK
-Celda<B2> - Fecha incorrecta: aa | invalid literal for int() with base 10: 'aa'
-Celda<D3> - No existe estadoUt: Campaña exitosaa
-Celda<E5> - No existe estado: Terminado con Exitoo
-Proceso del Archivo de Gestion Finalizado

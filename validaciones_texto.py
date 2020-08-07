@@ -9,6 +9,20 @@ def validaFechaInput(f1, f2, fecha_x):
     except Exception as e:
         print("Error de fecha, formato correcto YYYYMMDD | %s" % e)
 
+def validaFechaCelda(celdaFila):
+    try:
+        fecha = str(celdaFila.value)
+        fechaAnho = fecha[0:4]
+        fechaMes = fecha[4:6]
+        if type(datetime.date(int(fechaAnho), int(fechaMes), 1)) is datetime.date:
+            return celdaFila
+        else:
+            errorMsg = "Celda%s - Fecha incorrecta: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
+            return errorMsg
+    except Exception as e:
+        errorMsg = "Celda%s - Fecha incorrecta: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
+        return errorMsg
+
 def setearFechaCelda(celdaFila):
     try:
         fecha = str(celdaFila.value).replace("-","")
@@ -18,8 +32,7 @@ def setearFechaCelda(celdaFila):
         fechaSalida = datetime.date(int(fechaAnho), int(fechaMes), int(fechaDia))
         return fechaSalida
     except Exception as e:
-        celda = celdaFila
-        errorMsg = "Celda%s - Fecha incorrecta: %s | %s" % (setearCelda(celda), str(celdaFila.value), e)
+        errorMsg = "Celda%s - Fecha incorrecta: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
         return errorMsg
 
 def setearFechaInput(fecha):
@@ -59,3 +72,4 @@ def setearCelda(celda):
     return ('<%s') % celdaN
 
 # print(setearFechaInput('20200101'))
+# print(validaFechaCelda('202019'))

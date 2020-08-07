@@ -1,6 +1,0 @@
-Encabezado del archivo de Gestion OK
-Celda<D1> - test_xls/Propietarios CRO - copia.xlsx: Encabezado incorrecto: FECHA DE LA ÚLTIMA MODIFICACIÓN
-Celda<G1> - test_xls/Propietarios CRO - copia.xlsx: Encabezado incorrecto: CUENTA: PROPIETARIO DEL CLIENTE: NOMBRE COMPLETO
-Error al leer archivo: test_xls/Propietarios CRO - copia.xlsx | No active exception to reraise
-Error: test_xls/Gestión CRO - copia.xlsx | No active exception to reraise
-Error al procesar Archivo de Gestion
