@@ -5,6 +5,7 @@ from leerFugaXLSX import leerArchivoFuga, LOG_PROCESO_FUGA
 from leerAsistenciaXLSX import leerArchivoAsistencia, LOG_PROCESO_ASISTENCIA
 from leerGestionXLSX import leerArchivoGestion, LOG_PROCESO_GESTION
 from leerCampanhasEspecialesXLSX import leerArchivoCampanhasEsp, LOG_PROCESO_CAMPANHAS
+from leerDotacionXLSX import leerArchivoDotacion, LOG_PROCESO_DOTACION
 
 from escribir_txt import salidaArchivoTxt, salidaLogTxt
 from validaciones_texto import validaFechaInput
@@ -27,18 +28,20 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
                 if procesoInput == 'FUGA':
                     dataXlsx, encabezadoXlsx = leerArchivoFuga(archivoXlsx, fechaInput)
                     logProceso = LOG_PROCESO_FUGA
-                    # print(pathLogSalida)
                 if procesoInput == 'ASISTENCIA':
                     dataXlsx, encabezadoXlsx = leerArchivoAsistencia(archivoXlsx, fechaInput)
+                    dataXlsxDotacion, encabezadoXlsxDotacion = leerArchivoDotacion(fechaInput)
                     logProceso = LOG_PROCESO_ASISTENCIA
+                    logProceso.update(LOG_PROCESO_DOTACION)
                 if procesoInput == 'CAMPANHA_ESPECIAL':
                     dataXlsx, encabezadoXlsx = leerArchivoCampanhasEsp(archivoXlsx, fechaInput)
                     logProceso = LOG_PROCESO_CAMPANHAS
-                # print(len(dataXlsx))
                 if dataXlsx:
                     salidaArchivoTxt(archivoTxtOutput, dataXlsx, encabezadoXlsx)
-                    # print("Archivo: %s Creado !!" % archivoTxtOutput)
-                    LOG_PROCESO_GESTION.setdefault('SALIDA_TXT', {len(LOG_PROCESO_GESTION)+1: 'Archivo: %s creado!! ' % archivoTxtOutput})
+                    if procesoInput == 'ASISTENCIA':
+                        archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, 'ICOM_CA_MTLFCC_', fechaInput)
+                        salidaArchivoTxt(archivoTxtOutput, dataXlsxDotacion, encabezadoXlsxDotacion)
+                    # LOG_PROCESO_GESTION.setdefault('SALIDA_TXT', {len(LOG_PROCESO_GESTION)+1: 'Archivo: %s creado!! ' % archivoTxtOutput})
                 if salidaLogTxt(pathLogSalida, logProceso):
                     print("Archivo: %s creado !!" % pathLogSalida)
             except Exception as e:
@@ -49,13 +52,14 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
 procesos = {'FUGA': {'argumentos': 2, 'archivoLecturaXls': '_FUGA_AGENCIA', 'archivoSalidaTxt': 'FUGA'}, 
             'ASISTENCIA': {'argumentos': 2, 'archivoLecturaXls': '_Asistencia_CRO', 'archivoSalidaTxt': 'ASISTENCIA'},
             'GESTION': {'argumentos': 4, 'archivoLecturaXls': 'Gestión CRO', 'archivoSalidaTxt': 'GESTION'},
-            'CAMPANHA_ESPECIAL': {'argumentos': 2, 'archivoLecturaXls': '_CampañasEspeciales_CRO', 'archivoSalidaTxt': 'PILOTO'}
+            'CAMPANHA_ESPECIAL': {'argumentos': 2, 'archivoLecturaXls': '_CampañasEspeciales_CRO', 'archivoSalidaTxt': 'PILOTO'},
+            'DOTACION': {'argumentos': 2, 'archivoLecturaXls': '_Asistencia_CRO', 'archivoSalidaTxt': 'ICOM_CA_CANAL_'}
             }
 procesoInput = str(sys.argv[1]).upper()
 
 if procesos.get(procesoInput):
     if len(sys.argv) == procesos[procesoInput]['argumentos'] + 1:
-        if procesoInput == 'FUGA' or procesoInput == 'ASISTENCIA' or procesoInput == 'CAMPANHA_ESPECIAL':
+        if procesoInput == 'FUGA' or procesoInput == 'ASISTENCIA' or procesoInput == 'CAMPANHA_ESPECIAL' or procesoInput == 'DOTACION':
             fechaEntrada = str(sys.argv[2])
             archivoXls = procesos[procesoInput]['archivoLecturaXls']
             archivoTxt = procesos[procesoInput]['archivoSalidaTxt']
@@ -71,8 +75,8 @@ if procesos.get(procesoInput):
                 print("Archivo: %s encontrado." % archivoXls)
                 print("Iniciando Lectura...")
                 pathTxtSalida = PATH_TXT
-                archivoTxt = ('%s%s%s.txt') % (pathTxtSalida, procesos[procesoInput]['archivoSalidaTxt'], fechaEntrada)
-                pathLogSalida = ('%slog_%s%s.txt') % (PATH_LOG, procesos[procesoInput]['archivoSalidaTxt'], fechaEntrada)
+                archivoTxt = ('%s%s_%s-%s.txt') % (pathTxtSalida, procesos[procesoInput]['archivoSalidaTxt'], fechaRangoUno, fechaRangoDos)
+                pathLogSalida = ('%slog_%s_%s-%s.txt') % (PATH_LOG, procesos[procesoInput]['archivoSalidaTxt'], fechaRangoUno, fechaRangoDos)
                 dataXlsx, encabezadoXlsx = leerArchivoGestion(archivoXls, fechaEntrada, fechaRangoUno, fechaRangoDos)
                 if dataXlsx and salidaArchivoTxt(archivoTxt, dataXlsx, encabezadoXlsx):
                     # print("Archivo: GESTION Creado !!")

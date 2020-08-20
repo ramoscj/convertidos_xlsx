@@ -1,0 +1,5 @@
+Iniciando proceso de lectura del Archivo: INPUTS/202003_Asistencia_CRO.xlsx
+Encabezado del Archivo: INPUTS/202003_Asistencia_CRO.xlsx OK
+Iniciando lectura de Celdas del Archivo: INPUTS/202003_Asistencia_CRO.xlsx
+Lectura de Celdas del Archivo: INPUTS/202003_Asistencia_CRO.xlsx Finalizada - 34 filas
+Proceso del Archivo: INPUTS/202003_Asistencia_CRO.xlsx Finalizado

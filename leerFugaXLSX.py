@@ -71,9 +71,9 @@ def leerArchivoFuga(archivo, periodo):
                         else:
                             errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['RUT_CRO']]), rut)
                             LOG_PROCESO_FUGA.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_FUGA)+1: errorRut})
-                    else:
-                        errorfecha = 'Celda%s - Error en fecha: %s' % (setearCelda(fechaLpattrs), str(fechaLpattrs.value))
-                        LOG_PROCESO_FUGA.setdefault('ERROR_FECHA_%s' % i, {len(LOG_PROCESO_FUGA)+1: errorfecha})
+                    # else:
+                    #     errorfecha = 'Celda%s - Error en fecha: %s' % (setearCelda(fechaLpattrs), str(fechaLpattrs.value))
+                    #     LOG_PROCESO_FUGA.setdefault('ERROR_FECHA_%s' % i, {len(LOG_PROCESO_FUGA)+1: errorfecha})
                 i += 1
 
             LOG_PROCESO_FUGA.setdefault('FIN_CELDAS_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})

@@ -78,3 +78,16 @@ CAMPANHAS_CONFIG_XLSX = {
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'RUT': 1, 'NUMERO_GESTIONES': 3 }
 }
+
+DOTACION_CONFIG_XLSX = {
+    # Nombre que tendra el proceso dentro del flujo
+    'PROCESO': 'DOTACION',
+    # Argumentos que necesita el proceso para funcionar
+    'ARGUMENTOS_PROCESO': 2,
+    # Nombre del archivo XLSX que el proceso usara
+    'ENTRADA_XLSX': '_Asistencia_CRO',
+    # Nombre del archivo TXT que el proceso generara
+    'SALIDA_TXT': 'ICOM_CA_CANAL_',
+    # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
+    'ENCABEZADO_TXT': ['Rut', 'Nombres', 'Apellido Paterno', 'Apellido Materno', 'Direccion', 'Comuna', 'Telefono', 'Celular', 'Fecha Ingreso', 'Fecha Nacimiento', 'Fecha Desvinculacion', 'Correo Electronico', 'Rut Jefe ', 'Empresa', 'Sucursal', 'Cargo', 'Nivel Cargo', 'Canal Negocio', 'Rol Pago'],
+}

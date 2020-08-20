@@ -23,11 +23,12 @@ def salidaLogTxt(ArchivoSalidaTxt, dataXlsx):
         raise Exception('Error al escribir archivo: %s | %s' % (ArchivoSalidaTxt, e))
 
 
-# try:
-#     if 1 == 1:
-#         raise
-#     else:
-#         pass
-#     print('sigo aqui')
-# except Exception as e:
-#     print('Error')
+import datetime
+from dateutil.relativedelta import relativedelta
+# from datetime import datetime
+
+# datetime.today().replace(day=1)
+primer = datetime.datetime(2020, 2, 5).replace(day=1).date()
+ultimo = datetime.datetime(2020, 2, 5).replace(day=1).date()+relativedelta(months=1)+datetime.timedelta(days=-1)
+# print(primer)
+# print(ultimo)

@@ -47,3 +47,21 @@ def buscarRutEjecutivosDb():
     finally:
         cursor.close()
         db.close()
+
+def buscarEjecutivosAllDb(ultimoDiaMes, primerDiaMes):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        ejecutivos = dict()
+        sql = """SELECT rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion FROM ejecutivos WHERE ifnull(fecha_desvinculacion, %s) >= %s"""
+        cursor.execute(sql, (ultimoDiaMes, primerDiaMes))
+        for (rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion) in cursor:
+            ejecutivos[rut] = {'RUT': rut, 'NOMBRE': nombre, 'PLATAFORMA': plataforma, 'FECHA_INGRESO': fecha_ingreso, 'FECHA_DESVINCULACION': fecha_desvinculacion}
+        return ejecutivos
+    except Exception as e:
+        raise Exception('Error buscarEjecutivosAllDb: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+# print(buscarEjecutivosDb())

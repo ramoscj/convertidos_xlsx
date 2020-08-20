@@ -1,4 +1,5 @@
 import datetime
+from dateutil.relativedelta import relativedelta
 
 def validaFechaInput(f1, f2, fecha_x):
     try:
@@ -52,6 +53,11 @@ def formatearRut(rut):
     rutSalida = '%s%s' % (rutMantisa, dv)
     return rutSalida
 
+def formatearRutGion(rut):
+    caracteres = len(str(rut).strip())
+    rutSalida = '%s-%s' % (rut[0:caracteres-1], rut[caracteres-1:caracteres])
+    return rutSalida
+
 def validarEncabezadoXlsx(filasXlsx: [], encabezadoXls: [], nombreArchivo):
     columnasError = dict()
     i = 0
@@ -71,5 +77,22 @@ def setearCelda(celda):
     resto, separador, celdaN = str(celda).partition(".")
     return ('<%s') % celdaN
 
+def primerDiaMes(fecha):
+    fechaAnho = str(fecha)[0:4]
+    fechaMes = str(fecha)[4:6]
+    primerDia = datetime.datetime(int(fechaAnho), int(fechaMes), 1).replace(day=1).date()
+    return primerDia
+
+def ultimoDiaMes(fecha):
+    fechaAnho = str(fecha)[0:4]
+    fechaMes = str(fecha)[4:6]
+    ultimoDia = datetime.datetime(int(fechaAnho), int(fechaMes), 1).replace(day=1).date()+relativedelta(months=1)+datetime.timedelta(days=-1)
+    return ultimoDia
+
+def formatearPlataformaCRO(plataforma):
+    carateres = len(str(plataforma).strip())
+    plataformaSalida = str(plataforma[0:carateres-1]).strip()
+    return plataformaSalida
+
 # print(setearFechaInput('20200101'))
-# print(validaFechaCelda('202019'))
+# print(formatearPlataformaCRO('CRO 2'))

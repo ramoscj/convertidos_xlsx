@@ -2,22 +2,41 @@ from openpyxl import load_workbook
 from conexio_db import conectorDB
 from tqdm import tqdm
 
-from validaciones_texto import formatearRut, validarEncabezadoXlsx
+from validaciones_texto import formatearRut, validarEncabezadoXlsx, primerDiaMes, ultimoDiaMes
 from config_xlsx import ASISTENCIA_CONFIG_XLSX
 
 LOG_PROCESO_ASISTENCIA = dict()
 
-def insertarEjecutivo(rut, nombre, plataforma):
+def updateEjecutivoFechaDesv(periodo):
     try:
         db = conectorDB()
         cursor = db.cursor()
-        sql = "INSERT INTO ejecutivos (id, rut, nombre, plataforma) VALUES (NULL,%s, %s, %s) ON DUPLICATE KEY UPDATE nombre=%s, plataforma=%s"
-        valores = (rut, nombre, plataforma, nombre, plataforma)
+        ultimoDia = ultimoDiaMes(periodo)
+        sql = """UPDATE ejecutivos SET fecha_desvinculacion=%s WHERE fecha_desvinculacion is NULL"""
+        cursor.execute(sql, (ultimoDia,))
+        db.commit()
+        return True
+    except Exception as e:
+        raise Exception('Error al actualizar tabla de ejecutivos | %s' %e)
+    finally:
+        cursor.close()
+        db.close()
+
+def insertarEjecutivo(rut, nombre, plataforma, periodo):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        primerDia = primerDiaMes(periodo)
+        sql = "INSERT INTO ejecutivos (id, rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion) VALUES (NULL, %s, %s, %s, %s, NULL) ON DUPLICATE KEY UPDATE nombre=%s, plataforma=%s, fecha_desvinculacion=NULL"
+        valores = (rut, nombre, plataforma, primerDia, nombre, plataforma)
         cursor.execute(sql, valores)
         db.commit()
         return True
     except Exception as e:
         raise Exception('Error al insertar ejecutivo: %s - %s' % (rut ,e))
+    finally:
+        cursor.close()
+        db.close()
 
 def leerArchivoAsistencia(archivo, periodo):
     try:
@@ -36,6 +55,8 @@ def leerArchivoAsistencia(archivo, periodo):
             totalColumnas = len(tuple(hoja.iter_cols(min_row=3, min_col=1)))
             totalFilas = len(tuple(hoja.iter_rows(min_row=3, min_col=1)))
             LOG_PROCESO_ASISTENCIA.setdefault('INICIO_CELDAS_GESTION', {len(LOG_PROCESO_ASISTENCIA)+1: 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
+
+            updateEjecutivoFechaDesv(periodo)
             for fila in tqdm(iterable=hoja.iter_rows(min_row=3, min_col=1), total = totalFilas, desc='Leyendo AsistenciaCRO' , unit=' Fila'):
             # for fila in hoja.rows:
                 diasVacaciones = 0
@@ -45,7 +66,7 @@ def leerArchivoAsistencia(archivo, periodo):
                     rut = formatearRut(str(fila[columna['RUT']].value))
                     plataforma = str(fila[columna['PLATAFORMA']].value).upper()
 
-                    insertarEjecutivo(rut, nombreEjecutivo, plataforma)
+                    insertarEjecutivo(rut, nombreEjecutivo, plataforma, periodo)
                     if not filaSalidaXls.get(rut):
                         conteoVhcAplica = 0
                         vhcAplica = 0
@@ -66,7 +87,7 @@ def leerArchivoAsistencia(archivo, periodo):
                         correlativo += 1
                     else:
                         errorRut = 'Celda%s - Ejecutivo duplicado: %s' % (setearCelda(fila[columna['RUT']]), rut)
-                        LOG_PROCESO_ASISTENCIA.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_ASISTENCIA)+1: errorRut})
+                        LOG_PROCESO_ASISTENCIA.setdefault('EJECUTIVO_DUPLICADO_%s' % i, {len(LOG_PROCESO_ASISTENCIA)+1: errorRut})
             LOG_PROCESO_ASISTENCIA.setdefault('FIN_CELDAS_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
             LOG_PROCESO_ASISTENCIA.setdefault('PROCESO_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
             return filaSalidaXls, encabezadoTxt

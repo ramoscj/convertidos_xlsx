@@ -146,10 +146,10 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
                         else:
                             errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), nombre_ejecutivo)
                             LOG_PROCESO_GESTION.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorRut})
-                    else:
-                        celdaCoordenada = setearCelda(fila[columna['FECHA_DE_CREACION']])
-                        errorMsg = '%s: %s no esta en el rago %s - %s' % (celdaCoordenada, fechaCreacion, fechaRangoUno, fechaRangoDos)
-                        LOG_PROCESO_GESTION.setdefault('RANGO_FECHA_CREACION', {len(LOG_PROCESO_GESTION)+1: errorMsg})
+                    # else:
+                    #     celdaCoordenada = setearCelda(fila[columna['FECHA_DE_CREACION']])
+                    #     errorMsg = '%s: %s no esta en el rago %s - %s' % (celdaCoordenada, fechaCreacion, fechaRangoUno, fechaRangoDos)
+                    #     LOG_PROCESO_GESTION.setdefault('RANGO_FECHA_CREACION', {len(LOG_PROCESO_GESTION)+1: errorMsg})
                 i += 1
             LOG_PROCESO_GESTION.setdefault('FIN_CELDAS_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
             LOG_PROCESO_GESTION.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
