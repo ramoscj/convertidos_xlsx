@@ -1,33 +1,33 @@
 Rut;Nombres;Apellido Paterno;Apellido Materno;Direccion;Comuna;Telefono;Celular;Fecha Ingreso;Fecha Nacimiento;Fecha Desvinculacion;Correo Electronico;Rut Jefe ;Empresa;Sucursal;Cargo;Nivel Cargo;Canal Negocio;Rol Pago
-10593048-8;Varinia Navarrete Bobadilla;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-10607655-3;Ximena Cortes Rojas;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-11255455-6;Gina Acevedo Perez;X;X;;;;;2020-05-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-11633197-7;Paola Farias;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-11638936-3;Luis Marcelo Ponce Contreras;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-11828597-2;Macarena Jacob;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-11850112-8;Claudia Alejandra Gonzalez;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-12502455-6;Yanet Valdes;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-12890442-5;Pamela Salazar;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-13057952-3;Karen Schwarzkoff Lamatta;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-13241372-K;Lorena Araya;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-13273506-9;Rodrigo Gutierrez;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-13275948-0;Roxana Burgos;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-13521436-1;Ingrid Delano Koch;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-13708452-K;Angela Rubio;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-13913895-3;Milena Zuloaga Salazar;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-13921899-k;Maria Cecilia Irarrazaval Rossel;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-15321570-7;Susana Freifeld;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-15973569-9;Ana Maria Lira;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-16073491-4;Marcelo Ibarra Valencia;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-17231206-3;Daniel Cuadra Gonzalez;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-17517639-K;Pia Vega Santana;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-17703841-5;Catalina Berrios;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-17775743-8;Valeria Gonzalez;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-18625644-1;Nataly Aguirre;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-24871812-9;Alejandra Lopez;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-25563408-9;Melvin Gomez;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-25669749-1;Doralys Lander;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
-6976532-7;Maria Cecilia Sotomayor;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-8920488-7;Maria Elgueta;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-9580234-6;Paola Ramenzoni Cantallopts;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
-9662904-4;Magdalena Paz Lama Vidaurre;X;X;;;;;2020-03-01;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+10593048-8;Varinia Navarrete Bobadilla;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+10607655-3;Ximena Cortes Rojas;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+11255455-6;Gina Acevedo Perez;X;X;;;;;01-05-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+11633197-7;Paola Farias;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+11638936-3;Luis Marcelo Ponce Contreras;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+11828597-2;Macarena Jacob;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+11850112-8;Claudia Alejandra Gonzalez;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+12502455-6;Yanet Valdes;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+12890442-5;Pamela Salazar;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+13057952-3;Karen Schwarzkoff Lamatta;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+13241372-K;Lorena Araya;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+13273506-9;Rodrigo Gutierrez;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+13275948-0;Roxana Burgos;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+13521436-1;Ingrid Delano Koch;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+13708452-K;Angela Rubio;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+13913895-3;Milena Zuloaga Salazar;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+13921899-k;Maria Cecilia Irarrazaval Rossel;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+15321570-7;Susana Freifeld;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+15973569-9;Ana Maria Lira;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+16073491-4;Marcelo Ibarra Valencia;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+17231206-3;Daniel Cuadra Gonzalez;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+17517639-K;Pia Vega Santana;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+17703841-5;Catalina Berrios;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+17775743-8;Valeria Gonzalez;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+18625644-1;Nataly Aguirre;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+24871812-9;Alejandra Lopez;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+25563408-9;Melvin Gomez;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+25669749-1;Doralys Lander;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 2;1;MTLFCC;CRO
+6976532-7;Maria Cecilia Sotomayor;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+8920488-7;Maria Elgueta;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+9580234-6;Paola Ramenzoni Cantallopts;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO
+9662904-4;Magdalena Paz Lama Vidaurre;X;X;;;;;01-03-2020;;;;;METLIFE;;CRO 1;1;MTLFCC;CRO

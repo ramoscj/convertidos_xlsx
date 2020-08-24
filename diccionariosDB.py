@@ -37,10 +37,10 @@ def buscarRutEjecutivosDb():
         db = conectorDB()
         cursor = db.cursor()
         ejecutivos = dict()
-        sql = """SELECT rut, nombre FROM ejecutivos"""
+        sql = """SELECT rut, nombre, plataforma FROM ejecutivos"""
         cursor.execute(sql)
-        for (rut, nombre) in cursor:
-            ejecutivos[rut] = {'RUT': rut, 'NOMBRE': nombre}
+        for (rut, nombre, plataforma) in cursor:
+            ejecutivos[rut] = {'RUT': rut, 'NOMBRE': nombre, 'PLATAFORMA': ''.join((plataforma).split())}
         return ejecutivos
     except Exception as e:
         raise Exception('Error buscarRutEjecutivosDb: %s' % e)
@@ -56,7 +56,9 @@ def buscarEjecutivosAllDb(ultimoDiaMes, primerDiaMes):
         sql = """SELECT rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion FROM ejecutivos WHERE ifnull(fecha_desvinculacion, %s) >= %s"""
         cursor.execute(sql, (ultimoDiaMes, primerDiaMes))
         for (rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion) in cursor:
-            ejecutivos[rut] = {'RUT': rut, 'NOMBRE': nombre, 'PLATAFORMA': plataforma, 'FECHA_INGRESO': fecha_ingreso, 'FECHA_DESVINCULACION': fecha_desvinculacion}
+            if fecha_desvinculacion is not None:
+                fecha_desvinculacion = fecha_desvinculacion.strftime("%d-%m-%Y")
+            ejecutivos[rut] = {'RUT': rut, 'NOMBRE': nombre, 'PLATAFORMA': plataforma, 'FECHA_INGRESO': fecha_ingreso.strftime("%d-%m-%Y"), 'FECHA_DESVINCULACION': fecha_desvinculacion}
         return ejecutivos
     except Exception as e:
         raise Exception('Error buscarEjecutivosAllDb: %s' % e)
@@ -64,4 +66,5 @@ def buscarEjecutivosAllDb(ultimoDiaMes, primerDiaMes):
         cursor.close()
         db.close()
 
-# print(buscarEjecutivosDb())
+
+# print(buscarEjecutivosAllDb('2020-03-31', '2020-03-01'))

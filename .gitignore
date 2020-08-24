@@ -1,0 +1,10 @@
+__pycache__/
+
+# Salida y entradas de archivos
+INPUTS/
+OUTPUTS/
+PROCESO_LOG/
+
+# Extension de archivos de entrada y salida
+.xlsx
+.txt

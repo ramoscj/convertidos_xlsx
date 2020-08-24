@@ -4,7 +4,7 @@ from tqdm import tqdm
 import datetime
 import sys;
 
-from validaciones_texto import setearFechaInput, validarEncabezadoXlsx, setearCelda, setearFechaCelda
+from validaciones_texto import formatearFechaYM, validarEncabezadoXlsx, setearCelda, setearFechaCelda, primerDiaMes, ultimoDiaMes
 from diccionariosDB import buscarCamphnasDb, buscarEjecutivosDb
 from config_xlsx import GESTION_CONFIG_XLSX, PATH_XLSX
 
@@ -85,7 +85,7 @@ def insertarCamphnaCro(nombreCampahna):
         cursor.close()
         db.close()
         
-def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
+def leerArchivoGestion(archivo, periodo):
     try:
         LOG_PROCESO_GESTION.setdefault('INICIO_LECTURA_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
         encabezadoXls = GESTION_CONFIG_XLSX['ENCABEZADO_XLSX']
@@ -105,12 +105,12 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
             i = 0
             correlativo = 1
             LOG_PROCESO_GESTION.setdefault('INICIO_CELDAS_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
-            for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo GestiónCRO' , unit=' Fila'):
+            for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo GestionCRO' , unit=' Fila'):
             # for fila in hoja.iter_rows(min_row=3, min_col=1):
                 if i >= 1:
                     fechaCreacion = setearFechaCelda(fila[columna['FECHA_DE_CREACION']])
-                    fechaUno = setearFechaInput(fechaRangoUno)
-                    fechaDos = setearFechaInput(fechaRangoDos)
+                    fechaUno = primerDiaMes(periodo)
+                    fechaDos = ultimoDiaMes(periodo)
 
                     if type(fechaCreacion) is not datetime.date:
                         LOG_PROCESO_GESTION.setdefault('FECHA_CREACION', {len(LOG_PROCESO_GESTION)+1: fechaCreacion})
@@ -127,13 +127,9 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
                         if type(estado) is not int:
                             LOG_PROCESO_GESTION.setdefault('ERROR_ESTADO', {len(LOG_PROCESO_GESTION)+1: estado})
                             continue
-                        if campahnasExistentesDb.get(nombreCampahna):
-                            codigoCampahnaDb = campahnasExistentesDb[nombreCampahna]['CODIGO']
-                        else:
+                        if not campahnasExistentesDb.get(nombreCampahna):
                             insertarCamphnaCro(nombreCampahna)
                             campahnasExistentesDb = buscarCamphnasDb()
-                            if campahnasExistentesDb.get(nombreCampahna):
-                                codigoCampahnaDb = campahnasExistentesDb[nombreCampahna]['CODIGO']
 
                         if nombreCampahna == 'Inbound CRO':
                             nombre_ejecutivo = propietarioCro[campanhaId]['NOMBRE_IBCRO']
@@ -141,7 +137,7 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
                             nombre_ejecutivo = propietarioCro[campanhaId]['NOMBRE_NO_IBCRO']
                         if ejecutivosExistentesDb.get(nombre_ejecutivo):
                             rut = ejecutivosExistentesDb[nombre_ejecutivo]['RUT']
-                            filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CDG_CAMPANHA': codigoCampahnaDb, 'RUT': rut}
+                            filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampahna[0:30], 'RUT': rut}
                             correlativo += 1
                         else:
                             errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), nombre_ejecutivo)
@@ -163,5 +159,5 @@ def leerArchivoGestion(archivo, periodo, fechaRangoUno, fechaRangoDos):
         LOG_PROCESO_GESTION.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Error al procesar Archivo: %s' % archivo})
         return False, False
 
-# leerArchivoGestion('Gestión CRO.xlsx', '202003', '20200101', '20200131')
-# print(CAPTURADOR_ERRORES)
+# leerArchivoGestion('test_xls/Gestión CRO - copia.xlsx', '202003')
+# print(LOG_PROCESO_GESTION)

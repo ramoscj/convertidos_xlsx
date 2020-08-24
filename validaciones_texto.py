@@ -1,8 +1,10 @@
 import datetime
 from dateutil.relativedelta import relativedelta
 
-def validaFechaInput(f1, f2, fecha_x):
+def validaFechaInput(fecha_x):
     try:
+        f1 = fecha_x[0:4]
+        f2 = fecha_x[4:6]
         if type(datetime.date(int(f1), int(f2), 1)) is datetime.date and len(fecha_x) <= 6:
             return True
         else:
@@ -45,7 +47,6 @@ def setearFechaInput(fecha):
         return fechaSalida
     except Exception as e:
         errorMsg = "Error %s, formato correcto YYYYMMDD | %s" % (fecha, e)
-        # return errorMsg
         raise Exception(errorMsg)
 
 def formatearRut(rut):
@@ -94,5 +95,24 @@ def formatearPlataformaCRO(plataforma):
     plataformaSalida = str(plataforma[0:carateres-1]).strip()
     return plataformaSalida
 
-# print(setearFechaInput('20200101'))
-# print(formatearPlataformaCRO('CRO 2'))
+def formatearFechaYM(fecha):
+    try:
+        fechaAnho = str(fecha)[0:4]
+        fechaMes = str(fecha)[4:6]
+        fechaSalida = datetime.date(int(fechaAnho), int(fechaMes), 1)
+        return fechaSalida
+    except Exception as e:
+        errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
+        raise Exception(errorMsg)
+
+def formatearFechaMesSiguiente(fecha):
+    try:
+        fechaAnho = str(fecha)[0:4]
+        fechaMes = str(fecha)[4:6]
+        fechaSalida = datetime.datetime(int(fechaAnho), int(fechaMes), 1).replace(day=1).date()+relativedelta(months=1)
+        return fechaSalida.strftime("%Y%m")
+    except Exception as e:
+        errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
+        raise Exception(errorMsg)
+
+# print(formatearFechaMesSiguiente('202011'))

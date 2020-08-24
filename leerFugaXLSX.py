@@ -8,7 +8,7 @@ from diccionariosDB import buscarRutEjecutivosDb
 
 LOG_PROCESO_FUGA = dict()
 
-def validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut):
+def validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut, unidad):
     rutNuevo = dict()
     rutNuevo["CRR"] = correlativo
     if tipo == 'FUGA' and considerarFuga != 'NO':
@@ -20,6 +20,7 @@ def validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut):
     else:
         rutNuevo["STOCK"] = 0
     rutNuevo["RUT"] = rut
+    rutNuevo["UNIDAD"] = unidad
     return rutNuevo
 
 def existeRut(tipo, lpattrCodStat, considerarFuga, rutExistente):
@@ -62,11 +63,11 @@ def leerArchivoFuga(archivo, periodo):
                         lpattrCodStat = str(fila[columna['LPATTR_COD_STAT']].value).upper()
 
                         if ejecutivosExistentesDb.get(rut):
-
+                            unidad = ejecutivosExistentesDb[rut]['PLATAFORMA']
                             if filaSalidaXls.get(rut):
-                                filaSalidaXls[rut] = existeRut(tipo, lpattrCodStat, considerarFuga, filaSalidaXls[rut])
+                                filaSalidaXls[rut] = existeRut(tipo, lpattrCodStat, considerarFuga, filaSalidaXls[rut], )
                             else:
-                                filaSalidaXls[rut] = validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut)
+                                filaSalidaXls[rut] = validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut, unidad)
                                 correlativo += 1
                         else:
                             errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['RUT_CRO']]), rut)

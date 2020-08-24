@@ -8,19 +8,22 @@ from leerCampanhasEspecialesXLSX import leerArchivoCampanhasEsp, LOG_PROCESO_CAM
 from leerDotacionXLSX import leerArchivoDotacion, LOG_PROCESO_DOTACION
 
 from escribir_txt import salidaArchivoTxt, salidaLogTxt
-from validaciones_texto import validaFechaInput
+from validaciones_texto import validaFechaInput, formatearFechaMesSiguiente
 
 from config_xlsx import PATH_XLSX, PATH_TXT, PATH_LOG
 
 def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
-    fechaYear = fechaInput[0:4]
-    fechaMonth = fechaInput[4:6]
     pathTxtSalida = PATH_TXT
     pathXlsxEntrada = PATH_XLSX
-    if validaFechaInput(fechaYear, fechaMonth, fechaInput):
+    
+    if validaFechaInput(fechaInput):
         archivoXlsx = '%s%s%s.xlsx' % (pathXlsxEntrada, fechaInput, archivoXlsxInput)
-        archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, archivoTxt, fechaInput)
         pathLogSalida = ('%slog_%s%s.txt') % (PATH_LOG, archivoTxt, fechaInput)
+        if procesoInput == 'FUGA':
+            archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, archivoTxt, formatearFechaMesSiguiente(fechaInput))
+        else:
+            archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, archivoTxt, fechaInput)
+            
         if os.path.isfile(archivoXlsx):
             print("Archivo: %s encontrado." % archivoXlsx)
             print("Iniciando Lectura...")
@@ -51,7 +54,7 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
 
 procesos = {'FUGA': {'argumentos': 2, 'archivoLecturaXls': '_FUGA_AGENCIA', 'archivoSalidaTxt': 'FUGA'}, 
             'ASISTENCIA': {'argumentos': 2, 'archivoLecturaXls': '_Asistencia_CRO', 'archivoSalidaTxt': 'ASISTENCIA'},
-            'GESTION': {'argumentos': 4, 'archivoLecturaXls': 'Gestión CRO', 'archivoSalidaTxt': 'GESTION'},
+            'GESTION': {'argumentos': 2, 'archivoLecturaXls': 'Gestión CRO', 'archivoSalidaTxt': 'GESTION'},
             'CAMPANHA_ESPECIAL': {'argumentos': 2, 'archivoLecturaXls': '_CampañasEspeciales_CRO', 'archivoSalidaTxt': 'PILOTO'},
             'DOTACION': {'argumentos': 2, 'archivoLecturaXls': '_Asistencia_CRO', 'archivoSalidaTxt': 'ICOM_CA_CANAL_'}
             }
@@ -66,8 +69,6 @@ if procesos.get(procesoInput):
             procesoGeneral(procesoInput, fechaEntrada, archivoXls, archivoTxt)
         elif procesoInput == 'GESTION':
             fechaEntrada = str(sys.argv[2])
-            fechaRangoUno = str(sys.argv[3])
-            fechaRangoDos = str(sys.argv[4])
             # pathXlsxEntrada = 'test_xls/'
             pathXlsxEntrada = PATH_XLSX
             archivoXls = ('%s%s.xlsx') % (pathXlsxEntrada, procesos[procesoInput]['archivoLecturaXls'])
@@ -75,9 +76,9 @@ if procesos.get(procesoInput):
                 print("Archivo: %s encontrado." % archivoXls)
                 print("Iniciando Lectura...")
                 pathTxtSalida = PATH_TXT
-                archivoTxt = ('%s%s_%s-%s.txt') % (pathTxtSalida, procesos[procesoInput]['archivoSalidaTxt'], fechaRangoUno, fechaRangoDos)
-                pathLogSalida = ('%slog_%s_%s-%s.txt') % (PATH_LOG, procesos[procesoInput]['archivoSalidaTxt'], fechaRangoUno, fechaRangoDos)
-                dataXlsx, encabezadoXlsx = leerArchivoGestion(archivoXls, fechaEntrada, fechaRangoUno, fechaRangoDos)
+                archivoTxt = ('%s%s%s.txt') % (pathTxtSalida, procesos[procesoInput]['archivoSalidaTxt'], fechaEntrada)
+                pathLogSalida = ('%slog_%s_%s.txt') % (PATH_LOG, procesos[procesoInput]['archivoSalidaTxt'], fechaEntrada)
+                dataXlsx, encabezadoXlsx = leerArchivoGestion(archivoXls, fechaEntrada)
                 if dataXlsx and salidaArchivoTxt(archivoTxt, dataXlsx, encabezadoXlsx):
                     # print("Archivo: GESTION Creado !!")
                     LOG_PROCESO_GESTION.setdefault('SALIDA_TXT', {len(LOG_PROCESO_GESTION)+1: 'Archivo: %s creado!! ' % archivoTxt})

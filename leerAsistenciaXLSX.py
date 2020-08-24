@@ -2,7 +2,7 @@ from openpyxl import load_workbook
 from conexio_db import conectorDB
 from tqdm import tqdm
 
-from validaciones_texto import formatearRut, validarEncabezadoXlsx, primerDiaMes, ultimoDiaMes
+from validaciones_texto import formatearRut, validarEncabezadoXlsx, primerDiaMes, ultimoDiaMes, setearCelda
 from config_xlsx import ASISTENCIA_CONFIG_XLSX
 
 LOG_PROCESO_ASISTENCIA = dict()
@@ -87,7 +87,7 @@ def leerArchivoAsistencia(archivo, periodo):
                         correlativo += 1
                     else:
                         errorRut = 'Celda%s - Ejecutivo duplicado: %s' % (setearCelda(fila[columna['RUT']]), rut)
-                        LOG_PROCESO_ASISTENCIA.setdefault('EJECUTIVO_DUPLICADO_%s' % i, {len(LOG_PROCESO_ASISTENCIA)+1: errorRut})
+                        LOG_PROCESO_ASISTENCIA.setdefault('EJECUTIVO_DUPLICADO_%s' % correlativo, {len(LOG_PROCESO_ASISTENCIA)+1: errorRut})
             LOG_PROCESO_ASISTENCIA.setdefault('FIN_CELDAS_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
             LOG_PROCESO_ASISTENCIA.setdefault('PROCESO_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
             return filaSalidaXls, encabezadoTxt
