@@ -1,7 +1,7 @@
 Iniciando proceso de lectura del Archivo: INPUTS/202005_Asistencia_CRO.xlsx
 Encabezado del Archivo: INPUTS/202005_Asistencia_CRO.xlsx OK
 Iniciando lectura de Celdas del Archivo: INPUTS/202005_Asistencia_CRO.xlsx
-Lectura de Celdas del Archivo: INPUTS/202005_Asistencia_CRO.xlsx Finalizada - 34 filas
+Lectura de Celdas del Archivo: INPUTS/202005_Asistencia_CRO.xlsx Finalizada - 43 filas
 Proceso del Archivo: INPUTS/202005_Asistencia_CRO.xlsx Finalizado
 -----------------------------------------------------
 Iniciando proceso de escritura del Archivo de GESTION

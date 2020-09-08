@@ -21,10 +21,10 @@ def buscarCamphnasDb():
         db = conectorDB()
         cursor = db.cursor()
         campanhas = dict()
-        sql = """SELECT codigo, nombre FROM codigos_cro"""
+        sql = """SELECT nombre FROM codigos_cro"""
         cursor.execute(sql)
-        for (codigo, nombre) in cursor:
-            campanhas[nombre] = {'CODIGO': codigo, 'NOMBRE': nombre}
+        for (nombre,) in cursor:
+            campanhas[nombre] = {'NOMBRE': nombre}
         return campanhas
     except Exception as e:
         raise Exception('Error buscarCamphnasDb: %s' % e)
@@ -53,7 +53,7 @@ def buscarEjecutivosAllDb(ultimoDiaMes, primerDiaMes):
         db = conectorDB()
         cursor = db.cursor()
         ejecutivos = dict()
-        sql = """SELECT rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion FROM ejecutivos WHERE ifnull(fecha_desvinculacion, %s) >= %s"""
+        sql = """SELECT rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion FROM ejecutivos WHERE isnull(fecha_desvinculacion, ?) >= ?"""
         cursor.execute(sql, (ultimoDiaMes, primerDiaMes))
         for (rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion) in cursor:
             if fecha_desvinculacion is not None:
@@ -66,5 +66,4 @@ def buscarEjecutivosAllDb(ultimoDiaMes, primerDiaMes):
         cursor.close()
         db.close()
 
-
-# print(buscarEjecutivosAllDb('2020-03-31', '2020-03-01'))
+# print(buscarRutEjecutivosDb())

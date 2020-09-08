@@ -12,7 +12,7 @@ def updateEjecutivoFechaDesv(periodo):
         db = conectorDB()
         cursor = db.cursor()
         ultimoDia = ultimoDiaMes(periodo)
-        sql = """UPDATE ejecutivos SET fecha_desvinculacion=%s WHERE fecha_desvinculacion is NULL"""
+        sql = """UPDATE ejecutivos SET fecha_desvinculacion= ? WHERE fecha_desvinculacion is NULL"""
         cursor.execute(sql, (ultimoDia,))
         db.commit()
         return True
@@ -27,8 +27,18 @@ def insertarEjecutivo(rut, nombre, plataforma, periodo):
         db = conectorDB()
         cursor = db.cursor()
         primerDia = primerDiaMes(periodo)
-        sql = "INSERT INTO ejecutivos (id, rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion) VALUES (NULL, %s, %s, %s, %s, NULL) ON DUPLICATE KEY UPDATE nombre=%s, plataforma=%s, fecha_desvinculacion=NULL"
-        valores = (rut, nombre, plataforma, primerDia, nombre, plataforma)
+        sql = """MERGE ejecutivos AS target
+                USING (VALUES (?)) AS source (rut)
+                ON (source.rut = target.rut)
+                WHEN MATCHED
+                THEN UPDATE
+                    SET target.nombre = ?,
+                        target.plataforma = ?,
+                        target.fecha_desvinculacion = NULL
+                WHEN NOT MATCHED
+                THEN INSERT (rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion)
+                    VALUES (?, ?, ?, ?, NULL);"""
+        valores = (rut, nombre, plataforma, rut, nombre, plataforma, primerDia)
         cursor.execute(sql, valores)
         db.commit()
         return True
@@ -63,7 +73,7 @@ def leerArchivoAsistencia(archivo, periodo):
                 if fila[columna['EJECUTIVA']].value is not None and fila[columna['RUT']].value is not None and fila[columna['PLATAFORMA']].value is not None:
 
                     nombreEjecutivo = str(fila[columna['EJECUTIVA']].value).lower()
-                    rut = formatearRut(str(fila[columna['RUT']].value))
+                    rut = formatearRut(str(fila[columna['RUT']].value).upper())
                     plataforma = str(fila[columna['PLATAFORMA']].value).upper()
 
                     insertarEjecutivo(rut, nombreEjecutivo, plataforma, periodo)

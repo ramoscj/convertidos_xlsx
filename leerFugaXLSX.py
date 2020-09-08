@@ -9,43 +9,44 @@ from diccionariosDB import buscarRutEjecutivosDb
 LOG_PROCESO_FUGA = dict()
 
 def validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut, unidad):
-    rutNuevo = dict()
-    rutNuevo["CRR"] = correlativo
+    rutNuevoFuga = dict()
+    rutNuevoFuga["CRR"] = correlativo
     if tipo == 'FUGA' and considerarFuga != 'NO':
-        rutNuevo["FUGA"] = 1
+        rutNuevoFuga["FUGA"] = 1
     else:
-        rutNuevo["FUGA"] = 0
-    if  lpattrCodStat != 'NVIG' or considerarFuga == 'NO':
-        rutNuevo["STOCK"] = 1
+        rutNuevoFuga["FUGA"] = 0
+    if  lpattrCodStat != 'NVIG' and considerarFuga != 'NO':
+        rutNuevoFuga["STOCK"] = 1
     else:
-        rutNuevo["STOCK"] = 0
-    rutNuevo["RUT"] = rut
-    rutNuevo["UNIDAD"] = unidad
-    return rutNuevo
+        rutNuevoFuga["STOCK"] = 0
+    rutNuevoFuga["RUT"] = rut
+    rutNuevoFuga["UNIDAD"] = unidad
+    return rutNuevoFuga
 
-def existeRut(tipo, lpattrCodStat, considerarFuga, rutExistente):
+def existeRut(tipo, lpattrCodStat, considerarFuga, rutExistenteFuga):
     if tipo == 'FUGA' and  considerarFuga != 'NO':
-        rutExistente["FUGA"] += 1
-    elif  lpattrCodStat != 'NVIG' or considerarFuga == 'NO':
-        rutExistente["STOCK"] += 1
-    return rutExistente
+        rutExistenteFuga["FUGA"] += 1
+    elif  lpattrCodStat != 'NVIG' and considerarFuga != 'NO':
+        rutExistenteFuga["STOCK"] += 1
+    return rutExistenteFuga
 
 def leerArchivoFuga(archivo, periodo):
     try:
         LOG_PROCESO_FUGA.setdefault('INICIO_LECTURA_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
         encabezadoXls = FUGA_CONFIG_XLSX['ENCABEZADO_XLSX']
-        encabezadoTxt = FUGA_CONFIG_XLSX['ENCABEZADO_TXT']
+        encabezadoFugaTxt = FUGA_CONFIG_XLSX['ENCABEZADO_FUGA_TXT']
+        # encabezadoStockTxt = FUGA_CONFIG_XLSX['ENCABEZADO_STOCK_TXT']
         columna = FUGA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
         archivo_correcto = validarEncabezadoXlsx(hoja['A1:M1'], encabezadoXls, archivo)
-        LOG_PROCESO_FUGA.setdefault('ENCABEZADO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Encabezado del Archivo: %s OK' % archivo})
         if type(archivo_correcto) is not dict:
+            LOG_PROCESO_FUGA.setdefault('ENCABEZADO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Encabezado del Archivo: %s OK' % archivo})
             i = 0
             correlativo = 1
-            filaSalidaXls = dict()
-            x = []
+            filaSalidaFugaXls = dict()
+            filaSalidaStockXls = dict()
             ejecutivosExistentesDb = buscarRutEjecutivosDb()
             LOG_PROCESO_FUGA.setdefault('INICIO_CELDAS_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
             for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo FugaCRO' , unit=' Fila'):
@@ -56,18 +57,18 @@ def leerArchivoFuga(archivo, periodo):
                             LOG_PROCESO_FUGA.setdefault('FECHA_CREACION', {len(LOG_PROCESO_FUGA)+1: fechaLpattrs})
                             continue
                     if periodo == str(fechaLpattrs.value) and fila[columna['RUT_CRO']].value is not None:
-                        
-                        rut = formatearRut(str(fila[columna['RUT_CRO']].value))
+
+                        rut = formatearRut(str(fila[columna['RUT_CRO']].value).upper())
                         tipo = str(fila[columna['TIPO']].value).upper()
                         considerarFuga = str(fila[columna['CONSIDERAR_FUGA']].value).upper()
                         lpattrCodStat = str(fila[columna['LPATTR_COD_STAT']].value).upper()
 
                         if ejecutivosExistentesDb.get(rut):
                             unidad = ejecutivosExistentesDb[rut]['PLATAFORMA']
-                            if filaSalidaXls.get(rut):
-                                filaSalidaXls[rut] = existeRut(tipo, lpattrCodStat, considerarFuga, filaSalidaXls[rut], )
+                            if filaSalidaFugaXls.get(rut):
+                                filaSalidaFugaXls[rut] = existeRut(tipo, lpattrCodStat, considerarFuga, filaSalidaFugaXls[rut])
                             else:
-                                filaSalidaXls[rut] = validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut, unidad)
+                                filaSalidaFugaXls[rut] = validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut, unidad)
                                 correlativo += 1
                         else:
                             errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['RUT_CRO']]), rut)
@@ -79,14 +80,17 @@ def leerArchivoFuga(archivo, periodo):
 
             LOG_PROCESO_FUGA.setdefault('FIN_CELDAS_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
             LOG_PROCESO_FUGA.setdefault('PROCESO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
-            return filaSalidaXls, encabezadoTxt
+            # return filaSalidaFugaXls, filaSalidaStockXls, encabezadoFugaTxt, encabezadoStockTxt
+            return filaSalidaFugaXls, encabezadoFugaTxt
         else:
             LOG_PROCESO_FUGA.setdefault('ENCABEZADO_FUGA', archivo_correcto)
-            raise
+            raise Exception('Error en enbezado de archivo: %s' % archivo)
     except Exception as e:
         errorMsg = 'Error: %s | %s' % (archivo, e)
         LOG_PROCESO_FUGA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_FUGA)+1: errorMsg})
         LOG_PROCESO_FUGA.setdefault('PROCESO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Error al procesar Archivo: %s' % archivo})
-        return False, False
+        return False, False, False
 
-# print(leerArchivoFuga('INPUTS/201911_Fuga_Agencia - copia.xlsx', '201911'))
+# x,y,z = leerArchivoFuga('INPUTS/202001_Fuga_Agencia.xlsx', '202001')
+# print(x)
+# print(y)
