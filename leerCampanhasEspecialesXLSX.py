@@ -26,7 +26,7 @@ def leerArchivoCampanhasEsp(archivo, periodo):
             for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo CamapañasEspeciales' , unit=' Fila'):
             # for fila in hoja.rows:
                 if i >= 2 and fila[celda['RUT']].value is not None:
-                    rut = formatearRut(str(fila[celda['RUT']].value).upper)
+                    rut = formatearRut(str(fila[celda['RUT']].value).upper())
                     if ejecutivosExistentesDb.get(rut):
                         numeroGestiones = fila[celda['NUMERO_GESTIONES']].value
                         filaSalidaXls[rut] = {'CRR': correlativo, 'NUMERO_GESTIONES': numeroGestiones, 'RUT': rut}

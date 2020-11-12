@@ -22,9 +22,9 @@ def leerArchivoDotacion(periodo):
         # # for fila in hoja.rows:
 
             filaSalidaXls[rut] = {'RUT': formatearRutGion(ejecutivosDB[rut]['RUT'])}
-            filaSalidaXls[rut].setdefault('NOMBRES', str(ejecutivosDB[rut]['NOMBRE']).title())
-            filaSalidaXls[rut].setdefault('APELLIDO_PATERNO', 'X')
-            filaSalidaXls[rut].setdefault('APELLIDO_MATERNO', 'X')
+            filaSalidaXls[rut].setdefault('NOMBRES', str(ejecutivosDB[rut]['NOMBRES']))
+            filaSalidaXls[rut].setdefault('APELLIDO_PATERNO', str(ejecutivosDB[rut]['APELLIDO_PATERNO']))
+            filaSalidaXls[rut].setdefault('APELLIDO_MATERNO', str(ejecutivosDB[rut]['APELLIDO_MATERNO']))
             filaSalidaXls[rut].setdefault('DIRECCION', '')
             filaSalidaXls[rut].setdefault('COMUNA', '')
             filaSalidaXls[rut].setdefault('TELEFONO', '')

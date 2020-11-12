@@ -5,6 +5,8 @@ from tqdm import tqdm
 from validaciones_texto import formatearRut, validarEncabezadoXlsx, primerDiaMes, ultimoDiaMes, setearCelda
 from config_xlsx import ASISTENCIA_CONFIG_XLSX
 
+from diccionariosDB import buscarRutEjecutivosDb
+
 LOG_PROCESO_ASISTENCIA = dict()
 
 def updateEjecutivoFechaDesv(periodo):
@@ -22,7 +24,7 @@ def updateEjecutivoFechaDesv(periodo):
         cursor.close()
         db.close()
 
-def insertarEjecutivo(rut, nombre, plataforma, periodo):
+def insertarEjecutivo(rut, nombre, nombreRrh, plataforma, periodo):
     try:
         db = conectorDB()
         cursor = db.cursor()
@@ -33,12 +35,13 @@ def insertarEjecutivo(rut, nombre, plataforma, periodo):
                 WHEN MATCHED
                 THEN UPDATE
                     SET target.nombre = ?,
+                        target.nombre_rrh = ?,
                         target.plataforma = ?,
                         target.fecha_desvinculacion = NULL
                 WHEN NOT MATCHED
-                THEN INSERT (rut, nombre, plataforma, fecha_ingreso, fecha_desvinculacion)
-                    VALUES (?, ?, ?, ?, NULL);"""
-        valores = (rut, nombre, plataforma, rut, nombre, plataforma, primerDia)
+                THEN INSERT (rut, nombre, nombre_rrh, plataforma, fecha_ingreso, fecha_desvinculacion)
+                    VALUES (?, ?, ?, ?, ?, NULL);"""
+        valores = (rut, nombre, nombreRrh, plataforma, rut, nombre, nombreRrh, plataforma, primerDia)
         cursor.execute(sql, valores)
         db.commit()
         return True
@@ -70,13 +73,16 @@ def leerArchivoAsistencia(archivo, periodo):
             for fila in tqdm(iterable=hoja.iter_rows(min_row=3, min_col=1), total = totalFilas, desc='Leyendo AsistenciaCRO' , unit=' Fila'):
             # for fila in hoja.rows:
                 diasVacaciones = 0
-                if fila[columna['EJECUTIVA']].value is not None and fila[columna['RUT']].value is not None and fila[columna['PLATAFORMA']].value is not None:
+                if fila[columna['EJECUTIVO']].value is not None and fila[columna['RUT']].value is not None and fila[columna['PLATAFORMA']].value is not None:
 
-                    nombreEjecutivo = str(fila[columna['EJECUTIVA']].value).lower()
+                    nombreEjecutivo = str(fila[columna['EJECUTIVO']].value).lower()
+                    nombreEjecutivoRrh = str(fila[columna['NOMBRE_RRH']].value)
                     rut = formatearRut(str(fila[columna['RUT']].value).upper())
                     plataforma = str(fila[columna['PLATAFORMA']].value).upper()
 
-                    insertarEjecutivo(rut, nombreEjecutivo, plataforma, periodo)
+                    insertarEjecutivo(rut, nombreEjecutivo, nombreEjecutivoRrh, plataforma, periodo)
+                    ejecutivosExistentesDb = buscarRutEjecutivosDb()
+
                     if not filaSalidaXls.get(rut):
                         conteoVhcAplica = 0
                         vhcAplica = 0
@@ -91,9 +97,10 @@ def leerArchivoAsistencia(archivo, periodo):
                                 vhcAplica = 1
                                 conteoVhcAplica = 0
                         filaSalidaXls[rut].setdefault('VHC_MES', diasVacaciones)
-                        filaSalidaXls[rut].setdefault('DIAS_HABILES_MES', totalColumnas - 3)
+                        filaSalidaXls[rut].setdefault('DIAS_HABILES_MES', totalColumnas - 4)
                         filaSalidaXls[rut].setdefault('CARGA', vhcAplica)
                         filaSalidaXls[rut].setdefault('RUT', rut)
+                        # filaSalidaXls[rut].setdefault('NOMBRE_RRH', ejecutivosExistentesDb[rut]['NOMBRE_RRH'])
                         correlativo += 1
                     else:
                         errorRut = 'Celda%s - Ejecutivo duplicado: %s' % (setearCelda(fila[columna['RUT']]), rut)

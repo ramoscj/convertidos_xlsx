@@ -20,10 +20,10 @@ def validaFechaCelda(celdaFila):
         if type(datetime.date(int(fechaAnho), int(fechaMes), 1)) is datetime.date:
             return celdaFila
         else:
-            errorMsg = "Celda%s - Fecha incorrecta: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
+            errorMsg = "Celda%s - validaFechaCelda: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
             return errorMsg
     except Exception as e:
-        errorMsg = "Celda%s - Fecha incorrecta: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
+        errorMsg = "Celda%s - validaFechaCelda: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
         return errorMsg
 
 def setearFechaCelda(celdaFila):
@@ -35,7 +35,7 @@ def setearFechaCelda(celdaFila):
         fechaSalida = datetime.date(int(fechaAnho), int(fechaMes), int(fechaDia))
         return fechaSalida
     except Exception as e:
-        errorMsg = "Celda%s - Fecha incorrecta: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
+        errorMsg = "Celda%s - setearFechaCelda: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
         return errorMsg
 
 def setearFechaInput(fecha):
@@ -46,7 +46,7 @@ def setearFechaInput(fecha):
         fechaSalida = datetime.date(int(fechaAnho), int(fechaMes), int(fechaDia))
         return fechaSalida
     except Exception as e:
-        errorMsg = "Error %s, formato correcto YYYYMMDD | %s" % (fecha, e)
+        errorMsg = "Error %s, setearFechaInput YYYYMMDD | %s" % (fecha, e)
         raise Exception(errorMsg)
 
 def formatearRut(rut):
@@ -102,7 +102,7 @@ def formatearFechaYM(fecha):
         fechaSalida = datetime.date(int(fechaAnho), int(fechaMes), 1)
         return fechaSalida
     except Exception as e:
-        errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
+        errorMsg = "Error %s, formatearFechaYM YYYYMM | %s" % (fecha, e)
         raise Exception(errorMsg)
 
 def formatearFechaMesSiguiente(fecha):
@@ -115,4 +115,42 @@ def formatearFechaMesSiguiente(fecha):
         errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
         raise Exception(errorMsg)
 
-# print(formatearFechaMesSiguiente('202011'))
+def mesSiguienteUltimoDia(fecha):
+    try:
+        fechaAnho = str(fecha)[0:4]
+        fechaMes = str(fecha)[4:6]
+        fechaSalida = datetime.datetime(int(fechaAnho), int(fechaMes), 1).replace(day=1).date()+relativedelta(months=1)
+        fechaSalida = datetime.datetime(int(fechaSalida.strftime("%Y")), int(fechaSalida.strftime("%m")), 1).replace(day=1).date()+relativedelta(months=1)+datetime.timedelta(days=-1)
+        return fechaSalida
+    except Exception as e:
+        errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
+        raise Exception(errorMsg)
+
+def separarNombreApellido(nombreCompleto):
+    apellidos, separador, nombres = nombreCompleto.partition(',')
+    nombresSalida = setearNombre(nombres.split())
+    apellidoPaterno = apellidos.split()
+    apellidoMaterno = setearApellidoMaterno(apellidos.split())
+    return apellidoPaterno[0], apellidoMaterno, nombresSalida
+
+def setearApellidoMaterno(texto):
+    textoFormateado = ''
+    for cantidad in range(1,len(texto)):
+        if cantidad == len(texto)-1:
+            textoFormateado += texto[cantidad]
+        else:
+            textoFormateado += texto[cantidad] + ' '
+    return textoFormateado
+
+def setearNombre(texto):
+    textoFormateado = ''
+    for cantidad in range(0,len(texto)):
+        if cantidad == len(texto)-1:
+            textoFormateado += texto[cantidad]
+        else:
+            textoFormateado += texto[cantidad] + ' '
+    return textoFormateado
+
+# print(separarNombreApellido('RAMOS PEREZ PEREZ Perez ROSO, CARLOS JAVIER'))
+
+

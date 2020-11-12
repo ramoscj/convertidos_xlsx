@@ -1,4 +1,0 @@
-Iniciando proceso de lectura del Archivo: INPUTS/202004_CampañasEspeciales_CRO.xlsx
-Encabezado del Archivo: INPUTS/202004_CampañasEspeciales_CRO.xlsx OK
-Lectura de Celdas del Archivo: INPUTS/202004_CampañasEspeciales_CRO.xlsx Finalizada - 32 filas
-Proceso del Archivo: INPUTS/202004_CampañasEspeciales_CRO.xlsx Finalizado

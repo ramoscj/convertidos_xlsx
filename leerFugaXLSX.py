@@ -89,8 +89,9 @@ def leerArchivoFuga(archivo, periodo):
         errorMsg = 'Error: %s | %s' % (archivo, e)
         LOG_PROCESO_FUGA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_FUGA)+1: errorMsg})
         LOG_PROCESO_FUGA.setdefault('PROCESO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Error al procesar Archivo: %s' % archivo})
-        return False, False, False
+        # print(e)
+        return False, False
 
-# x,y,z = leerArchivoFuga('INPUTS/202001_Fuga_Agencia.xlsx', '202001')
-# print(x)
+# x,y = leerArchivoFuga('INPUTS/202007_Fuga_Agencia.xlsx', '202007')
+# print(LOG_PROCESO_FUGA)
 # print(y)

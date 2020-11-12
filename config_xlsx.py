@@ -29,15 +29,15 @@ ASISTENCIA_CONFIG_XLSX = {
     # Argumentos que necesita el proceso para funcionar
     'ARGUMENTOS_PROCESO': 2,
     # Nombre del archivo XLSX que el proceso usara
-    'ENTRADA_XLSX': '_Asistencia_CRO',
+    'ENTRADA_XLSX': '_Asistencia_Plataformas',
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': 'ASISTENCIA',
-    # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto) 
-    'ENCABEZADO_XLSX': ['EJECUTIVA', 'RUT', 'PLATAFORMA'],
+    # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
+    'ENCABEZADO_XLSX': ['EJECUTIVA', 'NOMBRE SISTEMA RRHH', 'RUT', 'PLATAFORMA'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
     'ENCABEZADO_TXT': ['CRR', 'VHC_MES', 'DIAS_HABILES_MES', 'VHC_APLICA', 'RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
-    'COLUMNAS_PROCESO_XLSX': {'EJECUTIVA': 0, 'RUT': 1, 'PLATAFORMA': 2}
+    'COLUMNAS_PROCESO_XLSX': {'EJECUTIVO': 0, 'NOMBRE_RRH': 1, 'RUT': 2, 'PLATAFORMA': 3}
 }
 
 GESTION_CONFIG_XLSX = {
@@ -54,13 +54,13 @@ GESTION_CONFIG_XLSX = {
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
     'ENCABEZADO_XLSX': ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'ESTADO DE ÚLTIMA TAREA', 'ESTADO', 'FECHA DE LA ÚLTIMA MODIFICACIÓN', 'DUEÑO: NOMBRE COMPLETO'],
     # Nombre de las columnas del encabezado que tendra el archivo de PropietariosCRO (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_PROPIETARIOS_XLSX': ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'FECHA DE LA ÚLTIMA MODIFICACIÓN', 'DUEÑO: NOMBRE COMPLETO', 'ASIGNADO A: NOMBRE COMPLETO', 'CUENTA: PROPIETARIO DEL CLIENTE: NOMBRE COMPLETO'],
+    'ENCABEZADO_PROPIETARIOS_XLSX': ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'FECHA', 'DUEÑO: NOMBRE COMPLETO', 'ASIGNADO A: NOMBRE COMPLETO', 'CUENTA: PROPIETARIO DEL CLIENTE: NOMBRE COMPLETO'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'ESTADO', 'ESTADO_UT', 'ID_CAMPANA', 'CAMPANA','RUT', 'NOMBRE_GESTION', 'NOMBRE_PROPIETARIO'],
+    'ENCABEZADO_TXT': ['CRR', 'ESTADO', 'ESTADO_UT', 'ID_CAMPANA', 'CAMPANA','RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'CAMPAÑA_ID': 0, 'FECHA_DE_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'ESTADO_UT': 3, 'ESTADO': 4, 'FECHA_ULTIMA_MODF': 5, 'NOMBRE_COMPLETO': 6},
     # Columnas que se utilizaran durante el procesamiento del archivo PropietariosCRO XLSX
-    'COLUMNAS_PROPIETARIOS_XLSX': {'CAMPAÑA_ID': 0, 'DUEÑO_NOMBRE_COMPLETO': 4, 'ASIGNADO_NOMBRE_COMPLETO': 5, 'CUENTA_NOMBRE_COMPLETO': 6}
+    'COLUMNAS_PROPIETARIOS_XLSX': {'CAMPAÑA_ID': 0, 'FECHA': 3, 'DUEÑO_NOMBRE_COMPLETO': 4, 'ASIGNADO_NOMBRE_COMPLETO': 5, 'CUENTA_NOMBRE_COMPLETO': 6}
 }
 
 CAMPANHAS_CONFIG_XLSX = {
@@ -108,4 +108,27 @@ DOTACION_CONFIG_XLSX = {
     'SALIDA_TXT': 'ICOM_CA_CANAL_',
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
     'ENCABEZADO_TXT': ['Rut', 'Nombres', 'Apellido Paterno', 'Apellido Materno', 'Direccion', 'Comuna', 'Telefono', 'Celular', 'Fecha Ingreso', 'Fecha Nacimiento', 'Fecha Desvinculacion', 'Correo Electronico', 'Rut Jefe ', 'Empresa', 'Sucursal', 'Cargo', 'Nivel Cargo', 'Canal Negocio', 'Rol Pago'],
+}
+
+PROACTIVA_CONFIG_XLSX = {
+    # Nombre que tendra el proceso dentro del flujo
+    'PROCESO': 'PROACTIVA',
+    # Argumentos que necesita el proceso para funcionar
+    'ARGUMENTOS_PROCESO': 4,
+    # Nombre del archivo XLSX que el proceso usara
+    'ENTRADA_XLSX': 'BD Gestion CORETProactiva',
+    # Nombre del archivo
+    # 'ENTRADA_PROPIETARIOS_XLSX': 'Propietarios CRO',
+    # Nombre del archivo TXT que el proceso generara
+    'SALIDA_TXT': '',
+    # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
+    'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'DUEÑO: NOMBRE COMPLETO', 'ESTADO', 'FECHA DE CIERRE', 'PÓLIZA: NUMERO DE PÓLIZA', 'FECHA DE EXPIRACIÓN DEL CO-RET', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID', 'ESTADO DE ÚLTIMA TAREA'],
+    # Nombre de las columnas del encabezado que tendra el archivo de PropietariosCRO (se usa para validar que el archivo este correcto)
+    # 'ENCABEZADO_PROPIETARIOS_XLSX': ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'FECHA', 'DUEÑO: NOMBRE COMPLETO', 'ASIGNADO A: NOMBRE COMPLETO', 'CUENTA: PROPIETARIO DEL CLIENTE: NOMBRE COMPLETO'],
+    # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
+    'ENCABEZADO_TXT': [],
+    # Columnas que se utilizaran durante el procesamiento del archivo XLSX
+    'COLUMNAS_PROCESO_XLSX': {'NOMBRE_CLIENTE': 0, 'FECHA_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'NOMBRE_EJECUTIVO': 3, 'ESTADO': 4, 'FECHA_CIERRE': 5, 'NRO_POLIZA': 6, 'EXPIRACION_CORET': 7, 'ESTADO_RETENCION': 8, 'ESTADO_ULTIMA_TAREA': 10},
+    # Columnas que se utilizaran durante el procesamiento del archivo PropietariosCRO XLSX
+    # 'COLUMNAS_PROPIETARIOS_XLSX': {'CAMPAÑA_ID': 0, 'FECHA': 3, 'DUEÑO_NOMBRE_COMPLETO': 4, 'ASIGNADO_NOMBRE_COMPLETO': 5, 'CUENTA_NOMBRE_COMPLETO': 6}
 }

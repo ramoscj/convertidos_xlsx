@@ -13,8 +13,8 @@ from escribir_txt import salidaArchivoTxt
 LOG_PROCESO_GESTION = dict()
 
 def extraerPropietariosCro():
-    # pathXlsxEntrada = 'test_xls/'
-    pathXlsxEntrada = PATH_XLSX
+    pathXlsxEntrada = 'test_xls/'
+    # pathXlsxEntrada = PATH_XLSX
     archivo = '%s%s.xlsx' % (pathXlsxEntrada, GESTION_CONFIG_XLSX['ENTRADA_PROPIETARIOS_XLSX'])
     LOG_PROCESO_GESTION.setdefault('INICIO_LECTURA_PROPIETARIOS', {len(LOG_PROCESO_GESTION)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
     try:
@@ -27,19 +27,36 @@ def extraerPropietariosCro():
         validarArchivo = validarEncabezadoXlsx(hoja['A1:G1'], encabezadoXls, archivo)
         if type(validarArchivo) is not dict:
             for fila in tqdm(iterable=hoja.rows, total= len(tuple(hoja.rows)), desc= 'Leyendo PropietariosCRO' , unit=' Fila'):
+
                 campahnaId = str(fila[celda['CAMPAÑA_ID']].value)
+                fecha = None
+                if fila[celda['FECHA']].value is not None:
+                    fecha = setearFechaCelda(fila[celda['FECHA']])
+
+                if fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value is None:
+                    nombreNoIBCRO = str(fila[celda['CUENTA_NOMBRE_COMPLETO']].value).lower()
+                else:
+                    nombreNoIBCRO = str(fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value).lower()
+
                 if not propietariosCro.get(campahnaId):
                     nombreIBCRO = str(fila[celda['DUEÑO_NOMBRE_COMPLETO']].value).lower()
-                    if fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value is None:
-                        nombreNoIBCRO = str(fila[celda['CUENTA_NOMBRE_COMPLETO']].value).lower()
+                    propietariosCro[campahnaId] = {'NOMBRE_IBCRO': nombreIBCRO , 'NOMBRE_NO_IBCRO': nombreNoIBCRO, 'FECHA': fecha}
+                else:
+                    if propietariosCro[campahnaId]['FECHA'] is None:
+                        if fecha is not None:
+                            propietariosCro[campahnaId]['NOMBRE_NO_IBCRO'] = nombreNoIBCRO
+                            propietariosCro[campahnaId]['FECHA'] = fecha
                     else:
-                        nombreNoIBCRO = str(fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value).lower()
-                    propietariosCro[campahnaId] = {'NOMBRE_IBCRO': nombreIBCRO , 'NOMBRE_NO_IBCRO': nombreNoIBCRO}
+                        if fecha is not None:
+                            propietariosCro[campahnaId]['NOMBRE_NO_IBCRO'] = str(fila[celda['CUENTA_NOMBRE_COMPLETO']].value).lower()
+                            propietariosCro[campahnaId]['FECHA'] = fecha
+
             LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1 , {'ENCABEZADO_PROPIETARIOSCRO': 'Encabezado del Archivo: %s OK' % archivo})
             LOG_PROCESO_GESTION.setdefault('LECTURA_PROPIETARIOS', {len(LOG_PROCESO_GESTION)+1: 'Lectura del Archivo: %s Finalizado' % archivo})
             return propietariosCro
         else:
             LOG_PROCESO_GESTION.setdefault('ENCABEZADO_PROPIETARIOSCRO', validarArchivo)
+            print(LOG_PROCESO_GESTION)
             raise
     except Exception as e:
         errorMsg = 'Error al leer archivo: %s | %s' % (archivo, e)
@@ -54,11 +71,10 @@ def getEstado(celdaFila):
         return 0
     else:
         celdaCoordenada = setearCelda(celdaFila)
-        error = 'Celda%s - No existe estado: %s' % (celdaCoordenada, celdaFila.value)
+        error = 'Celda%s;No existe estado;%s' % (celdaCoordenada, celdaFila.value)
         return error
 
 def getEstadoUt(celdaFila):
-    columnasError = []
     listaEstadoUt = {'Campaña exitosa': 1, 'Teléfono ocupado': 2, 'Sin respuesta': 3, 'Campaña completada con 5 intentos': 4, 'Buzón de voz': 5, 'Llamado reprogramado': 6, 'Contacto por correo': 7, 'Teléfono apagado': 8, 'Número equivocado': 9, 'Numero invalido': 10, 'Solicita renuncia': 11, 'No quiere escuchar': 12, 'Cliente desconoce venta': 13, 'Temporalmente fuera de servicio': 14, 'Cliente vive en el extranjero': 15, 'Sin teléfono registrado': 16, 'Cliente no retenido': 17, 'No contesta': 18, 'Pendiente de envío de Póliza': 19}
     if listaEstadoUt.get(celdaFila.value):
         return listaEstadoUt[celdaFila.value]
@@ -66,7 +82,7 @@ def getEstadoUt(celdaFila):
         return 0
     else:
         celdaCoordenada = setearCelda(celdaFila)
-        error = 'Celda%s - No existe estadoUt: %s' % (celdaCoordenada, celdaFila.value)
+        error = 'Celda%s;No existe estadoUt;%s' % (celdaCoordenada, celdaFila.value)
         return error
 
 def insertarCamphnaCro(nombreCampahna):
@@ -98,6 +114,7 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
         if type(archivo_correcto) is not dict:
             LOG_PROCESO_GESTION.setdefault('ENCABEZADO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Encabezado del Archivo: %s OK' % archivoEntrada})
             filaSalidaXls = dict()
+            ejecutivosNoExisten = dict()
             propietarioCro = extraerPropietariosCro()
             campahnasExistentesDb = buscarCamphnasDb()
             ejecutivosExistentesDb = buscarEjecutivosDb()
@@ -115,7 +132,6 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
 
                 if i >= 1:
                     fechaCreacion = setearFechaCelda(fila[columna['FECHA_DE_CREACION']])
-                    fechaUltimaModificacion = setearFechaCelda(fila[columna['FECHA_ULTIMA_MODF']])
 
                     estado = getEstado(fila[columna['ESTADO']])
                     nombreCampahna = str(fila[columna['NOMBRE_DE_CAMPAÑA']].value)
@@ -123,11 +139,7 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                     estadoUt = getEstadoUt(fila[columna['ESTADO_UT']])
 
                     # test
-                    nombreCompletoGestion = str(fila[columna['NOMBRE_COMPLETO']].value)
-
-                    if type(fechaUltimaModificacion) is not datetime.date:
-                        LOG_PROCESO_GESTION.setdefault('FECHA_ULTIMA_MODF', {len(LOG_PROCESO_GESTION)+1: fechaUltimaModificacion})
-                        continue
+                    # nombreCompletoGestion = str(fila[columna['NOMBRE_COMPLETO']].value)
 
                     if type(fechaCreacion) is not datetime.date:
                         LOG_PROCESO_GESTION.setdefault('FECHA_CREACION', {len(LOG_PROCESO_GESTION)+1: fechaCreacion})
@@ -141,11 +153,20 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                         continue
 
                     if nombreCampahna == 'Inbound CRO':
-                        if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:
-                            if estado == 0:
-                                continue
+                        if estado != 0:
+                            if propietarioCro.get(campanhaId):
+                                fechaUltimaModificacion = propietarioCro[campanhaId]['FECHA']
+                                if fechaUltimaModificacion is None:
+                                    errorCampana = 'Celda%s;FECHA Archivo Propietario;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), campanhaId)
+                                    LOG_PROCESO_GESTION.setdefault('CAMPANA_NONE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorCampana})
+                                if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:
+                                    nombre_ejecutivo = propietarioCro[campanhaId]['NOMBRE_IBCRO']
+                                else:
+                                    continue
                             else:
-                                nombre_ejecutivo = propietarioCro[campanhaId]['NOMBRE_IBCRO']
+                                errorCampana = 'Celda%s;No existe Campaña en PROPIETARIOS_CRO;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), campanhaId)
+                                LOG_PROCESO_GESTION.setdefault('CAMPANA_NO_EXISTE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorCampana})
+                                continue
                         else:
                             continue
                     else:
@@ -159,14 +180,24 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
 
                     if ejecutivosExistentesDb.get(nombre_ejecutivo):
                         rut = ejecutivosExistentesDb[nombre_ejecutivo]['RUT']
-                        filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampahna[0:30], 'RUT': rut, 'NOMBRE_GESTION': nombreCompletoGestion, 'NOMBRE_PROPIETARIO': nombre_ejecutivo}
+                        filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampahna[0:30], 'RUT': rut}
                         correlativo += 1
                     else:
-                        # errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), nombre_ejecutivo)
-                        # LOG_PROCESO_GESTION.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorRut})
-                        rut = 'SIN RUT'
-                        filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampahna[0:30], 'RUT': rut, 'NOMBRE_GESTION': nombreCompletoGestion, 'NOMBRE_PROPIETARIO': nombre_ejecutivo}
-                        correlativo += 1
+                        nombreEjecutivoSeparado = str(nombre_ejecutivo).split()
+                        # ejecutivosNombresDb = ejecutivosExistentesDb.fromkeys()
+                        for nombre in ejecutivosExistentesDb.keys():
+                            nombreEncontrado = 0
+                            for nombreBuscado in nombreEjecutivoSeparado:
+                                if str(nombre).count(nombreBuscado) > 0:
+                                    nombreEncontrado += 1
+                            if nombreEncontrado >= 2:
+                                print(nombre)
+
+                        errorRut = 'Celda%s;No existe Ejecutivo;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), nombre_ejecutivo)
+                        LOG_PROCESO_GESTION.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorRut})
+                        # rut = 'SIN RUT'
+                        # filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampahna[0:30], 'RUT': rut, 'NOMBRE_GESTION': nombreCompletoGestion, 'NOMBRE_PROPIETARIO': nombre_ejecutivo}
+                        # correlativo += 1
                     # else:
                     #     celdaCoordenada = setearCelda(fila[columna['FECHA_DE_CREACION']])
                     #     errorMsg = '%s: %s no esta en el rago %s - %s' % (celdaCoordenada, fechaCreacion, fechaRangoUno, fechaRangoDos)
@@ -184,5 +215,9 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
         LOG_PROCESO_GESTION.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
         return False, False
 
-# leerArchivoGestion('test_xls/Gestión CRO - copia.xlsx', '202003')
-# print(LOG_PROCESO_GESTION)
+x, y = leerArchivoGestion('test_xls/Gestión CRO - copia.xlsx', '202009', '20200825', '20200923')
+# print(salidaArchivoTxt('test.txt', x, y))
+# print(extraerPropietariosCro())
+
+# nombre = 'catalina berrios'
+# print(nombre.count('berrios'))
