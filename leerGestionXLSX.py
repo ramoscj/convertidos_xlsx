@@ -13,8 +13,8 @@ from escribir_txt import salidaArchivoTxt
 LOG_PROCESO_GESTION = dict()
 
 def extraerPropietariosCro():
-    pathXlsxEntrada = 'test_xls/'
-    # pathXlsxEntrada = PATH_XLSX
+    # pathXlsxEntrada = 'test_xls/'
+    pathXlsxEntrada = PATH_XLSX
     archivo = '%s%s.xlsx' % (pathXlsxEntrada, GESTION_CONFIG_XLSX['ENTRADA_PROPIETARIOS_XLSX'])
     LOG_PROCESO_GESTION.setdefault('INICIO_LECTURA_PROPIETARIOS', {len(LOG_PROCESO_GESTION)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
     try:
@@ -183,16 +183,6 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                         filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampahna[0:30], 'RUT': rut}
                         correlativo += 1
                     else:
-                        nombreEjecutivoSeparado = str(nombre_ejecutivo).split()
-                        # ejecutivosNombresDb = ejecutivosExistentesDb.fromkeys()
-                        for nombre in ejecutivosExistentesDb.keys():
-                            nombreEncontrado = 0
-                            for nombreBuscado in nombreEjecutivoSeparado:
-                                if str(nombre).count(nombreBuscado) > 0:
-                                    nombreEncontrado += 1
-                            if nombreEncontrado >= 2:
-                                print(nombre)
-
                         errorRut = 'Celda%s;No existe Ejecutivo;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), nombre_ejecutivo)
                         LOG_PROCESO_GESTION.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorRut})
                         # rut = 'SIN RUT'
@@ -215,7 +205,7 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
         LOG_PROCESO_GESTION.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
         return False, False
 
-x, y = leerArchivoGestion('test_xls/Gestión CRO - copia.xlsx', '202009', '20200825', '20200923')
+# x, y = leerArchivoGestion('test_xls/Gestión CRO - copia.xlsx', '202009', '20200825', '20200923')
 # print(salidaArchivoTxt('test.txt', x, y))
 # print(extraerPropietariosCro())
 
