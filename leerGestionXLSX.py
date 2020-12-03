@@ -42,14 +42,14 @@ def extraerPropietariosCro():
                     nombreIBCRO = str(fila[celda['DUEÑO_NOMBRE_COMPLETO']].value).lower()
                     propietariosCro[campahnaId] = {'NOMBRE_IBCRO': nombreIBCRO , 'NOMBRE_NO_IBCRO': nombreNoIBCRO, 'FECHA': fecha}
                 else:
-                    if propietariosCro[campahnaId]['FECHA'] is None:
-                        if fecha is not None:
+                    if fecha is not None:
+                        if propietariosCro[campahnaId]['FECHA'] is None:
                             propietariosCro[campahnaId]['NOMBRE_NO_IBCRO'] = nombreNoIBCRO
                             propietariosCro[campahnaId]['FECHA'] = fecha
-                    else:
-                        if fecha is not None:
-                            propietariosCro[campahnaId]['NOMBRE_NO_IBCRO'] = str(fila[celda['CUENTA_NOMBRE_COMPLETO']].value).lower()
-                            propietariosCro[campahnaId]['FECHA'] = fecha
+                        else:
+                            if fecha > propietariosCro[campahnaId]['FECHA']:
+                                propietariosCro[campahnaId]['NOMBRE_NO_IBCRO'] = nombreNoIBCRO
+                                propietariosCro[campahnaId]['FECHA'] = fecha
 
             LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1 , {'ENCABEZADO_PROPIETARIOSCRO': 'Encabezado del Archivo: %s OK' % archivo})
             LOG_PROCESO_GESTION.setdefault('LECTURA_PROPIETARIOS', {len(LOG_PROCESO_GESTION)+1: 'Lectura del Archivo: %s Finalizado' % archivo})
@@ -160,7 +160,7 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                                     errorCampana = 'Celda%s;FECHA Archivo Propietario;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), campanhaId)
                                     LOG_PROCESO_GESTION.setdefault('CAMPANA_NONE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorCampana})
                                 if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:
-                                    nombre_ejecutivo = propietarioCro[campanhaId]['NOMBRE_IBCRO']
+                                    nombre_ejecutivo = propietarioCro[campanhaId]['NOMBRE_NO_IBCRO']
                                 else:
                                     continue
                             else:
