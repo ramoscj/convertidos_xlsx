@@ -25,6 +25,7 @@ def extraerPropietariosCro():
         hoja = xls[nombre_hoja[0]]
         propietariosCro = dict()
         validarArchivo = validarEncabezadoXlsx(hoja['A1:G1'], encabezadoXls, archivo)
+        ejecutivosExistentesDb = buscarEjecutivosDb()
         if type(validarArchivo) is not dict:
             for fila in tqdm(iterable=hoja.rows, total= len(tuple(hoja.rows)), desc= 'Leyendo PropietariosCRO' , unit=' Fila'):
 
@@ -33,14 +34,12 @@ def extraerPropietariosCro():
                 if fila[celda['FECHA']].value is not None:
                     fecha = setearFechaCelda(fila[celda['FECHA']])
 
-                if fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value is None:
+                nombreNoIBCRO = str(fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value).lower()
+                if not ejecutivosExistentesDb.get(nombreNoIBCRO):
                     nombreNoIBCRO = str(fila[celda['CUENTA_NOMBRE_COMPLETO']].value).lower()
-                else:
-                    nombreNoIBCRO = str(fila[celda['ASIGNADO_NOMBRE_COMPLETO']].value).lower()
 
                 if not propietariosCro.get(campahnaId):
-                    nombreIBCRO = str(fila[celda['DUEÑO_NOMBRE_COMPLETO']].value).lower()
-                    propietariosCro[campahnaId] = {'NOMBRE_IBCRO': nombreIBCRO , 'NOMBRE_NO_IBCRO': nombreNoIBCRO, 'FECHA': fecha}
+                    propietariosCro[campahnaId] = {'NOMBRE_NO_IBCRO': nombreNoIBCRO, 'FECHA': fecha}
                 else:
                     if fecha is not None:
                         if propietariosCro[campahnaId]['FECHA'] is None:
@@ -138,9 +137,6 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                     campanhaId = str(fila[columna['CAMPAÑA_ID']].value)
                     estadoUt = getEstadoUt(fila[columna['ESTADO_UT']])
 
-                    # test
-                    # nombreCompletoGestion = str(fila[columna['NOMBRE_COMPLETO']].value)
-
                     if type(fechaCreacion) is not datetime.date:
                         LOG_PROCESO_GESTION.setdefault('FECHA_CREACION', {len(LOG_PROCESO_GESTION)+1: fechaCreacion})
                         continue
@@ -185,13 +181,6 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                     else:
                         errorRut = 'Celda%s;No existe Ejecutivo;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), nombre_ejecutivo)
                         LOG_PROCESO_GESTION.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_GESTION)+1: errorRut})
-                        # rut = 'SIN RUT'
-                        # filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampahna[0:30], 'RUT': rut, 'NOMBRE_GESTION': nombreCompletoGestion, 'NOMBRE_PROPIETARIO': nombre_ejecutivo}
-                        # correlativo += 1
-                    # else:
-                    #     celdaCoordenada = setearCelda(fila[columna['FECHA_DE_CREACION']])
-                    #     errorMsg = '%s: %s no esta en el rago %s - %s' % (celdaCoordenada, fechaCreacion, fechaRangoUno, fechaRangoDos)
-                    #     LOG_PROCESO_GESTION.setdefault('RANGO_FECHA_CREACION', {len(LOG_PROCESO_GESTION)+1: errorMsg})
                 i += 1
             LOG_PROCESO_GESTION.setdefault('FIN_CELDAS_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivoEntrada, len(tuple(hoja.rows)))})
             LOG_PROCESO_GESTION.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Proceso del Archivo: %s Finalizado' % archivoEntrada})

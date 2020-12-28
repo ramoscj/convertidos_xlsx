@@ -67,7 +67,6 @@ def getEstadoContacto(celdaFila, celdaEstadoUltimaTarea):
         if listaUltimaTarea.get(celdaEstadoUltimaTarea.value):
             return listaUltimaTarea[celdaEstadoUltimaTarea.value]
         else:
-            # REVISAR ESTA REGLA
             return 1
     else:
         celdaCoordenada = setearCelda(celdaFila)

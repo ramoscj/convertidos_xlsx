@@ -35,7 +35,6 @@ def leerArchivoFuga(archivo, periodo):
         LOG_PROCESO_FUGA.setdefault('INICIO_LECTURA_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
         encabezadoXls = FUGA_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoFugaTxt = FUGA_CONFIG_XLSX['ENCABEZADO_FUGA_TXT']
-        # encabezadoStockTxt = FUGA_CONFIG_XLSX['ENCABEZADO_STOCK_TXT']
         columna = FUGA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
@@ -80,7 +79,6 @@ def leerArchivoFuga(archivo, periodo):
 
             LOG_PROCESO_FUGA.setdefault('FIN_CELDAS_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
             LOG_PROCESO_FUGA.setdefault('PROCESO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
-            # return filaSalidaFugaXls, filaSalidaStockXls, encabezadoFugaTxt, encabezadoStockTxt
             return filaSalidaFugaXls, encabezadoFugaTxt
         else:
             LOG_PROCESO_FUGA.setdefault('ENCABEZADO_FUGA', archivo_correcto)

@@ -17,7 +17,6 @@ def leerArchivoDotacion(periodo):
 
         filaSalidaXls = dict()
         ejecutivosDB = buscarEjecutivosAllDb(ultimoDiaMes(periodo), primerDiaMes(periodo))
-        # print(ejecutivosDB)
         for  rut, valor in tqdm(iterable= ejecutivosDB.items(), total= len(ejecutivosDB), desc='Leyendo AsistenciaCRO' , unit=' Fila'):
         # # for fila in hoja.rows:
 
@@ -48,4 +47,3 @@ def leerArchivoDotacion(periodo):
         LOG_PROCESO_DOTACION.setdefault('LECTURA_ARCHIVO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: errorMsg})
         LOG_PROCESO_DOTACION.setdefault('PROCESO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: 'Error al procesar Archivo: GESTION'})
         return False, False
-        # raise e

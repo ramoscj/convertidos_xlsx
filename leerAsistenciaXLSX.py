@@ -100,7 +100,7 @@ def leerArchivoAsistencia(archivo, periodo):
                         filaSalidaXls[rut].setdefault('DIAS_HABILES_MES', totalColumnas - 4)
                         filaSalidaXls[rut].setdefault('CARGA', vhcAplica)
                         filaSalidaXls[rut].setdefault('RUT', rut)
-                        # filaSalidaXls[rut].setdefault('NOMBRE_RRH', ejecutivosExistentesDb[rut]['NOMBRE_RRH'])
+                        filaSalidaXls[rut].setdefault('NOMBRE_RRH', ejecutivosExistentesDb[rut]['NOMBRE_RRH'])
                         correlativo += 1
                     else:
                         errorRut = 'Celda%s - Ejecutivo duplicado: %s' % (setearCelda(fila[columna['RUT']]), rut)

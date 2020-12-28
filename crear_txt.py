@@ -48,9 +48,6 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
                     if procesoInput == 'ASISTENCIA':
                         archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, 'ICOM_CA_MTLFCC_', fechaInput)
                         salidaArchivoTxt(archivoTxtOutput, dataXlsxDotacion, encabezadoXlsxDotacion)
-                    # if procesoInput == 'FUGA':
-                    #     archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, 'STOCK', formatearFechaMesSiguiente(fechaInput))
-                    #     salidaArchivoTxt(archivoTxtOutput, dataStockXlsx, encabezadoStockXlsx)
 
                 if salidaLogTxt(pathLogSalida, logProceso):
                     print("Archivo: %s creado !!" % pathLogSalida)
@@ -58,14 +55,6 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
                 print(e)
         else:
             print('Error: Archivo %s no encontrado' % archivoXlsx)
-
-# procesos = {'FUGA': {'argumentos': 2, 'archivoLecturaXls': '_FUGA_AGENCIA', 'archivoSalidaTxt': 'FUGA'},
-#             'ASISTENCIA': {'argumentos': 2, 'archivoLecturaXls': '_Asistencia_CRO', 'archivoSalidaTxt': 'ASISTENCIA'},
-#             'GESTION': {'argumentos': 4, 'archivoLecturaXls': 'Gestión CRO', 'archivoSalidaTxt': 'GESTION'},
-#             'CAMPANHA_ESPECIAL': {'argumentos': 2, 'archivoLecturaXls': '_CampañasEspeciales_CRO', 'archivoSalidaTxt': 'PILOTO'},
-#             'DOTACION': {'argumentos': 2, 'archivoLecturaXls': '_Asistencia_CRO', 'archivoSalidaTxt': 'ICOM_CA_CANAL_'},
-#             'CALIDAD': {'argumentos': 2, 'archivoLecturaXls': '_Asistencia_CRO', 'archivoSalidaTxt': 'ICOM_CA_CANAL_'}
-#             }
 
 procesos = {'FUGA': FUGA_CONFIG_XLSX,
             'ASISTENCIA': ASISTENCIA_CONFIG_XLSX,
@@ -87,7 +76,6 @@ if procesos.get(procesoInput):
             fechaEntrada = str(sys.argv[2])
             fechaRangoUno = str(sys.argv[3])
             fechaRangoDos = str(sys.argv[4])
-            # pathXlsxEntrada = 'test_xls/'
             pathXlsxEntrada = PATH_XLSX
             archivoXls = ('%s%s.xlsx') % (pathXlsxEntrada, procesos[procesoInput]['ENTRADA_XLSX'])
             if os.path.isfile(archivoXls):
@@ -98,7 +86,6 @@ if procesos.get(procesoInput):
                 pathLogSalida = ('%slog_%s_%s.txt') % (PATH_LOG, procesos[procesoInput]['SALIDA_TXT'], fechaEntrada)
                 dataXlsx, encabezadoXlsx = leerArchivoGestion(archivoXls, fechaEntrada, fechaRangoUno, fechaRangoDos)
                 if dataXlsx and salidaArchivoTxt(archivoTxt, dataXlsx, encabezadoXlsx):
-                    # print("Archivo: GESTION Creado !!")
                     LOG_PROCESO_GESTION.setdefault('SALIDA_TXT', {len(LOG_PROCESO_GESTION)+1: 'Archivo: %s creado!! ' % archivoTxt})
                 erroresProceso = LOG_PROCESO_GESTION
                 if salidaLogTxt(pathLogSalida, erroresProceso):

@@ -16,7 +16,7 @@ class PersonaFuga:
             raise Exception('El valor "stock" no es un int')
         elif type(self.rut) is not str:
             raise Exception('El valor "rut" no es un str')
-    
+
 # jorge = PersonaFuga(1,2,1,2)
 
 from itertools import cycle
