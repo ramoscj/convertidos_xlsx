@@ -32,6 +32,10 @@ El formato que debe tener el parametro **FECHA** debe ser YYYMM. La unica varian
 + **python crear_txt.py calidad 202009**: Genera el archivo de CALIDAD
 + **python crear_txt.py gestion 202009 20200901 20200930**: Genera el archivo de GESTION
 
+## Instalacion de la Base de Datos
+
+El archivo con la base de datos esta en la carpeta "DB" hay se encuentra el .bak que es de un SQL Server.
+
 ## NOTA
 
 Para los fines de configuracion el archivo **config_xlsx.py**  contiene las varibles que controlan los directorios donde se encuentran los archivos base, las salidas generadas y los logs. Se debe asegurar que el usuario con que se ejecute el programa tenga permisos para escribir en estos directorios.
