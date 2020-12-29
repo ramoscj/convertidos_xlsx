@@ -5,6 +5,7 @@ INPUTS/
 OUTPUTS/
 PROCESO_LOG/
 test_xls/
+.vscode/
 
 # Extension de archivos de entrada y salida
 *.xlsx
