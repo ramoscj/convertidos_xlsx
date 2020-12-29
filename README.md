@@ -34,7 +34,7 @@ El formato que debe tener el parametro **FECHA** debe ser YYYMM. La unica varian
 
 ## Instalacion de la Base de Datos
 
-El archivo con la base de datos esta en la carpeta "DB" hay se encuentra el .bak que es de un SQL Server.
+El archivo con la base de datos esta en la carpeta "DB" hay se encuentra el .bak que es de un SQL Server. En el archivo **config_xlsx.py** existe una variable que contiene los parametros para conectarse a la DB que tiene por nombre **ACCESO_DB**, solo se deben cambiar los parametros de conexion.
 
 ## NOTA
 

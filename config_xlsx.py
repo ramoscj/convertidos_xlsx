@@ -5,6 +5,14 @@ PATH_TXT = 'OUTPUTS/'
 # Directorio de archivos LOG de salida
 PATH_LOG = 'PROCESO_LOG/'
 
+# Parametros de conexion a la DB
+ACCESO_DB = {
+    'SERVIDOR': 'SOMARCJ\SOMAR01',
+    'NOMBRE_DB': 'icom',
+    'USUARIO': 'sa',
+    'CLAVE': 'testdb'
+}
+
 FUGA_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'FUGA',
