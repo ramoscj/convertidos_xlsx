@@ -14,7 +14,7 @@
 pip install -r requirements.txt
 ```
 
-+ Como ultimo paso el archivo que controla la ejecucion es "crear_txt.py" y para ejecutarlo se debe escribir el siguiente comando en la consola.
++ El archivo que controla la ejecucion es "crear_txt.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD).
 
 **python crear_txt.py** + el proceso con sus respectivos parametros de entrada
 ```python
@@ -40,7 +40,7 @@ El archivo con la base de datos esta en la carpeta "DB" hay se encuentra el .bak
 
 Para los fines de configuracion el archivo **config_xlsx.py**  contiene las varibles que controlan los directorios donde se encuentran los archivos base, las salidas generadas y los logs. Se debe asegurar que el usuario con que se ejecute el programa tenga permisos para escribir en estos directorios.
 + **PATH_XLSX**: Directorio de archivos de entrada XLSX
-+ **PATH_TXT **: Directorio de archivos de salida TXT
++ **PATH_TXT**: Directorio de archivos de salida TXT
 + **PATH_LOG**: Directorio de archivos LOG de salida
 + En el mismo archivo existen siete variables que tienen algunos parametros para evaluar los archivos de entrada. Se dara ejemplo con la variable del archivo de FUGA y las demas tambien tendran una estructura parecida:
  + **FUGA_CONFIG_XLSX**: Archivo de FUGA
