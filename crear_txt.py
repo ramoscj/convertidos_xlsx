@@ -46,7 +46,7 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
                 if dataXlsx:
                     salidaArchivoTxt(archivoTxtOutput, dataXlsx, encabezadoXlsx)
                     if procesoInput == 'ASISTENCIA':
-                        archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, 'ICOM_CA_MTLFCC_', fechaInput)
+                        archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, DOTACION_CONFIG_XLSX['SALIDA_TXT'], fechaInput)
                         salidaArchivoTxt(archivoTxtOutput, dataXlsxDotacion, encabezadoXlsxDotacion)
 
                 if salidaLogTxt(pathLogSalida, logProceso):
@@ -60,14 +60,13 @@ procesos = {'FUGA': FUGA_CONFIG_XLSX,
             'ASISTENCIA': ASISTENCIA_CONFIG_XLSX,
             'GESTION': GESTION_CONFIG_XLSX,
             'CAMPANHA_ESPECIAL': CAMPANHAS_CONFIG_XLSX,
-            'DOTACION': DOTACION_CONFIG_XLSX,
             'CALIDAD': CALIDAD_CONFIG_XLSX
             }
 procesoInput = str(sys.argv[1]).upper()
 
 if procesos.get(procesoInput):
     if len(sys.argv) == procesos[procesoInput]['ARGUMENTOS_PROCESO'] + 1:
-        if procesoInput == 'FUGA' or procesoInput == 'ASISTENCIA' or procesoInput == 'CAMPANHA_ESPECIAL' or procesoInput == 'DOTACION' or procesoInput == 'CALIDAD':
+        if procesoInput == 'FUGA' or procesoInput == 'ASISTENCIA' or procesoInput == 'CAMPANHA_ESPECIAL' or procesoInput == 'CALIDAD':
             fechaEntrada = str(sys.argv[2])
             archivoXls = procesos[procesoInput]['ENTRADA_XLSX']
             archivoTxt = procesos[procesoInput]['SALIDA_TXT']

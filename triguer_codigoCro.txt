@@ -1,7 +1,0 @@
-DELIMITER $
-CREATE TRIGGER generarCodigoCro BEFORE INSERT on codigos_cro FOR EACH ROW
-BEGIN
-    DECLARE siguiente_codigo int;
-    set siguiente_codigo = (SELECT ifnull(max(CONVERT(substring(codigo, 4), signed integer)), 0) FROM codigos_cro) + 1;
-    set new.codigo = CONCAT('CDG', LPAD(siguiente_codigo, 5, '0'));
-END $

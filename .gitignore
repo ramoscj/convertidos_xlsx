@@ -4,7 +4,10 @@ __pycache__/
 INPUTS/
 OUTPUTS/
 PROCESO_LOG/
+test_xls/
 
 # Extension de archivos de entrada y salida
-.xlsx
-.txt
+*.xlsx
+*.txt
+*.sql
+*.pyc
