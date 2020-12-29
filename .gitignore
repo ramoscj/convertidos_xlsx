@@ -9,6 +9,5 @@ test_xls/
 
 # Extension de archivos de entrada y salida
 *.xlsx
-*.txt
 *.sql
 *.pyc
