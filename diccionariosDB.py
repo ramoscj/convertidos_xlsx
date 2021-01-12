@@ -68,4 +68,37 @@ def buscarEjecutivosAllDb(ultimoDiaMes, primerDiaMes):
         cursor.close()
         db.close()
 
-# print(buscarRutEjecutivosDb())
+def buscarPolizasReliquidar(mesAnterior):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        polizasParaRequilidar = dict()
+        sql = """SELECT rut_ejecutivo, id_cliente, numero_poliza, campana_id, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre FROM retenciones_por_reliquidar WHERE fecha_proceso = ?"""
+        cursor.execute(sql, (mesAnterior))
+        for (rut_ejecutivo, id_cliente, numero_poliza, campana_id, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) in cursor:
+            polizasParaRequilidar[numero_poliza] = {'COBRANZA_PRO': cobranza_pro, 'COBRANZA_REL_PRO': cobranza_rel_pro, 'PACPAT_PRO': pacpat_pro, 'PACPAT_REL_PRO': pacpat_rel_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'RUT': rut_ejecutivo, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente, 'FECHA_CIERRE': fecha_cierre}
+        return polizasParaRequilidar
+    except Exception as e:
+        raise Exception('Error buscar Polizas para reliquidar: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def buscarPolizasReliquidarAll():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        polizasParaRequilidar = dict()
+        sql = """SELECT rut_ejecutivo, id_cliente, numero_poliza FROM retenciones_por_reliquidar"""
+        cursor.execute(sql)
+        for (rut_ejecutivo, id_cliente, numero_poliza) in cursor:
+            pk = '%s_%s_%s' % (id_cliente, rut_ejecutivo, numero_poliza)
+            polizasParaRequilidar[pk] = {'RUT': rut_ejecutivo, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente}
+        return polizasParaRequilidar
+    except Exception as e:
+        raise Exception('Error buscar Polizas para reliquidarAll: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+# print(buscarPolizasReliquidarAll())

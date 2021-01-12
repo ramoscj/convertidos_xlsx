@@ -23,7 +23,7 @@ FUGA_CONFIG_XLSX = {
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': 'FUGA',
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'NRO_POLIZA', 'ESTADOPOLIZA',            'FECHAINICIOVIGENCIA', 'RUT_CRO', 'NOMBRE_CRO', 'FECHAPROCESO', 'CONSIDERAR_FUGA'],
+    'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'NRO_POLIZA', 'ESTADOPOLIZA',            'FECHAINICIOVIGENCIA', 'RUT_CRO', 'NOMBRE_CRO', 'FECHAPROCESO', 'CONSIDERAR'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
     'ENCABEZADO_FUGA_TXT': ['CRR', 'FUGA_MES_ANTERIOR', 'STOCK', 'RUT', 'UNIDAD'],
     # 'ENCABEZADO_STOCK_TXT': ['CRR','STOCK_PROXIMO_MES', 'RUT', 'UNIDAD'],
@@ -41,7 +41,7 @@ ASISTENCIA_CONFIG_XLSX = {
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': 'ASISTENCIA',
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['EJECUTIVA', 'NOMBRE SISTEMA RRHH', 'RUT', 'PLATAFORMA'],
+    'ENCABEZADO_XLSX': ['EJECUTIVO', 'NOMBRE POR SISTEMA', 'RUT', 'PLATAFORMA'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
     'ENCABEZADO_TXT': ['CRR', 'VHC_MES', 'DIAS_HABILES_MES', 'VHC_APLICA', 'RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
@@ -126,17 +126,25 @@ PROACTIVA_CONFIG_XLSX = {
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': 'BD Gestion CORETProactiva',
     # Nombre del archivo
-    # 'ENTRADA_PROPIETARIOS_XLSX': 'Propietarios CRO',
+    'ENTRADA_COMPLEMENTO_CLIENTE': 'COMPLEMENTO CLIENT vLite 20201111_2',
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': '',
-    # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'DUEÑO: NOMBRE COMPLETO', 'ESTADO', 'FECHA DE CIERRE', 'PÓLIZA: NUMERO DE PÓLIZA', 'FECHA DE EXPIRACIÓN DEL CO-RET', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID', 'ESTADO DE ÚLTIMA TAREA'],
-    # Nombre de las columnas del encabezado que tendra el archivo de PropietariosCRO (se usa para validar que el archivo este correcto)
-    # 'ENCABEZADO_PROPIETARIOS_XLSX': ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'FECHA', 'DUEÑO: NOMBRE COMPLETO', 'ASIGNADO A: NOMBRE COMPLETO', 'CUENTA: PROPIETARIO DEL CLIENTE: NOMBRE COMPLETO'],
+
+    # Nombre de las columnas del encabezado que tendra el archivo de Complemento Cliente (se usa para validar que el archivo este correcto)
+    'ENCABEZADO_COMPLEMENTO_CLIENTE': ['NROPOLIZA', 'NROCERT', 'ESTADOPOLIZA', 'FEC_ULT_PAG', 'ESTADO_MANDATO', 'FECHA_MANDATO', 'FECHAPROCESO'],
+
+    # # Columnas que se utilizaran durante el procesamiento del archivo Complemento Cliente
+    'COLUMNAS_COMPLEMENTO_CLIENTE': {'NRO_POLIZA': 0, 'NRO_CERT': 1, 'FEC_ULT_PAG': 3, 'ESTADO_MANDATO': 4, 'FECHA_MANDATO': 5},
+
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': [],
+    'ENCABEZADO_TXT': ['CRR', 'COBRANZA_PRO', 'COBRANZA_REL_PRO', 'PACPAT_PRO', 'PACPAT_REL_PRO', 'ESTADO_PRO', 'ESTADO_UT_PRO', 'RUT', 'ID_CAMPANA', 'CAMPANA', 'POLIZA', 'ID_CLIENTE'],
+
+    # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
+    'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'DUEÑO: NOMBRE COMPLETO', 'ESTADO', 'FECHA DE CIERRE',	'PÓLIZA: NUMERO DE PÓLIZA', 'FECHA DE EXPIRACIÓN DEL CO-RET', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID.', 'ESTADO DE ÚLTIMA TAREA'],
+
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
-    'COLUMNAS_PROCESO_XLSX': {'NOMBRE_CLIENTE': 0, 'FECHA_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'NOMBRE_EJECUTIVO': 3, 'ESTADO': 4, 'FECHA_CIERRE': 5, 'NRO_POLIZA': 6, 'EXPIRACION_CORET': 7, 'ESTADO_RETENCION': 8, 'ESTADO_ULTIMA_TAREA': 10},
-    # Columnas que se utilizaran durante el procesamiento del archivo PropietariosCRO XLSX
-    # 'COLUMNAS_PROPIETARIOS_XLSX': {'CAMPAÑA_ID': 0, 'FECHA': 3, 'DUEÑO_NOMBRE_COMPLETO': 4, 'ASIGNADO_NOMBRE_COMPLETO': 5, 'CUENTA_NOMBRE_COMPLETO': 6}
+    'COLUMNAS_PROCESO_XLSX': {'NOMBRE_CLIENTE': 0, 'FECHA_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'NOMBRE_EJECUTIVO': 3, 'ESTADO': 4, 'FECHA_CIERRE': 5, 'NRO_POLIZA': 6, 'EXPIRACION_CORET': 7, 'ESTADO_RETENCION': 8, 'CAMAPAÑA_ID': 9, 'ESTADO_ULTIMA_TAREA': 10},
+
+    # Valores para los Estado de Última Tarea
+    'LISTA_ULTIMA_TAREA' : {'Numero invalido': 1, 'Cliente retenido': 2, 'Llamado reprogramado': 3, 'Cliente no retenido': 4, 'Sin respuesta': 5, 'Buzón de voz': 6, 'Pagos al día': 7, 'Teléfono ocupado': 8, 'Teléfono apagado':	9, 'No quiere escuchar': 10, 'Contacto con el asesor': 11, 'Campaña completada con 5 intentos': 12, 'Apoyo del asesor al ejecutivo': 13, 'Número equivocado': 14, 'Pendiente respuesta cliente': 15, 'Sin gestión de cierre': 16, 'Sin teléfono registrado': 17, 'Cliente no actualizado': 18, 'Temporalmente fuera de servicio': 19, 'Carta de revocación pendiente': 20, 'Contacto por correo': 21, 'Campaña exitosa': 22, 'Solicita renuncia': 23, 'Cliente desconoce venta': 24, 'No se pudo instalar mandato':	25, 'Anulado por cambio de producto Metlife': 26, 'Cliente vive en el extranjero': 27, 'Cliente activa mandato': 28, 'Plazo previsto del producto': 28, 'Queda vigente sin pagar': 30, 'Lo está viendo con Asesor': 31},
 }

@@ -1,7 +1,7 @@
 from openpyxl import load_workbook
 from tqdm import tqdm
 
-from validaciones_texto import formatearRut, validarEncabezadoXlsx, setearCelda
+from validaciones_texto import formatearRut, validarEncabezadoXlsx, setearCelda2
 from diccionariosDB import buscarRutEjecutivosDb
 from config_xlsx import CAMPANHAS_CONFIG_XLSX
 
@@ -32,17 +32,17 @@ def leerArchivoCampanhasEsp(archivo, periodo):
                         filaSalidaXls[rut] = {'CRR': correlativo, 'NUMERO_GESTIONES': numeroGestiones, 'RUT': rut}
                         correlativo += 1
                     else:
-                        errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[celda['RUT']]), rut)
-                        LOG_PROCESO_CAMPANHAS.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_CAMPANHAS)+1: errorRut})
+                        errorRut = '%s;No existe Ejecutivo;%s' % (setearCelda2(fila[celda['RUT']], 0), rut)
+                        LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'EJECUTIVO_NO_EXISTE_%s' % i: errorRut})
                 i += 1
-            LOG_PROCESO_CAMPANHAS.setdefault('FIN_CELDAS_CAMPANHAS', {len(LOG_PROCESO_CAMPANHAS)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
-            LOG_PROCESO_CAMPANHAS.setdefault('PROCESO_CAMPANHAS', {len(LOG_PROCESO_CAMPANHAS)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
+            LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'FIN_CELDAS_CAMPANHAS': 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
+            LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'PROCESO_CAMPANHAS': 'Proceso del Archivo: %s Finalizado' % archivo})
             return filaSalidaXls, encabezadoTxt
         else:
             LOG_PROCESO_CAMPANHAS.setdefault('ENCABEZADO_CAMPANHAS', archivo_correcto)
             raise
     except Exception as e:
         errorMsg = 'Error: %s | %s' % (archivo, e)
-        LOG_PROCESO_CAMPANHAS.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_CAMPANHAS)+1: errorMsg})
-        LOG_PROCESO_CAMPANHAS.setdefault('PROCESO_CAMPANHAS', {len(LOG_PROCESO_CAMPANHAS)+1: 'Error al procesar Archivo: %s' % archivo})
+        LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'LECTURA_ARCHIVO': errorMsg})
+        LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'PROCESO_CAMPANHAS': 'Error al procesar Archivo: %s' % archivo})
         return False, False

@@ -1,6 +1,8 @@
 import datetime
 from dateutil.relativedelta import relativedelta
 
+import string
+
 def validaFechaInput(fecha_x):
     try:
         f1 = fecha_x[0:4]
@@ -66,7 +68,7 @@ def validarEncabezadoXlsx(filasXlsx: [], encabezadoXls: [], nombreArchivo):
         for celda in fila:
             if str(celda.value).upper() != encabezadoXls[i]:
                 celda = setearCelda(str(fila[i]))
-                error = 'Celda%s - %s: Encabezado incorrecto: %s' % (celda, nombreArchivo, encabezadoXls[i])
+                error = 'Celda%s - %s;Encabezado incorrecto;%s' % (celda, nombreArchivo, encabezadoXls[i])
                 columnasError.setdefault(len(columnasError)+1, error)
             i += 1
     if len(columnasError) > 0:
@@ -77,6 +79,23 @@ def validarEncabezadoXlsx(filasXlsx: [], encabezadoXls: [], nombreArchivo):
 def setearCelda(celda):
     resto, separador, celdaN = str(celda).partition(".")
     return ('<%s') % celdaN
+
+def setearCelda2(celda, cantidad, *nroRegistro):
+    if cantidad > 0:
+        if celda[cantidad].value is None:
+            cantidad -= 1
+            setearCelda2(celda, cantidad, nroRegistro[0])
+        if cantidad == len(celda) -1:
+            resto, separador, celdaN = str(celda[cantidad]).partition(".")
+            coordenada = 'Celda<%s' % celdaN
+        else:
+            resto, separador, celdaN = str(celda[cantidad]).partition(".")
+            letrasAbecedario = list(string.ascii_uppercase)
+            coordenada = 'Celda<%s%s>' % (letrasAbecedario[len(celda)-1], nroRegistro[0])
+    else:
+        resto, separador, celdaN = str(celda).partition(".")
+        coordenada = 'Celda<%s' % celdaN
+    return coordenada
 
 def primerDiaMes(fecha):
     fechaAnho = str(fecha)[0:4]
@@ -151,6 +170,23 @@ def setearNombre(texto):
             textoFormateado += texto[cantidad] + ' '
     return textoFormateado
 
+def formatearFechaMesAnterior(fecha):
+    try:
+        fechaAnho = str(fecha)[0:4]
+        fechaMes = str(fecha)[4:6]
+        fechaSalida = datetime.datetime(int(fechaAnho), int(fechaMes), 1).replace(day=1).date()-relativedelta(months=1)
+        return fechaSalida
+    except Exception as e:
+        errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
+        raise Exception(errorMsg)
+
+def formatearNumeroPoliza(numeroPoliza):
+    polizaSalida = None
+    if numeroPoliza is not None and numeroPoliza != '':
+        nroPolizaSolo, separador, nroCertificado = str(numeroPoliza).partition("_")
+        polizaSalida = nroPolizaSolo
+    return polizaSalida
+
 # print(separarNombreApellido('RAMOS PEREZ PEREZ Perez ROSO, CARLOS JAVIER'))
-
-
+# x = ('123.5', '6789.5', None)
+# print(formatearFechaMesAnterior('202011'))

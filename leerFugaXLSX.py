@@ -41,19 +41,19 @@ def leerArchivoFuga(archivo, periodo):
         hoja = xls[nombre_hoja[0]]
         archivo_correcto = validarEncabezadoXlsx(hoja['A1:M1'], encabezadoXls, archivo)
         if type(archivo_correcto) is not dict:
-            LOG_PROCESO_FUGA.setdefault('ENCABEZADO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Encabezado del Archivo: %s OK' % archivo})
+            LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'ENCABEZADO_FUGA': 'Encabezado del Archivo: %s OK' % archivo})
             i = 0
             correlativo = 1
             filaSalidaFugaXls = dict()
             filaSalidaStockXls = dict()
             ejecutivosExistentesDb = buscarRutEjecutivosDb()
-            LOG_PROCESO_FUGA.setdefault('INICIO_CELDAS_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
+            LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'INICIO_CELDAS_FUGA': 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
             for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo FugaCRO' , unit=' Fila'):
 
                 if i >= 1:
                     fechaLpattrs = validaFechaCelda(fila[columna['LPATTR_PER_RES']])
                     if type(fechaLpattrs) is str:
-                            LOG_PROCESO_FUGA.setdefault('FECHA_CREACION', {len(LOG_PROCESO_FUGA)+1: fechaLpattrs})
+                            LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'FECHA_CREACION': fechaLpattrs})
                             continue
                     if periodo == str(fechaLpattrs.value) and fila[columna['RUT_CRO']].value is not None:
 
