@@ -13,6 +13,9 @@ ACCESO_DB = {
     'CLAVE': 'testdb'
 }
 
+# Lista de ESTADO_ULTIMA_TAREA Contactado
+listaEstadoContactado = {'Cliente retenido': 1, 'Llamado reprogramado': 2, 'Cliente no retenido': 3, 'No quiere escuchar': 4, 'Contacto con el asesor': 5, 'Apoyo del asesor al ejecutivo': 6, 'Pendiente respuesta cliente': 7, 'Carta de revocación pendiente': 8, 'Contacto por correo': 9, 'Campaña exitosa': 10, 'Solicita renuncia': 11, 'Cliente desconoce venta': 12, 'No se pudo instalar mandato': 13, 'Anulado por cambio de producto Metlife': 14, 'Cliente vive en el extranjero': 15, 'Cliente activa mandato': 16, 'Queda vigente sin pagar': 17, 'Lo está viendo con Asesor': 18}
+
 FUGA_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'FUGA',
@@ -122,29 +125,66 @@ PROACTIVA_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'PROACTIVA',
     # Argumentos que necesita el proceso para funcionar
-    'ARGUMENTOS_PROCESO': 4,
+    'ARGUMENTOS_PROCESO': 2,
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': 'BD Gestion CORETProactiva',
-    # Nombre del archivo
-    'ENTRADA_COMPLEMENTO_CLIENTE': 'COMPLEMENTO CLIENT vLite 20201111_2',
     # Nombre del archivo TXT que el proceso generara
-    'SALIDA_TXT': '',
-
-    # Nombre de las columnas del encabezado que tendra el archivo de Complemento Cliente (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_COMPLEMENTO_CLIENTE': ['NROPOLIZA', 'NROCERT', 'ESTADOPOLIZA', 'FEC_ULT_PAG', 'ESTADO_MANDATO', 'FECHA_MANDATO', 'FECHAPROCESO'],
-
-    # # Columnas que se utilizaran durante el procesamiento del archivo Complemento Cliente
-    'COLUMNAS_COMPLEMENTO_CLIENTE': {'NRO_POLIZA': 0, 'NRO_CERT': 1, 'FEC_ULT_PAG': 3, 'ESTADO_MANDATO': 4, 'FECHA_MANDATO': 5},
+    'SALIDA_TXT': 'ICOM_GESTION_CORPRO',
 
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
     'ENCABEZADO_TXT': ['CRR', 'COBRANZA_PRO', 'COBRANZA_REL_PRO', 'PACPAT_PRO', 'PACPAT_REL_PRO', 'ESTADO_PRO', 'ESTADO_UT_PRO', 'RUT', 'ID_CAMPANA', 'CAMPANA', 'POLIZA', 'ID_CLIENTE'],
 
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'DUEÑO: NOMBRE COMPLETO', 'ESTADO', 'FECHA DE CIERRE',	'PÓLIZA: NUMERO DE PÓLIZA', 'FECHA DE EXPIRACIÓN DEL CO-RET', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID.', 'ESTADO DE ÚLTIMA TAREA'],
+    'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'DUEÑO: NOMBRE COMPLETO', 'ESTADO', 'FECHA DE CIERRE', 'PÓLIZA: NUMERO DE PÓLIZA', 'FECHA DE EXPIRACIÓN DEL CO-RET', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID.', 'ESTADO DE ÚLTIMA TAREA'],
 
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'NOMBRE_CLIENTE': 0, 'FECHA_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'NOMBRE_EJECUTIVO': 3, 'ESTADO': 4, 'FECHA_CIERRE': 5, 'NRO_POLIZA': 6, 'EXPIRACION_CORET': 7, 'ESTADO_RETENCION': 8, 'CAMAPAÑA_ID': 9, 'ESTADO_ULTIMA_TAREA': 10},
 
     # Valores para los Estado de Última Tarea
     'LISTA_ULTIMA_TAREA' : {'Numero invalido': 1, 'Cliente retenido': 2, 'Llamado reprogramado': 3, 'Cliente no retenido': 4, 'Sin respuesta': 5, 'Buzón de voz': 6, 'Pagos al día': 7, 'Teléfono ocupado': 8, 'Teléfono apagado':	9, 'No quiere escuchar': 10, 'Contacto con el asesor': 11, 'Campaña completada con 5 intentos': 12, 'Apoyo del asesor al ejecutivo': 13, 'Número equivocado': 14, 'Pendiente respuesta cliente': 15, 'Sin gestión de cierre': 16, 'Sin teléfono registrado': 17, 'Cliente no actualizado': 18, 'Temporalmente fuera de servicio': 19, 'Carta de revocación pendiente': 20, 'Contacto por correo': 21, 'Campaña exitosa': 22, 'Solicita renuncia': 23, 'Cliente desconoce venta': 24, 'No se pudo instalar mandato':	25, 'Anulado por cambio de producto Metlife': 26, 'Cliente vive en el extranjero': 27, 'Cliente activa mandato': 28, 'Plazo previsto del producto': 28, 'Queda vigente sin pagar': 30, 'Lo está viendo con Asesor': 31},
+}
+
+REACTIVA_CONFIG_XLSX = {
+    # Nombre que tendra el proceso dentro del flujo
+    'PROCESO': 'REACTIVA',
+    # Argumentos que necesita el proceso para funcionar
+    'ARGUMENTOS_PROCESO': 4,
+    # Nombre del archivo TXT que el proceso generara
+    'SALIDA_TXT': 'REACTIVA',
+
+    # Nombre del archivo XLSX que el proceso usara
+    'ENTRADA_XLSX': '',
+
+    # Nombre del archivo base de certificacion
+    'ARCHIVO_BASE_CERTIFICACION': {
+
+        # Archivo de entrada
+        'NOMBRE_ARCHIVO': 'Base Certificacion',
+
+        # Nombre de las columnas del encabezado que tendra el archivo de Base Certificacion
+        'ENCABEZADO': ['PÓLIZA', 'REQUERIMIENTO', 'FECHA DE LLAMADO', 'HORA DE LLAMADO', 'EJECUTIVO', 'CANAL', 'SE ENCONTRÓ GRABACIÓN EN NICE', 'CLIENTE CONTACTADO', 'UTILIZA ARGUMENTO DE DESACTIVACIÓN DE MEDIO DE PAGO', 'CONFIRMA NOMBRE COMPLETO DE CLIENTE ', 'CONFIRMA RUT DEL CLIENTE', 'CONFIRMA TELÉFONO DE CONTACTO', 'EJECUTIVA DEJA SIN EFECTO CARTA EN FORMA VOLUNTARIA CLIENTE', 'MENCIONA NÚMERO DE PÓLIZA Y NOMBRE DEL PRODUCTO', 'MENCIONA QUE MANTENDRÁ COBERTURA VIGENTE', 'ENVÍA CARTA DE REVOCACIÓN ', 'EXPLICA COMO COMPLETAR CARTA DE REVOCACIÓN', 'TIPO DE CERTIFICACIÓN', 'FECHA CERTIFICACIÓN', 'EMAIL ENVIADO', 'GESTIÓN', 'UF', 'CARTA', 'EXISTE MIEMBRO DE CAMPAÑA - TERMINADO CON ÉXITO EN SALESFORCE'],
+
+        # # Columnas que se utilizaran durante el procesamiento del archivo Base de Certificacion
+        'COLUMNAS': {'NRO_POLIZA': 0, 'FECHA_LLAMADO': 2, 'EJECUTIVO': 4, 'CANAL': 5, 'TIPO_CERTIFICACION': 17}
+    },
+
+    # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
+    'ENCABEZADO_TXT': ['CRR', 'ESTADO_VALIDO_REACT', 'CONTACTO_REACT', 'EXITO_REPETIDO_REACT', 'GRAB_CERTIFICADA_REACT', 'RUT', 'ID_CAMPANA', 'CAMPANA', 'POLIZA', 'ID_CLIENTE'],
+
+    # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
+    'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'DUEÑO: NOMBRE COMPLETO', 'ESTADO', 'PÓLIZAS EN CAMPAÑA', 'FECHA DE CIERRE', 'PÓLIZA: NUMERO DE PÓLIZA', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID.', 'ESTADO DE ÚLTIMA TAREA', 'IS APV TRANSFER', 'ES LLAMADA SALIENTE', 'REQUERIMIENTO TIENE ADJUNTO', 'NÚMERO DE REQUERIMIENTO'],
+
+    # Columnas que se utilizaran durante el procesamiento del archivo XLSX
+    'COLUMNAS_PROCESO_XLSX': {'NOMBRE_CLIENTE': 0, 'FECHA_CREACION': 1, 'NOMBRE_EJECUTIVO': 2, 'ESTADO': 3, 'FECHA_CIERRE': 5, 'NRO_POLIZA': 6, 'ESTADO_RETENCION': 7, 'CAMAPAÑA_ID': 8, 'ESTADO_ULTIMA_TAREA': 9, 'LLAMADA_SALIENTE': 11},
+}
+
+COMPLEMENTO_CLIENTE_XLSX = {
+    # Nombre del archivo Complemento Cliente
+    'NOMBRE_ARCHIVO': 'COMPLEMENTO CLIENT vLite 20201111',
+
+    # Nombre de las columnas del encabezado que tendra el archivo de Complemento Cliente
+    'ENCABEZADO': ['NROPOLIZA', 'NROCERT', 'ESTADOPOLIZA', 'FEC_ULT_PAG', 'ESTADO_MANDATO', 'FECHA_MANDATO', 'FECHAPROCESO'],
+
+    # # Columnas que se utilizaran durante el procesamiento del archivo Complemento Cliente
+    'COLUMNAS': {'NRO_POLIZA': 0, 'NRO_CERT': 1, 'ESTADO_POLIZA': 2, 'FEC_ULT_PAG': 3, 'ESTADO_MANDATO': 4, 'FECHA_MANDATO': 5},
 }

@@ -49,12 +49,12 @@ def buscarRutEjecutivosDb():
         cursor.close()
         db.close()
 
-def buscarEjecutivosAllDb(ultimoDiaMes, primerDiaMes):
+def buscarEjecutivosVinculados(ultimoDiaMes, primerDiaMes):
     try:
         db = conectorDB()
         cursor = db.cursor()
         ejecutivos = dict()
-        sql = """SELECT rut, nombre_rrh, plataforma, fecha_ingreso, fecha_desvinculacion FROM ejecutivos WHERE isnull(fecha_desvinculacion, ?) >= ? AND plataforma <> 'CORET REACTIVA' AND plataforma <> 'CORET PROACTIVA'"""
+        sql = """SELECT rut, nombre_rrh, plataforma, fecha_ingreso, fecha_desvinculacion FROM ejecutivos WHERE isnull(fecha_desvinculacion, ?) >= ?"""
         cursor.execute(sql, (ultimoDiaMes, primerDiaMes))
         for (rut, nombre_rrh, plataforma, fecha_ingreso, fecha_desvinculacion) in cursor:
             if fecha_desvinculacion is not None:
@@ -102,3 +102,6 @@ def buscarPolizasReliquidarAll():
         db.close()
 
 # print(buscarPolizasReliquidarAll())
+x = False
+if x:
+    print('hola')

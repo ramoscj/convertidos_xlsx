@@ -15,7 +15,7 @@ def validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut, unid
         rutNuevoFuga["FUGA"] = 1
     else:
         rutNuevoFuga["FUGA"] = 0
-    if  lpattrCodStat != 'NVIG' and considerarFuga != 'NO':
+    if lpattrCodStat != 'NVIG' and considerarFuga != 'NO':
         rutNuevoFuga["STOCK"] = 1
     else:
         rutNuevoFuga["STOCK"] = 0
@@ -26,7 +26,7 @@ def validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, rut, unid
 def existeRut(tipo, lpattrCodStat, considerarFuga, rutExistenteFuga):
     if tipo == 'FUGA' and  considerarFuga != 'NO':
         rutExistenteFuga["FUGA"] += 1
-    elif  lpattrCodStat != 'NVIG' and considerarFuga != 'NO':
+    elif lpattrCodStat != 'NVIG' and considerarFuga != 'NO':
         rutExistenteFuga["STOCK"] += 1
     return rutExistenteFuga
 

@@ -5,7 +5,7 @@ from tqdm import tqdm
 from validaciones_texto import primerDiaMes, ultimoDiaMes, formatearRutGion, formatearPlataformaCRO
 from config_xlsx import DOTACION_CONFIG_XLSX
 
-from diccionariosDB import buscarEjecutivosAllDb
+from diccionariosDB import buscarEjecutivosVinculados
 
 LOG_PROCESO_DOTACION = dict()
 
@@ -16,7 +16,7 @@ def leerArchivoDotacion(periodo):
         encabezadoTxt = DOTACION_CONFIG_XLSX['ENCABEZADO_TXT']
 
         filaSalidaXls = dict()
-        ejecutivosDB = buscarEjecutivosAllDb(ultimoDiaMes(periodo), primerDiaMes(periodo))
+        ejecutivosDB = buscarEjecutivosVinculados(ultimoDiaMes(periodo), primerDiaMes(periodo))
         for  rut, valor in tqdm(iterable= ejecutivosDB.items(), total= len(ejecutivosDB), desc='Leyendo AsistenciaCRO' , unit=' Fila'):
         # # for fila in hoja.rows:
 

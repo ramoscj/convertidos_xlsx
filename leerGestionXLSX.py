@@ -114,7 +114,6 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
             filaSalidaXls = dict()
             ejecutivosNoExisten = dict()
             propietarioCro = extraerPropietariosCro()
-            print(propietarioCro)
             campahnasExistentesDb = buscarCamphnasDb()
             ejecutivosExistentesDb = buscarEjecutivosDb()
 

@@ -129,7 +129,8 @@ def formatearFechaMesSiguiente(fecha):
         fechaAnho = str(fecha)[0:4]
         fechaMes = str(fecha)[4:6]
         fechaSalida = datetime.datetime(int(fechaAnho), int(fechaMes), 1).replace(day=1).date()+relativedelta(months=1)
-        return fechaSalida.strftime("%Y%m")
+        # return fechaSalida.strftime("%Y%m")
+        return fechaSalida
     except Exception as e:
         errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
         raise Exception(errorMsg)
@@ -187,6 +188,21 @@ def formatearNumeroPoliza(numeroPoliza):
         polizaSalida = nroPolizaSolo
     return polizaSalida
 
+def formatearIdCliente(idCliente):
+    campana, separador, codCliente = str(idCliente).partition(":")
+    nombreCliente, separador, rutEjecutivo = str(codCliente).partition("-")
+    return nombreCliente.strip()
+
+def convertirDiccionario(dataLista: dict):
+    lista = []
+    for valores in dataLista.values():
+        lista.append([valores['RUT'], valores['ID_CLIENTE'], valores['NRO_POLIZA'], valores['ID_CAMPAÑA'], valores['COBRANZA_PRO'], valores['COBRANZA_REL_PRO'], valores['PACPAT_PRO'], valores['PACPAT_REL_PRO'], valores['ESTADO_VALIDO'], valores['ESTADO_VALIDOUT'], valores['FECHA_INICIO_MES'], valores['FECHA_CIERRE']])
+    return lista
+
 # print(separarNombreApellido('RAMOS PEREZ PEREZ Perez ROSO, CARLOS JAVIER'))
 # x = ('123.5', '6789.5', None)
-# print(formatearFechaMesAnterior('202011'))
+# print(formatearIdCliente('CO RET - Cobranza: MARIA RUBILAR LEAL - 2020924'))
+# d = {'x': 2}
+# d.update(x = 10, z = 0)
+# d.pop('x')
+# print(d)

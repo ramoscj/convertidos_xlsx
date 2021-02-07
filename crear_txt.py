@@ -28,7 +28,8 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
             print("Iniciando Lectura...")
             try:
                 if procesoInput == 'FUGA':
-                    archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, archivoTxt, formatearFechaMesSiguiente(fechaInput))
+                    mesSiguiente = formatearFechaMesSiguiente(fechaInput)
+                    archivoTxtOutput = '%s%s%s.txt' % (pathTxtSalida, archivoTxt, mesSiguiente.strftime("%Y%m"))
                     dataXlsx, encabezadoXlsx = leerArchivoFuga(archivoXlsx, fechaInput)
                     logProceso = LOG_PROCESO_FUGA
                 if procesoInput == 'ASISTENCIA':
