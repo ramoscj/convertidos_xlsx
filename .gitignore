@@ -1,9 +1,6 @@
 __pycache__/
 
 # Salida y entradas de archivos
-INPUTS/
-OUTPUTS/
-PROCESO_LOG/
 test_xls/
 .vscode/
 
@@ -11,3 +8,4 @@ test_xls/
 *.xlsx
 *.sql
 *.pyc
+*.txt
