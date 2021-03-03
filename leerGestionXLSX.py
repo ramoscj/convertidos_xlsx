@@ -140,12 +140,14 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_CREACION': fechaCreacion})
                         continue
 
-                    if type(estadoUt) is not int:
-                        LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'ERROR_ESTADOUT': estadoUt})
-                        continue
                     if type(estado) is not int:
                         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'ERROR_ESTADO': estado})
                         continue
+                    if type(estadoUt) is not int and estado != 2 and estado != 0:
+                        LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'ERROR_ESTADOUT': estadoUt})
+                        continue
+                    elif type(estadoUt) is not int:
+                        estadoUt = 0
 
                     if nombreCampahna == 'Inbound CRO':
                         if estado != 0:

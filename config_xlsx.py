@@ -7,14 +7,16 @@ PATH_LOG = 'PROCESO_LOG/'
 
 # Parametros de conexion a la DB
 ACCESO_DB = {
-    'SERVIDOR': 'SOMARCJ\SOMAR01',
+    'SERVIDOR': 'DESKTOP-8R9ENHE',
     'NOMBRE_DB': 'icom',
     'USUARIO': 'sa',
-    'CLAVE': 'testdb'
+    'CLAVE': '5325106'
 }
 
 # Lista de ESTADO_ULTIMA_TAREA Contactado
 listaEstadoContactado = {'Cliente retenido': 1, 'Llamado reprogramado': 2, 'Cliente no retenido': 3, 'No quiere escuchar': 4, 'Contacto con el asesor': 5, 'Apoyo del asesor al ejecutivo': 6, 'Pendiente respuesta cliente': 7, 'Carta de revocación pendiente': 8, 'Contacto por correo': 9, 'Campaña exitosa': 10, 'Solicita renuncia': 11, 'Cliente desconoce venta': 12, 'No se pudo instalar mandato': 13, 'Anulado por cambio de producto Metlife': 14, 'Cliente vive en el extranjero': 15, 'Cliente activa mandato': 16, 'Queda vigente sin pagar': 17, 'Lo está viendo con Asesor': 18}
+
+listaEstadoNoContactado = {'Numero invalido': 1, 'Sin respuesta': 2, 'Buzón de voz': 3, 'Pagos al día': 4, 'Teléfono ocupado': 5, 'Teléfono apagado': 6, 'Campaña completada con 5 intentos': 7, 'Número equivocado': 8, 'Sin gestión de cierre': 9, 'Sin teléfono registrado': 10, 'Cliente no actualizado': 11, 'Temporalmente fuera de servicio': 12, 'Plazo previsto del producto': 13}
 
 FUGA_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
@@ -26,7 +28,7 @@ FUGA_CONFIG_XLSX = {
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': 'FUGA',
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'NRO_POLIZA', 'ESTADOPOLIZA',            'FECHAINICIOVIGENCIA', 'RUT_CRO', 'NOMBRE_CRO', 'FECHAPROCESO', 'CONSIDERAR'],
+    'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'RUT_CRO', 'NOMBRE_CRO', 'FECHAPROCESO', 'CONSIDERAR'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
     'ENCABEZADO_FUGA_TXT': ['CRR', 'FUGA_MES_ANTERIOR', 'STOCK', 'RUT', 'UNIDAD'],
     # 'ENCABEZADO_STOCK_TXT': ['CRR','STOCK_PROXIMO_MES', 'RUT', 'UNIDAD'],
@@ -145,6 +147,8 @@ PROACTIVA_CONFIG_XLSX = {
 }
 
 REACTIVA_CONFIG_XLSX = {
+    # Coordenadas encabezado
+    'COORDENADA_ENCABEZADO': 'A1:N1',
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'REACTIVA',
     # Argumentos que necesita el proceso para funcionar
@@ -168,19 +172,35 @@ REACTIVA_CONFIG_XLSX = {
         'COLUMNAS': {'NRO_POLIZA': 0, 'FECHA_LLAMADO': 2, 'EJECUTIVO': 4, 'CANAL': 5, 'TIPO_CERTIFICACION': 17}
     },
 
-    # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'ESTADO_VALIDO_REACT', 'CONTACTO_REACT', 'EXITO_REPETIDO_REACT', 'GRAB_CERTIFICADA_REACT', 'RUT', 'ID_CAMPANA', 'CAMPANA', 'POLIZA', 'ID_CLIENTE'],
-
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
     'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'DUEÑO: NOMBRE COMPLETO', 'ESTADO', 'PÓLIZAS EN CAMPAÑA', 'FECHA DE CIERRE', 'PÓLIZA: NUMERO DE PÓLIZA', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID.', 'ESTADO DE ÚLTIMA TAREA', 'IS APV TRANSFER', 'ES LLAMADA SALIENTE', 'REQUERIMIENTO TIENE ADJUNTO', 'NÚMERO DE REQUERIMIENTO'],
 
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'NOMBRE_CLIENTE': 0, 'FECHA_CREACION': 1, 'NOMBRE_EJECUTIVO': 2, 'ESTADO': 3, 'FECHA_CIERRE': 5, 'NRO_POLIZA': 6, 'ESTADO_RETENCION': 7, 'CAMAPAÑA_ID': 8, 'ESTADO_ULTIMA_TAREA': 9, 'LLAMADA_SALIENTE': 11},
+
+    # Estados de Retencion
+    'ESTADOS_RETENCION': {'Cliente no vigente': 1, 'Cliente al día': 2, 'Lo va a pensar': 3, 'Solicita contacto por correo': 4, 'Pendiente de endoso': 5, 'Mantiene su producto': 6, 'Desiste el producto': 7, 'Anulado por cambio de producto': 8, 'Sin gestión por cierre': 9, 'Término programado de producto': 10, 'Queda vigente sin pagar': 11, 'Espera de carta de anulación': 12},
+
+    # Configuracion de archivos de salida
+    'SALIDA_TXT':{
+        'GESTION':{
+            'NOMBRE_SALIDA': 'GESTION_REACT',
+            'ENCABEZADO': 'ESTADO_VALIDO_REACT;CONTACTO_REACT;EXITO_REPETIDO_REACT;RUT;ID_CAMPANA;CAMPANA;POLIZA'
+        },
+        'POLIZA':{
+            'NOMBRE_SALIDA': 'POLIZA_REACT',
+            'ENCABEZADO': 'ESTADO_POLIZA_REACT;POLIZA'
+        },
+        'CERTIFICACION':{
+            'NOMBRE_SALIDA': 'CERTIFICACION_REACT',
+            'ENCABEZADO': 'GRAB_CERTIFICADA_REACT;RUT;CAMPANA;POLIZA'
+        },
+    }
 }
 
 COMPLEMENTO_CLIENTE_XLSX = {
     # Nombre del archivo Complemento Cliente
-    'NOMBRE_ARCHIVO': 'COMPLEMENTO CLIENT vLite 20201111',
+    'NOMBRE_ARCHIVO': 'COMPLEMENTO CLIENT vLite 20201111_2',
 
     # Nombre de las columnas del encabezado que tendra el archivo de Complemento Cliente
     'ENCABEZADO': ['NROPOLIZA', 'NROCERT', 'ESTADOPOLIZA', 'FEC_ULT_PAG', 'ESTADO_MANDATO', 'FECHA_MANDATO', 'FECHAPROCESO'],
