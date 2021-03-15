@@ -8,6 +8,7 @@ PATH_LOG = 'PROCESO_LOG/'
 # Parametros de conexion a la DB
 ACCESO_DB = {
     'SERVIDOR': 'DESKTOP-8R9ENHE',
+    # 'SERVIDOR': 'database-2.caftetfeht1y.us-west-2.rds.amazonaws.com',
     'NOMBRE_DB': 'icom',
     'USUARIO': 'sa',
     'CLAVE': '5325106'
@@ -126,10 +127,12 @@ DOTACION_CONFIG_XLSX = {
 PROACTIVA_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'PROACTIVA',
+    # Coordenada del encabezado
+    'COORDENADA_ENCABEZADO': 'A1:K1',
     # Argumentos que necesita el proceso para funcionar
     'ARGUMENTOS_PROCESO': 2,
     # Nombre del archivo XLSX que el proceso usara
-    'ENTRADA_XLSX': 'BD Gestion CORETProactiva',
+    'ENTRADA_XLSX': 'Gestión CoRet Proactiva',
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': 'ICOM_GESTION_CORPRO',
 
@@ -137,20 +140,20 @@ PROACTIVA_CONFIG_XLSX = {
     'ENCABEZADO_TXT': ['CRR', 'COBRANZA_PRO', 'COBRANZA_REL_PRO', 'PACPAT_PRO', 'PACPAT_REL_PRO', 'ESTADO_PRO', 'ESTADO_UT_PRO', 'RUT', 'ID_CAMPANA', 'CAMPANA', 'POLIZA', 'ID_CLIENTE'],
 
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'DUEÑO: NOMBRE COMPLETO', 'ESTADO', 'FECHA DE CIERRE', 'PÓLIZA: NUMERO DE PÓLIZA', 'FECHA DE EXPIRACIÓN DEL CO-RET', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID.', 'ESTADO DE ÚLTIMA TAREA'],
+    'ENCABEZADO_XLSX': ['NOMBRE', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'CAMPAIGN MEMBER: ID EMPLEADO', 'ESTADO', 'FECHA DE CIERRE', 'PÓLIZA: NUMERO DE PÓLIZA', 'FECHA DE EXPIRACIÓN DEL CO-RET', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID.', 'ESTADO DE ÚLTIMA TAREA'],
 
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
-    'COLUMNAS_PROCESO_XLSX': {'NOMBRE_CLIENTE': 0, 'FECHA_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'NOMBRE_EJECUTIVO': 3, 'ESTADO': 4, 'FECHA_CIERRE': 5, 'NRO_POLIZA': 6, 'EXPIRACION_CORET': 7, 'ESTADO_RETENCION': 8, 'CAMAPAÑA_ID': 9, 'ESTADO_ULTIMA_TAREA': 10},
+    'COLUMNAS_PROCESO_XLSX': {'NOMBRE_CLIENTE': 0, 'FECHA_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'CODIGO_EJECUTIVO': 3, 'ESTADO': 4, 'FECHA_CIERRE': 5, 'NRO_POLIZA': 6, 'EXPIRACION_CORET': 7, 'ESTADO_RETENCION': 8, 'CAMAPAÑA_ID': 9, 'ESTADO_ULTIMA_TAREA': 10},
 
     # Valores para los Estado de Última Tarea
     'LISTA_ULTIMA_TAREA' : {'Numero invalido': 1, 'Cliente retenido': 2, 'Llamado reprogramado': 3, 'Cliente no retenido': 4, 'Sin respuesta': 5, 'Buzón de voz': 6, 'Pagos al día': 7, 'Teléfono ocupado': 8, 'Teléfono apagado':	9, 'No quiere escuchar': 10, 'Contacto con el asesor': 11, 'Campaña completada con 5 intentos': 12, 'Apoyo del asesor al ejecutivo': 13, 'Número equivocado': 14, 'Pendiente respuesta cliente': 15, 'Sin gestión de cierre': 16, 'Sin teléfono registrado': 17, 'Cliente no actualizado': 18, 'Temporalmente fuera de servicio': 19, 'Carta de revocación pendiente': 20, 'Contacto por correo': 21, 'Campaña exitosa': 22, 'Solicita renuncia': 23, 'Cliente desconoce venta': 24, 'No se pudo instalar mandato':	25, 'Anulado por cambio de producto Metlife': 26, 'Cliente vive en el extranjero': 27, 'Cliente activa mandato': 28, 'Plazo previsto del producto': 28, 'Queda vigente sin pagar': 30, 'Lo está viendo con Asesor': 31},
 }
 
 REACTIVA_CONFIG_XLSX = {
-    # Coordenadas encabezado
-    'COORDENADA_ENCABEZADO': 'A1:N1',
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'REACTIVA',
+    # Coordenadas encabezado
+    'COORDENADA_ENCABEZADO': 'A1:N1',
     # Argumentos que necesita el proceso para funcionar
     'ARGUMENTOS_PROCESO': 4,
     # Nombre del archivo TXT que el proceso generara
@@ -200,7 +203,7 @@ REACTIVA_CONFIG_XLSX = {
 
 COMPLEMENTO_CLIENTE_XLSX = {
     # Nombre del archivo Complemento Cliente
-    'NOMBRE_ARCHIVO': 'COMPLEMENTO CLIENT vLite 20201111_2',
+    'NOMBRE_ARCHIVO': 'COMPLEMENTO CLIENT vLite',
 
     # Nombre de las columnas del encabezado que tendra el archivo de Complemento Cliente
     'ENCABEZADO': ['NROPOLIZA', 'NROCERT', 'ESTADOPOLIZA', 'FEC_ULT_PAG', 'ESTADO_MANDATO', 'FECHA_MANDATO', 'FECHAPROCESO'],

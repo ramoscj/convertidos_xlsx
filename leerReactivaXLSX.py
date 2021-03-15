@@ -287,8 +287,9 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
-        # return False, False
-        raise
+        return False, False
+        # raise
+
 x = leerArchivoReactiva('../test_xls/REACTIVA/Gestion Reactiva.xlsx', '202006', '20200615', '202007030')
 print(x[2])
 # print(LOG_PROCESO_REACTIVA)

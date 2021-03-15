@@ -36,3 +36,15 @@ def salidaLogTxt(ArchivoSalidaTxt, dataXlsx):
         return True
     except Exception as e:
         raise Exception('Error al escribir archivo: %s | %s' % (ArchivoSalidaTxt, e))
+
+
+def salidaInsertBulkCampanas(ArchivoSalidaTxt, dataXlsx, encabezado):
+    try:
+        with open(ArchivoSalidaTxt, 'w', newline='') as txt:
+            writer = csv.writer(txt, delimiter=',')
+            writer.writerow(encabezado)
+            for campana in tqdm(iterable=dataXlsx, total = len(dataXlsx), desc='Escribiendo ArchivoBulk', unit='Row'):
+                writer.writerow(campana)
+        return True
+    except Exception as e:
+        raise Exception('Error al escribir archivo: %s | %s' % (ArchivoSalidaTxt, e))

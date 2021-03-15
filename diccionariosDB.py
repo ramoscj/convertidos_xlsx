@@ -6,10 +6,10 @@ def buscarEjecutivosDb():
         db = conectorDB()
         cursor = db.cursor()
         ejecutivos = dict()
-        sql = """SELECT rut, nombre FROM ejecutivos"""
+        sql = """SELECT id, rut, nombre FROM ejecutivos"""
         cursor.execute(sql)
-        for (rut, nombre) in cursor:
-            ejecutivos[nombre] = {'RUT': rut, 'NOMBRE': nombre}
+        for (id, rut, nombre) in cursor:
+            ejecutivos[nombre] = {'ID': id, 'RUT': rut, 'NOMBRE': nombre}
         return ejecutivos
     except Exception as e:
         raise Exception('Error buscarEjecutivosDb: %s' % e)
@@ -73,13 +73,13 @@ def buscarPolizasReliquidar(mesAnterior):
         db = conectorDB()
         cursor = db.cursor()
         polizasParaRequilidar = dict()
-        sql = """SELECT rut_ejecutivo, id_cliente, numero_poliza, campana_id, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre FROM retenciones_por_reliquidar WHERE fecha_proceso = ?"""
+        sql = """SELECT codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre FROM retenciones_por_reliquidar WHERE fecha_proceso = ?"""
         cursor.execute(sql, (mesAnterior))
-        for (rut_ejecutivo, id_cliente, numero_poliza, campana_id, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) in cursor:
-            polizasParaRequilidar[numero_poliza] = {'COBRANZA_PRO': cobranza_pro, 'COBRANZA_REL_PRO': cobranza_rel_pro, 'PACPAT_PRO': pacpat_pro, 'PACPAT_REL_PRO': pacpat_rel_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'RUT': rut_ejecutivo, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente, 'FECHA_CIERRE': fecha_cierre}
+        for (codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) in cursor:
+            polizasParaRequilidar[numero_poliza] = {'COBRANZA_PRO': cobranza_pro, 'COBRANZA_REL_PRO': cobranza_rel_pro, 'PACPAT_PRO': pacpat_pro, 'PACPAT_REL_PRO': pacpat_rel_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': codigo_empleado, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente, 'FECHA_CIERRE': fecha_cierre}
         return polizasParaRequilidar
     except Exception as e:
-        raise Exception('Error buscar Polizas para reliquidar: %s' % e)
+        raise Exception('Error buscar Polizas para buscarPolizasReliquidar: %s' % e)
     finally:
         cursor.close()
         db.close()
@@ -89,19 +89,67 @@ def buscarPolizasReliquidarAll():
         db = conectorDB()
         cursor = db.cursor()
         polizasParaRequilidar = dict()
-        sql = """SELECT rut_ejecutivo, id_cliente, numero_poliza FROM retenciones_por_reliquidar"""
+        sql = """SELECT codigo_empleado, id_cliente, numero_poliza FROM retenciones_por_reliquidar"""
         cursor.execute(sql)
-        for (rut_ejecutivo, id_cliente, numero_poliza) in cursor:
-            pk = '%s_%s_%s' % (id_cliente, rut_ejecutivo, numero_poliza)
-            polizasParaRequilidar[pk] = {'RUT': rut_ejecutivo, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente}
+        for (codigo_empleado, id_cliente, numero_poliza) in cursor:
+            pk = '%s_%s_%s' % (id_cliente, codigo_empleado, numero_poliza)
+            polizasParaRequilidar[pk] = {'RUT': codigo_empleado, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente}
         return polizasParaRequilidar
     except Exception as e:
-        raise Exception('Error buscar Polizas para reliquidarAll: %s' % e)
+        raise Exception('Error buscar Polizas para buscarPolizasReliquidarAll: %s' % e)
     finally:
         cursor.close()
         db.close()
 
-# print(buscarPolizasReliquidarAll())
-x = False
-if x:
-    print('hola')
+def periodoCampanasEjecutivos(fechaPeriodo):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        campanasEjecutivos = dict()
+        sql = """SELECT id, id_ejecutivo, periodo FROM proactiva_campanas_periodo_ejecutivos WHERE periodo = ?"""
+        cursor.execute(sql, (fechaPeriodo))
+        for (id, id_ejecutivo, periodo) in cursor:
+            campanasEjecutivos[id_ejecutivo] = {'ID': id, 'ID_EMPLEADO': id_ejecutivo, 'PERIODO': periodo}
+        return campanasEjecutivos
+    except Exception as e:
+        raise Exception('Error buscar Polizas para periodoCampanasEjecutivos: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def CamapanasPorPeriodo(fechaPeriodo):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        idEjecutivos = []
+        ejecutivosExistentes = periodoCampanasEjecutivos(fechaPeriodo)
+        for valores in ejecutivosExistentes.values():
+            idEjecutivos.append(valores['ID'])
+
+        cantidadRegistros = ', '.join('?' * len(idEjecutivos))
+        sql = """SELECT count(*) FROM proactiva_campanas_ejecutivos WHERE id_periodo_ejecutivo IN ({valores})""".format(valores=cantidadRegistros)
+        cantidadCampanas = cursor.execute(sql, (idEjecutivos)).fetchone()
+        return cantidadCampanas[0]
+    except Exception as e:
+        raise Exception('Error buscar Camapañas CamapanasPorPeriodo: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def buscarEjecutivosDb2():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        ejecutivos = dict()
+        sql = """SELECT id, id_empleado, plataforma FROM ejecutivos_2"""
+        cursor.execute(sql)
+        for (id, idEmpleado, plataforma) in cursor:
+            ejecutivos[idEmpleado] = {'ID': id, 'CODIGO_EMPLEADO': idEmpleado, 'PLATAFORMA': plataforma}
+        return ejecutivos
+    except Exception as e:
+        raise Exception('Error buscarEjecutivosDb2: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+# print(CamapanasPorPeriodo('01/12/2020'))

@@ -1,6 +1,7 @@
 import mysql.connector
 import pyodbc
 import datetime
+import os
 
 from config_xlsx import ACCESO_DB
 
@@ -10,3 +11,5 @@ def conectorDB():
         return cnx
     except Exception as e:
         raise Exception('Error al conectar DB - %s' % e)
+
+# print(conectorDB())

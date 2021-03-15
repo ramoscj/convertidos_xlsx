@@ -6,10 +6,10 @@ from validaciones_texto import validarEncabezadoXlsx, setearFechaCelda
 
 LOG_COMPLEMENTO_CLIENTE = dict()
 
-def extraerComplementoCliente(registrosLog):
-    pathXlsxEntrada = '../test_xls/'
+def extraerComplementoCliente(registrosLog, fechaPeriodo):
+    pathXlsxEntrada = 'COMPLEMENTO_CLIENTE/'
     # pathXlsxEntrada = PATH_XLSX
-    archivo = '%s%s.xlsx' % (pathXlsxEntrada, COMPLEMENTO_CLIENTE_XLSX['NOMBRE_ARCHIVO'])
+    archivo = '%s%s %s.xlsx' % (pathXlsxEntrada, COMPLEMENTO_CLIENTE_XLSX['NOMBRE_ARCHIVO'], fechaPeriodo)
     registrosLog += 1
     LOG_COMPLEMENTO_CLIENTE.setdefault(registrosLog, {'INICIO_COMPLEMENTO_CLIENTE': 'Iniciando proceso de lectura del Archivo: %s' % archivo})
     try:
@@ -47,3 +47,4 @@ def extraerComplementoCliente(registrosLog):
         registrosLog += 1
         errorMsg = 'Error al leer archivo;%s | %s' % (archivo, e)
         LOG_COMPLEMENTO_CLIENTE.setdefault(registrosLog, {'LECTURA_COMPLEMENTOCLIENTE': errorMsg})
+        raise

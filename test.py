@@ -1,33 +1,44 @@
-from tqdm.auto import trange
-from time import sleep
-from tqdm import tqdm
-from openpyxl import load_workbook
-import os.path
+from conexio_db import conectorDB
+from diccionariosDB import periodoCampanasEjecutivos
 
-# for i in trange(4, desc='1st loop'):
-#     for j in trange(5, desc='2nd loop', leave=False):
-#         for k in trange(50, desc='3rd loop', leave=False):
-#             sleep(0.01)
+# encabezadoBulk = ['id', 'id_periodo_ejecutivo', 'nombre_cliente', 'fecha_creacion', 'nombre_campana', 'numero_poliza', 'fecha_cierre', 'estado_retencion', 'estado_ut']
+# if salidaInsertBulkCampanas(pathArchivoCsv, campanasPorPeriodo, encabezadoBulk):
+#     if os.path.isfile(pathArchivoCsv):
+#         pathActual = os.getcwd()
+#         sql = """BULK INSERT proactiva_campanas_ejecutivos FROM '{}\{}' WITH (FORMAT = 'CSV', FIELDTERMINATOR = ',', ROWTERMINATOR = '\n', FIRSTROW = 2);"""
+#         cursor.execute(sql.format(pathActual, pathArchivoCsv))
+# db.commit()
 
-from alive_progress import alive_bar
-import time
-filenames = ['INPUTS/202005_Asistencia_CRO.xlsx', 'INPUTS/201911_Fuga_Agencia.xlsx']
-for x in range(0, len(filenames)):
-    xls = load_workbook(filenames[x], read_only=True, data_only=True)
-    nombre_hoja = xls.sheetnames
-    hoja = xls[nombre_hoja[0]]
-    with alive_bar(len(hoja.rows)) as bar:
-        # for filename in tqdm(iterable= filenames, total= len(filenames), desc="Files"):
-        # for row in tqdm(iterable=hoja.rows, total= len(tuple(hoja.rows)), desc= 'Leyendo PropietariosCRO' , unit=' Fila'):
-        for row in hoja.rows:
-            for cell in row:
-                # print(cell)
-                pass
-            bar()
+# for valores in camapanasEjecutivos.values():
+#     campanasPorPeriodo = []
+#     idEjecutivo = valores['ID_EJECUTIVO']
+#     if camapanasPeriodoEjecutivos.get(idEjecutivo):
+#         campanasPorPeriodo = setearCampanasPorEjecutivo(valores['CAMPANAS'], camapanasPeriodoEjecutivos[idEjecutivo]['ID'])
+#         sql = """INSERT INTO proactiva_campanas_ejecutivos (id_periodo_ejecutivo, nombre_cliente, fecha_creacion, nombre_campana, numero_poliza, fecha_cierre, estado_retencion, estado_ut) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
+#         print(len(campanasPorPeriodo))
+#         cursor.executemany(sql, campanasPorPeriodo)
+#         db.commit()
 
-# with alive_bar(1000) as bar:
-#     for item in range(1000):
-#         if item % 300 == 0:
-#             print('Encontrado')
-#         time.sleep(.01)
-#         bar()
+def actualizarPolizasReliquidadas(polizasReliquidadas, fechaProceso):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        polizasParaActualizar = []
+        for valores in polizasReliquidadas.values():
+            polizasParaActualizar.append([fechaProceso, valores['POLIZA']])
+        sql = """UPDATE retenciones_por_reliquidar SET fecha_reliquidacion = ? WHERE numero_poliza = ? AND fecha_reliquidacion IS NULL;"""
+        cursor.executemany(sql, polizasParaActualizar)
+        db.commit()
+        return True
+    except Exception as e:
+        db.rollback()
+        raise Exception('Error al insertar polizas para reliquidar: %s' % (e))
+    finally:
+        cursor.close()
+        db.close()
+
+x = dict()
+x[1] = {'POLIZA': '344548'}
+x[2] = {'POLIZA': '305338'}
+
+# print(actualizarPolizasReliquidadas(x, '01/01/2021'))

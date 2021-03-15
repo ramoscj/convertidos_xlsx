@@ -1,4 +1,4 @@
-### Instalación de componentes necesarios:
+ ### Instalación de componentes necesarios:
 
 + Descargar e instalar una version de [Python 3.7.X](https://www.python.org/downloads/ "Python 3.7.X"), marcar la opción para agregar al PATH la varible de python al sistema.
 
@@ -14,7 +14,8 @@
 pip install -r requirements.txt
 ```
 
-+ El archivo que controla la ejecucion es "crear_txt.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD).
+## Proceso CRO
+El archivo que controla la ejecucion es "crear_txt.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD).
 
 **python crear_txt.py** + el proceso con sus respectivos parametros de entrada
 ```python
@@ -32,6 +33,15 @@ El formato que debe tener el parametro **FECHA** debe ser YYYMM. La unica varian
 + **python crear_txt.py calidad 202009**: Genera el archivo de CALIDAD
 + **python crear_txt.py gestion 202009 20200901 20200930**: Genera el archivo de GESTION
 
+## Proceso PROACTIVA
+El archivo que controla la ejecucion es "crearTxtProactiva.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD). El formato que debe tener el parametro **FECHA** debe ser YYYMM.
+
+**python crearTxtProactiva.py** + la fecha del proceso.
+
+```python
+python crearTxtProactiva.py 202012
+```
+
 ## Instalacion de la Base de Datos
 
 El archivo con la base de datos esta en la carpeta "DB" hay se encuentra el .bak que es de un SQL Server. En el archivo **config_xlsx.py** existe una variable que contiene los parametros para conectarse a la DB que tiene por nombre **ACCESO_DB**, solo se deben cambiar los parametros de conexion.
@@ -42,7 +52,9 @@ Para los fines de configuracion el archivo **config_xlsx.py**  contiene las vari
 + **PATH_XLSX**: Directorio de archivos de entrada XLSX
 + **PATH_TXT**: Directorio de archivos de salida TXT
 + **PATH_LOG**: Directorio de archivos LOG de salida
-+ En el mismo archivo existen siete variables que tienen algunos parametros para evaluar los archivos de entrada. Se dara ejemplo con la variable del archivo de FUGA y las demas tambien tendran una estructura parecida:
+
+### CRO
+En el mismo archivo existen siete variables que tienen algunos parametros para evaluar los archivos de entrada. Se dara ejemplo con la variable del archivo de FUGA y las demas tambien tendran una estructura parecida:
  + **FUGA_CONFIG_XLSX**: Archivo de FUGA
    + **ENTRADA_XLSX**: Nombre del archivo de entrada .XLSX
    + **SALIDA_TXT**: Nombre del archivo de salida .TXT
@@ -54,3 +66,10 @@ Para los fines de configuracion el archivo **config_xlsx.py**  contiene las vari
  + **CALIDAD_CONFIG_XLSX**: Archivo de CALIDAD
  + **DOTACION_CONFIG_XLSX**: Archivo de DOTACION
 ![](https://i.postimg.cc/gJkn1zSN/Captura.jpg)
+
+## PROACTIVA
+Para el proceso de "Proactiva" se crearon directorios apartes para no mezclar las salidas y entradas de los proceso, se encuentra en el mismo directorio que CRO solo que tendra una carpeta aparte con el nombre de "PROACTIVA" y tendra la misma esctructura.
+ + **PROACTIVA**
+   + **PROCESO_LOG**
+   + **OUTPUTS**
+   + **INPUTS**
