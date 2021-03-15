@@ -1,9 +1,11 @@
-import mysql.connector
-import pyodbc
 import datetime
 import os
 
+import mysql.connector
+import pyodbc
+
 from config_xlsx import ACCESO_DB
+
 
 def conectorDB():
     try:

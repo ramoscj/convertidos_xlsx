@@ -1,21 +1,15 @@
 import os.path
 import sys
 
-from config_xlsx import (
-    ASISTENCIA_CONFIG_XLSX,
-    CALIDAD_CONFIG_XLSX,
-    CAMPANHAS_CONFIG_XLSX,
-    DOTACION_CONFIG_XLSX,
-    FUGA_CONFIG_XLSX,
-    GESTION_CONFIG_XLSX,
-    PATH_LOG,
-    PATH_TXT,
-    PATH_XLSX,
-)
+from config_xlsx import (ASISTENCIA_CONFIG_XLSX, CALIDAD_CONFIG_XLSX,
+                         CAMPANHAS_CONFIG_XLSX, DOTACION_CONFIG_XLSX,
+                         FUGA_CONFIG_XLSX, GESTION_CONFIG_XLSX, PATH_LOG,
+                         PATH_TXT, PATH_XLSX)
 from escribir_txt import salidaArchivoTxt, salidaLogTxt
 from leerAsistenciaXLSX import LOG_PROCESO_ASISTENCIA, leerArchivoAsistencia
 from leerCalidadXSLX import LOG_PROCESO_CALIDAD, leerArchivoCalidad
-from leerCampanhasEspecialesXLSX import LOG_PROCESO_CAMPANHAS, leerArchivoCampanhasEsp
+from leerCampanhasEspecialesXLSX import (LOG_PROCESO_CAMPANHAS,
+                                         leerArchivoCampanhasEsp)
 from leerDotacionXLSX import LOG_PROCESO_DOTACION, leerArchivoDotacion
 from leerFugaXLSX import LOG_PROCESO_FUGA, leerArchivoFuga
 from leerGestionXLSX import LOG_PROCESO_GESTION, leerArchivoGestion

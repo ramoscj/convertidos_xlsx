@@ -1,6 +1,7 @@
 from conexio_db import conectorDB
 from validaciones_texto import separarNombreApellido
 
+
 def buscarEjecutivosDb():
     try:
         db = conectorDB()

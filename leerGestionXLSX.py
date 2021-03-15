@@ -1,14 +1,16 @@
-from openpyxl import load_workbook
-from conexio_db import conectorDB
-from tqdm import tqdm
 import datetime
-import sys;
+import sys
 
-from validaciones_texto import validarEncabezadoXlsx, setearCelda, setearFechaCelda, setearFechaInput, primerDiaMes, ultimoDiaMes
-from diccionariosDB import buscarCamphnasDb, buscarEjecutivosDb
+from openpyxl import load_workbook
+from tqdm import tqdm
+
+from conexio_db import conectorDB
 from config_xlsx import GESTION_CONFIG_XLSX, PATH_XLSX
-
+from diccionariosDB import buscarCamphnasDb, buscarEjecutivosDb
 from escribir_txt import salidaArchivoTxt
+from validaciones_texto import (primerDiaMes, setearCelda, setearFechaCelda,
+                                setearFechaInput, ultimoDiaMes,
+                                validarEncabezadoXlsx)
 
 LOG_PROCESO_GESTION = dict()
 

@@ -1,15 +1,21 @@
+import datetime
+
 from openpyxl import load_workbook
 from tqdm import tqdm
-import datetime
+
+from complementoCliente import (LOG_COMPLEMENTO_CLIENTE,
+                                extraerComplementoCliente)
 from conexio_db import conectorDB
-
-from validaciones_texto import validarEncabezadoXlsx, setearCelda, setearFechaCelda, primerDiaMes, ultimoDiaMes, setearFechaInput, formatearFechaMesAnterior, setearCelda2, formatearIdCliente, formatearRutGion
-from diccionariosDB import buscarEjecutivosDb, buscarPolizasReliquidar, buscarPolizasReliquidarAll
-from config_xlsx import REACTIVA_CONFIG_XLSX, PATH_XLSX, listaEstadoContactado, listaEstadoNoContactado
-
+from config_xlsx import (PATH_XLSX, REACTIVA_CONFIG_XLSX,
+                         listaEstadoContactado, listaEstadoNoContactado)
+from diccionariosDB import (buscarEjecutivosDb, buscarPolizasReliquidar,
+                            buscarPolizasReliquidarAll)
 from escribir_txt import salidaArchivoTxt, salidaLogTxt
-
-from complementoCliente import extraerComplementoCliente, LOG_COMPLEMENTO_CLIENTE
+from validaciones_texto import (formatearFechaMesAnterior, formatearIdCliente,
+                                formatearRutGion, primerDiaMes, setearCelda,
+                                setearCelda2, setearFechaCelda,
+                                setearFechaInput, ultimoDiaMes,
+                                validarEncabezadoXlsx)
 
 LOG_PROCESO_REACTIVA = dict()
 

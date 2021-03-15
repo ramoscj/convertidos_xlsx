@@ -1,9 +1,10 @@
 from openpyxl import load_workbook
 from tqdm import tqdm
 
-from validaciones_texto import formatearRut, validarEncabezadoXlsx, setearCelda2
-from diccionariosDB import buscarRutEjecutivosDb
 from config_xlsx import CAMPANHAS_CONFIG_XLSX
+from diccionariosDB import buscarRutEjecutivosDb
+from validaciones_texto import (formatearRut, setearCelda2,
+                                validarEncabezadoXlsx)
 
 LOG_PROCESO_CAMPANHAS = dict()
 

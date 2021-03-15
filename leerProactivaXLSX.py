@@ -1,5 +1,5 @@
-import datetime
 import contextlib
+import datetime
 import os
 
 from openpyxl import load_workbook
@@ -9,18 +9,18 @@ from complementoCliente import (LOG_COMPLEMENTO_CLIENTE,
                                 extraerComplementoCliente)
 from conexio_db import conectorDB
 from config_xlsx import PATH_XLSX, PROACTIVA_CONFIG_XLSX, listaEstadoContactado
-from diccionariosDB import (buscarEjecutivosDb2, buscarPolizasReliquidar,
-                            buscarPolizasReliquidarAll, periodoCampanasEjecutivos, CamapanasPorPeriodo)
+from diccionariosDB import (CamapanasPorPeriodo, buscarEjecutivosDb2,
+                            buscarPolizasReliquidar,
+                            buscarPolizasReliquidarAll,
+                            periodoCampanasEjecutivos)
 from escribir_txt import (salidaArchivoTxt, salidaArchivoTxtProactiva,
-                          salidaLogTxt, salidaInsertBulkCampanas)
-from validaciones_texto import (convertirALista,
+                          salidaInsertBulkCampanas, salidaLogTxt)
+from validaciones_texto import (convertirALista, convertirListaCampana,
                                 formatearFechaMesAnterior, formatearIdCliente,
                                 formatearNumeroPoliza, mesSiguienteUltimoDia,
-                                primerDiaMes, setearCelda, setearCelda2,
-                                setearFechaCelda, ultimoDiaMes,
-                                validarEncabezadoXlsx,
-                                convertirListaCampana,
-                                setearCampanasPorEjecutivo)
+                                primerDiaMes, setearCampanasPorEjecutivo,
+                                setearCelda, setearCelda2, setearFechaCelda,
+                                ultimoDiaMes, validarEncabezadoXlsx)
 
 LOG_PROCESO_PROACTIVA = dict()
 polizasNoAprobadas = dict()

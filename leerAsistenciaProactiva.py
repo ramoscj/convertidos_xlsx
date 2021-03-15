@@ -6,9 +6,9 @@ from tqdm import tqdm
 from conexio_db import conectorDB
 from config_xlsx import ASISTENCIA_CONFIG_XLSX
 from diccionariosDB import buscarRutEjecutivosDb
-from validaciones_texto import (convertirALista, formatearRut,
-                                primerDiaMes, setearCelda, setearCelda2,
-                                ultimoDiaMes, validarEncabezadoXlsx)
+from validaciones_texto import (convertirALista, formatearRut, primerDiaMes,
+                                setearCelda, setearCelda2, ultimoDiaMes,
+                                validarEncabezadoXlsx)
 
 LOG_PROCESO_ASISTENCIA = dict()
 
@@ -26,7 +26,6 @@ def insertarEjecutivo(idEjecutivo, plataforma):
                 WHEN NOT MATCHED
                 THEN INSERT (id_empleado, plataforma)
                     VALUES (?, ?);"""
-        # sql = """INSERT INTO ejecutivos_2 (id_empleado, plataforma) VALUES (?, ?);"""
         valores = (idEjecutivo, plataforma, idEjecutivo, plataforma)
         cursor.execute(sql, valores)
         db.commit()

@@ -1,11 +1,11 @@
 from openpyxl import load_workbook
-from conexio_db import conectorDB
 from tqdm import tqdm
 
-from validaciones_texto import primerDiaMes, ultimoDiaMes, formatearRutGion, formatearPlataformaCRO
+from conexio_db import conectorDB
 from config_xlsx import DOTACION_CONFIG_XLSX
-
 from diccionariosDB import buscarEjecutivosVinculados
+from validaciones_texto import (formatearPlataformaCRO, formatearRutGion,
+                                primerDiaMes, ultimoDiaMes)
 
 LOG_PROCESO_DOTACION = dict()
 

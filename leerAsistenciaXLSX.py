@@ -1,12 +1,14 @@
-from openpyxl import load_workbook
-from conexio_db import conectorDB
-from tqdm import tqdm
 import unicodedata
 
-from validaciones_texto import formatearRut, validarEncabezadoXlsx, primerDiaMes, ultimoDiaMes, setearCelda2, setearCelda
-from config_xlsx import ASISTENCIA_CONFIG_XLSX
+from openpyxl import load_workbook
+from tqdm import tqdm
 
+from conexio_db import conectorDB
+from config_xlsx import ASISTENCIA_CONFIG_XLSX
 from diccionariosDB import buscarRutEjecutivosDb
+from validaciones_texto import (formatearRut, primerDiaMes, setearCelda,
+                                setearCelda2, ultimoDiaMes,
+                                validarEncabezadoXlsx)
 
 LOG_PROCESO_ASISTENCIA = dict()
 

@@ -1,10 +1,12 @@
-from openpyxl import load_workbook
-from tqdm import tqdm
 import datetime
 
-from validaciones_texto import formatearRut, validarEncabezadoXlsx, setearCelda, validaFechaCelda
+from openpyxl import load_workbook
+from tqdm import tqdm
+
 from config_xlsx import FUGA_CONFIG_XLSX, PATH_XLSX
 from diccionariosDB import buscarRutEjecutivosDb
+from validaciones_texto import (formatearRut, setearCelda, validaFechaCelda,
+                                validarEncabezadoXlsx)
 
 LOG_PROCESO_FUGA = dict()
 
@@ -72,9 +74,6 @@ def leerArchivoFuga(archivo, periodo):
                         else:
                             errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['RUT_CRO']]), rut)
                             LOG_PROCESO_FUGA.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_FUGA)+1: errorRut})
-                    # else:
-                    #     errorfecha = 'Celda%s - Error en fecha: %s' % (setearCelda(fechaLpattrs), str(fechaLpattrs.value))
-                    #     LOG_PROCESO_FUGA.setdefault('ERROR_FECHA_%s' % i, {len(LOG_PROCESO_FUGA)+1: errorfecha})
                 i += 1
 
             LOG_PROCESO_FUGA.setdefault('FIN_CELDAS_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
