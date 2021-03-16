@@ -41,7 +41,7 @@ El archivo que controla la ejecucion es "crearTxtProactiva.py" y para ejecutarlo
 ```python
 python crearTxtProactiva.py 202012 '.\PROACTIVA\INPUTS\Gestión CoRet Proactiva_202012.xlsx' '.\COMPLEMENTO_CLIENTE\COMPLEMENTO CLIENT vLite 202012.xlsx' .\PROACTIVA\OUTPUTS
 ```
-**NOTA**: Si los nombre de los archivos contienen espacios se deben ingresar entre comillas simples ('') y el directorio donde se genera la salida.txt no debe llevar el ultimo "\" ya que esta predeterminado en la configuracion.
+> **NOTA**: Si los nombre de los archivos contienen espacios se deben ingresar entre comillas simples ('') y el directorio donde se genera la salida.txt no debe llevar el ultimo "\" ya que esta predeterminado en la configuracion.
 
 ## Instalacion de la Base de Datos
 
