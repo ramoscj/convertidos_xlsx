@@ -113,6 +113,8 @@ def ultimoDiaMes(fecha):
 def formatearPlataformaCRO(plataforma):
     carateres = len(str(plataforma).strip())
     plataformaSalida = str(plataforma[0:carateres-1]).strip()
+    if plataformaSalida != 'CRO':
+        plataformaSalida = plataforma
     return plataformaSalida
 
 def formatearFechaYM(fecha):
@@ -216,5 +218,3 @@ def setearCampanasPorEjecutivo(dataLista: [], idEjecutivo):
         data += valores
         lista.append(data)
     return lista
-
-

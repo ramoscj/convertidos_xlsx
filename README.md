@@ -15,23 +15,25 @@ pip install -r requirements.txt
 ```
 
 ## Proceso CRO
-El archivo que controla la ejecucion es "crear_txt.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD).
+El archivo que controla la ejecucion es "crear_txt.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD). El formato que debe tener el parametro **FECHA** debe ser YYYMM. 
 
-**python crear_txt.py** + el proceso con sus respectivos parametros de entrada
+**python crear_txt.py** + fecha del proceso + archivo data.xlsx + carpeta donde se generara la "salida.txt".
 ```python
-python crear_txt.py fuga 202009
-python crear_txt.py asistencia 202009
-python crear_txt.py campanha_especial 202009
-python crear_txt.py calidad 202009
-python crear_txt.py gestion 202009 20200901 20200930
+python .\crear_txt.py fuga 202006 '.\INPUTS\202006_Fuga_Agencia.xlsx' .\OUTPUTS
+python .\crear_txt.py asistencia 202011 '.\INPUTS\202011_Asistencia_Plataformas.xlsx' .\OUTPUTS
+python .\crear_txt.py campanha_especial 202011 '.\INPUTS\202011_CampañasEspeciales_CRO.xlsx' .\OUTPUTS
+python .\crear_txt.py calidad 202011 '.\INPUTS\202011_Calidad_CRO.xlsx' .\OUTPUTS
+python .\crear_txt.py gestion 202011 20201026 20201123 '.\INPUTS\Gestión CRO.xlsx' '.\INPUTS\Propietarios CRO.xlsx' .\OUTPUTS
 ```
-El formato que debe tener el parametro **FECHA** debe ser YYYMM. La unica variante es para generar el archivo de **GESTION** que se deben ingresar tres **FECHAS** la primera es la del periodo a procesar (YYYYMM) y las otras dos son el rango de fecha del periodo (YYYYMMDD)
+La unica variante es para generar el archivo de **GESTION** que se deben ingresar tres **FECHAS** la primera es la del periodo a procesar (YYYYMM) y las otras dos son el rango de fecha del periodo (YYYYMMDD) y aparte del archivo con la DATA, se debe indicar el directorio del archivo de PROPIETARIOS.xlsx que es necesario para el proceso seguido del directorio donde se generara la SALIDA.txt
 
-+ **python crear_txt.py fuga 202009**: Genera los archivos de FUGA
-+ **python crear_txt.py asistencia 202009**: Genera los archivos de ASISTENCIA y DOTACION
-+ **python crear_txt.py campanha_especial 202009**: Genera el archivo de PILOTO
-+ **python crear_txt.py calidad 202009**: Genera el archivo de CALIDAD
-+ **python crear_txt.py gestion 202009 20200901 20200930**: Genera el archivo de GESTION
++ **python crear_txt.py fuga**: Genera los archivos de FUGA
++ **python crear_txt.py asistencia**: Genera los archivos de ASISTENCIA y DOTACION
++ **python crear_txt.py campanha_especial**: Genera el archivo de PILOTO
++ **python crear_txt.py calidad**: Genera el archivo de CALIDAD
++ **python crear_txt.py gestion**: Genera el archivo de GESTION
+
+**NOTA**: Si los nombre de los archivos contienen espacios se deben ingresar entre comillas simples ('') y el directorio donde se genera la salida.txt no debe llevar el ultimo "/" ya que esta predeterminado en la configuracion.
 
 ## Proceso PROACTIVA
 El archivo que controla la ejecucion es "crearTxtProactiva.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD). El formato que debe tener el parametro **FECHA** debe ser YYYMM.
@@ -46,7 +48,7 @@ python crearTxtProactiva.py 202012 '.\PROACTIVA\INPUTS\Gestión CoRet Proactiva_
 ## Instalacion de la Base de Datos
 
 El archivo con la base de datos esta en la carpeta "DB" hay se encuentra el .bak que es de un SQL Server. En el archivo **config_xlsx.py** existe una variable que contiene los parametros para conectarse a la DB que tiene por nombre **ACCESO_DB**, solo se deben cambiar los parametros de conexion. 
-> Si se va a utilizar el archivo .bacpac solo se debe cargar en la opción "Import Data-tier Aplication" con la herramienta SQL Server Management. 
+> Si se va a utilizar el archivo .bacpac solo se debe cargar en la opción "Import Data-tier Aplication" con la herramienta SQL Server Management.
 
 ## NOTA
 
@@ -56,9 +58,8 @@ Para los fines de configuracion el archivo **config_xlsx.py**  contiene las vari
 + **PATH_LOG**: Directorio de archivos LOG de salida
 
 ### CRO
-En el mismo archivo existen siete variables que tienen algunos parametros para evaluar los archivos de entrada. Se dara ejemplo con la variable del archivo de FUGA y las demas tambien tendran una estructura parecida:
+En el mismo archivo existen seis variables que tienen algunos parametros para evaluar los archivos de entrada. Se dara ejemplo con la variable del archivo de FUGA y las demas tambien tendran una estructura parecida:
  + **FUGA_CONFIG_XLSX**: Archivo de FUGA
-   + **ENTRADA_XLSX**: Nombre del archivo de entrada .XLSX
    + **SALIDA_TXT**: Nombre del archivo de salida .TXT
    + **ENCABEZADO_XLSX**: Encabezado que debe tener el archivo de entrada .XLSX
    + **ENCABEZADO_FUGA_TXT**: Encabezado del archivo de salida .TXT
@@ -67,11 +68,7 @@ En el mismo archivo existen siete variables que tienen algunos parametros para e
  + **CAMPANHAS_CONFIG_XLSX**: Archivo PILOTO
  + **CALIDAD_CONFIG_XLSX**: Archivo de CALIDAD
  + **DOTACION_CONFIG_XLSX**: Archivo de DOTACION
-![](https://i.postimg.cc/gJkn1zSN/Captura.jpg)
 
 ## PROACTIVA
-Para el proceso de "Proactiva" se crearon directorios apartes para no mezclar las salidas y entradas de los proceso, se encuentra en el mismo directorio que CRO solo que tendra una carpeta aparte con el nombre de "PROACTIVA" y tendra la misma esctructura.
- + **PROACTIVA**
-   + **PROCESO_LOG**
-   + **OUTPUTS**
-   + **INPUTS**
+Para controlar la configuracion del proceso PROACTIVA  tiene una variable de control muy parcedi a las de CRO, en este caso el nombre es:
++ **PROACTIVA_CONFIG_XLSX**: Archivo de PROACTIVA

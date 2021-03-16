@@ -12,12 +12,12 @@ LOG_PROCESO_DOTACION = dict()
 def leerArchivoDotacion(periodo):
     try:
         LOG_PROCESO_DOTACION.setdefault('INICIO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: '-----------------------------------------------------'})
-        LOG_PROCESO_DOTACION.setdefault('INICIO_LECTURA_DOTACION', {len(LOG_PROCESO_DOTACION)+1: 'Iniciando proceso de escritura del Archivo de GESTION'})
+        LOG_PROCESO_DOTACION.setdefault('INICIO_LECTURA_DOTACION', {len(LOG_PROCESO_DOTACION)+1: 'Iniciando proceso de escritura del Archivo de DOTACION'})
         encabezadoTxt = DOTACION_CONFIG_XLSX['ENCABEZADO_TXT']
 
         filaSalidaXls = dict()
         ejecutivosDB = buscarEjecutivosVinculados(ultimoDiaMes(periodo), primerDiaMes(periodo))
-        for  rut, valor in tqdm(iterable= ejecutivosDB.items(), total= len(ejecutivosDB), desc='Leyendo AsistenciaCRO' , unit=' Fila'):
+        for  rut, valor in tqdm(iterable= ejecutivosDB.items(), total= len(ejecutivosDB), desc='Leyendo DotacionCRO' , unit=' Fila'):
         # # for fila in hoja.rows:
 
             filaSalidaXls[rut] = {'RUT': formatearRutGion(ejecutivosDB[rut]['RUT'])}
@@ -40,10 +40,9 @@ def leerArchivoDotacion(periodo):
             filaSalidaXls[rut].setdefault('CANAL_NEGOCIO', 'MTLFCC')
             filaSalidaXls[rut].setdefault('ROL_PAGO', formatearPlataformaCRO(ejecutivosDB[rut]['PLATAFORMA']))
 
-        LOG_PROCESO_DOTACION.setdefault(len(LOG_PROCESO_DOTACION)+1, {'PROCESO_DOTACION': 'Proceso del Archivo: GESTION Finalizado'})
+        LOG_PROCESO_DOTACION.setdefault('PROCESO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: 'Proceso del Archivo: DOTACION Finalizado - %s filas' % len(ejecutivosDB)})
         return filaSalidaXls, encabezadoTxt
     except Exception as e:
-        errorMsg = 'Error: Archivo de GESTION | %s' % (e)
-        LOG_PROCESO_DOTACION.setdefault(len(LOG_PROCESO_DOTACION)+1, {'LECTURA_ARCHIVO_DOTACION': errorMsg})
-        LOG_PROCESO_DOTACION.setdefault(len(LOG_PROCESO_DOTACION)+1, {'PROCESO_DOTACION': 'Error al procesar Archivo: GESTION'})
+        errorMsg = 'Error: Al escribir Archivo de DOTACION | %s' % (str(e))
+        LOG_PROCESO_DOTACION.setdefault('LECTURA_ARCHIVO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: errorMsg})
         return False, False

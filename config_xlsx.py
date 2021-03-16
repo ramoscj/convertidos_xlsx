@@ -41,7 +41,7 @@ ASISTENCIA_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'ASISTENCIA',
     # Argumentos que necesita el proceso para funcionar
-    'ARGUMENTOS_PROCESO': 2,
+    'ARGUMENTOS_PROCESO': 4,
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': '_Asistencia_Plataformas',
     # Nombre del archivo TXT que el proceso generara
@@ -58,7 +58,7 @@ GESTION_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'GESTION',
     # Argumentos que necesita el proceso para funcionar
-    'ARGUMENTOS_PROCESO': 4,
+    'ARGUMENTOS_PROCESO': 7,
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': 'Gestión CRO',
     # Nombre del archivo PropietariosCRO XLSX que el proceso usara
@@ -81,7 +81,7 @@ CAMPANHAS_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'CAMPANHA_ESPECIAL',
     # Argumentos que necesita el proceso para funcionar
-    'ARGUMENTOS_PROCESO': 2,
+    'ARGUMENTOS_PROCESO': 4,
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': '_CampañasEspeciales_CRO',
     # Nombre del archivo TXT que el proceso generara
@@ -98,7 +98,7 @@ CALIDAD_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'CALIDAD',
     # Argumentos que necesita el proceso para funcionar
-    'ARGUMENTOS_PROCESO': 2,
+    'ARGUMENTOS_PROCESO': 4,
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': '_Calidad_CRO',
     # Nombre del archivo TXT que el proceso generara
@@ -115,7 +115,7 @@ DOTACION_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'DOTACION',
     # Argumentos que necesita el proceso para funcionar
-    'ARGUMENTOS_PROCESO': 2,
+    'ARGUMENTOS_PROCESO': 4,
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': '_Asistencia_CRO',
     # Nombre del archivo TXT que el proceso generara

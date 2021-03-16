@@ -14,10 +14,10 @@ from validaciones_texto import (primerDiaMes, setearCelda, setearFechaCelda,
 
 LOG_PROCESO_GESTION = dict()
 
-def extraerPropietariosCro():
-    # pathXlsxEntrada = 'test_xls/TEST_GESTION/'
-    pathXlsxEntrada = PATH_XLSX
-    archivo = '%s%s.xlsx' % (pathXlsxEntrada, GESTION_CONFIG_XLSX['ENTRADA_PROPIETARIOS_XLSX'])
+def extraerPropietariosCro(archivoPropietariosXls):
+    # pathXlsxEntrada = PATH_XLSX
+    # archivo = '%s%s.xlsx' % (pathXlsxEntrada, GESTION_CONFIG_XLSX['ENTRADA_PROPIETARIOS_XLSX'])
+    archivo = archivoPropietariosXls
     LOG_PROCESO_GESTION.setdefault('INICIO_LECTURA_PROPIETARIOS', {len(LOG_PROCESO_GESTION)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
     try:
         encabezadoXls = GESTION_CONFIG_XLSX['ENCABEZADO_PROPIETARIOS_XLSX']
@@ -100,7 +100,7 @@ def insertarCamphnaCro(nombreCampahna):
         cursor.close()
         db.close()
 
-def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada):
+def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada, archivoPropietariosXls):
     try:
         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'INICIO_LECTURA_GESTION': 'Iniciando proceso de lectura del Archivo: %s' % archivoEntrada})
         encabezadoXls = GESTION_CONFIG_XLSX['ENCABEZADO_XLSX']
@@ -115,7 +115,7 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
             LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'ENCABEZADO_GESTION': 'Encabezado del Archivo: %s OK' % archivoEntrada})
             filaSalidaXls = dict()
             ejecutivosNoExisten = dict()
-            propietarioCro = extraerPropietariosCro()
+            propietarioCro = extraerPropietariosCro(archivoPropietariosXls)
             campahnasExistentesDb = buscarCamphnasDb()
             ejecutivosExistentesDb = buscarEjecutivosDb()
 
