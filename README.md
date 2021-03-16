@@ -36,15 +36,17 @@ El formato que debe tener el parametro **FECHA** debe ser YYYMM. La unica varian
 ## Proceso PROACTIVA
 El archivo que controla la ejecucion es "crearTxtProactiva.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD). El formato que debe tener el parametro **FECHA** debe ser YYYMM.
 
-**python crearTxtProactiva.py** + la fecha del proceso.
+**python crearTxtProactiva.py** + fecha del proceso + archivo PROACTIVA.xlsx + archivo COMPLEMENTO_CLIENTE.xlsx + carpeta donde se generara la "salida.txt".
 
 ```python
-python crearTxtProactiva.py 202012
+python crearTxtProactiva.py 202012 '.\PROACTIVA\INPUTS\Gestión CoRet Proactiva_202012.xlsx' '.\COMPLEMENTO_CLIENTE\COMPLEMENTO CLIENT vLite 202012.xlsx' .\PROACTIVA\OUTPUTS
 ```
+**NOTA**: Si los nombre de los archivos contienen espacios se deben ingresar entre comillas simples ('') y el directorio donde se genera la salida.txt no debe llevar el ultimo '\' ya que esta predeterminado en la configuracion.
 
 ## Instalacion de la Base de Datos
 
-El archivo con la base de datos esta en la carpeta "DB" hay se encuentra el .bak que es de un SQL Server. En el archivo **config_xlsx.py** existe una variable que contiene los parametros para conectarse a la DB que tiene por nombre **ACCESO_DB**, solo se deben cambiar los parametros de conexion.
+El archivo con la base de datos esta en la carpeta "DB" hay se encuentra el .bak que es de un SQL Server. En el archivo **config_xlsx.py** existe una variable que contiene los parametros para conectarse a la DB que tiene por nombre **ACCESO_DB**, solo se deben cambiar los parametros de conexion. 
+> Si se va a utilizar el archivo .bacpac solo se debe cargar en la opción "Import Data-tier Aplication" con la herramienta SQL Server Management. 
 
 ## NOTA
 
