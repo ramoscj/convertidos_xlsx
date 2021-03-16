@@ -23,7 +23,7 @@ FUGA_CONFIG_XLSX = {
     # Nombre que tendra el proceso dentro del flujo
     'PROCESO': 'FUGA',
     # Argumentos que necesita el proceso para funcionar
-    'ARGUMENTOS_PROCESO': 2,
+    'ARGUMENTOS_PROCESO': 4,
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': '_FUGA_AGENCIA',
     # Nombre del archivo TXT que el proceso generara
@@ -130,7 +130,7 @@ PROACTIVA_CONFIG_XLSX = {
     # Coordenada del encabezado
     'COORDENADA_ENCABEZADO': 'A1:K1',
     # Argumentos que necesita el proceso para funcionar
-    'ARGUMENTOS_PROCESO': 2,
+    'ARGUMENTOS_PROCESO': 4,
     # Nombre del archivo XLSX que el proceso usara
     'ENTRADA_XLSX': 'Gestión CoRet Proactiva',
     # Nombre del archivo TXT que el proceso generara

@@ -302,7 +302,7 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
 
     return cobranzaPro, pacpatPro
 
-def leerArchivoProactiva(archivoEntrada, periodo):
+def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
     try:
         encabezadoXls = PROACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = PROACTIVA_CONFIG_XLSX['ENCABEZADO_TXT']
@@ -322,7 +322,7 @@ def leerArchivoProactiva(archivoEntrada, periodo):
             i = 0
             correlativo = 1
             cantidadCampanas = 0
-            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), periodo)
+            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplmentoCliente, periodo)
             LOG_PROCESO_PROACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
             ejecutivosExistentesDb = buscarEjecutivosDb2()
             LOG_PROCESO_PROACTIVA.setdefault('INICIO_LECTURA_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: '-----------------------------------------------------' })

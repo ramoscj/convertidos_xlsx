@@ -7,23 +7,27 @@ from leerProactivaXLSX import LOG_PROCESO_PROACTIVA, leerArchivoProactiva
 from validaciones_texto import validaFechaInput
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 5:
 
         fechaProceso = str(sys.argv[1])
+        archivoXls = str(sys.argv[2])
+        archivoComplmentoCliente = str(sys.argv[3])
+        PATH_TXT = str(sys.argv[4])
+
         if validaFechaInput(fechaProceso):
 
-            archivoXls = ("PROACTIVA/%s%s_%s.xlsx") % (
-                PATH_XLSX,
-                PROACTIVA_CONFIG_XLSX["ENTRADA_XLSX"],
-                fechaProceso
-            )
+            # archivoXls = ("PROACTIVA/%s%s_%s.xlsx") % (
+            #     PATH_XLSX,
+            #     PROACTIVA_CONFIG_XLSX["ENTRADA_XLSX"],
+            #     fechaProceso
+            # )
 
             if os.path.isfile(archivoXls):
 
                 dataReactivaTxt, encabezadoTxt = leerArchivoProactiva(
-                    archivoXls, fechaProceso
+                    archivoXls, fechaProceso, archivoComplmentoCliente
                 )
-                archivoTxtSalida = "PROACTIVA/%s%s%s.txt" % (
+                archivoTxtSalida = "%s/%s%s.txt" % (
                     PATH_TXT,
                     PROACTIVA_CONFIG_XLSX["SALIDA_TXT"],
                     fechaProceso,
@@ -46,6 +50,6 @@ if __name__ == "__main__":
         print(
             "Error: El proceso "
             "'%s'"
-            " necesita la fecha del proceso para su ejecucion"
+            " necesita los parametros: "'FECHA_PERIODO'", "'ARCHIVO_PROACTIVA.XLSX'", "'ARCHIVO_COMPLEMENTO_CLIENTE.XLSX'", "'PATH_SALIDA_TXT'""
             % PROACTIVA_CONFIG_XLSX["PROCESO"]
         )

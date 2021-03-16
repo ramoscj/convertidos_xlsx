@@ -16,14 +16,16 @@ from leerGestionXLSX import LOG_PROCESO_GESTION, leerArchivoGestion
 from validaciones_texto import formatearFechaMesSiguiente, validaFechaInput
 
 
-def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
-    pathTxtSalida = PATH_TXT
-    pathXlsxEntrada = PATH_XLSX
+def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, pathArchivoTxt):
+    # pathTxtSalida = PATH_TXT
+    # pathXlsxEntrada = PATH_XLSX
 
     if validaFechaInput(fechaInput):
-        archivoXlsx = "%s%s%s.xlsx" % (pathXlsxEntrada, fechaInput, archivoXlsxInput)
-        pathLogSalida = ("%slog_%s%s.txt") % (PATH_LOG, archivoTxt, fechaInput)
-        archivoTxtOutput = "%s%s%s.txt" % (pathTxtSalida, archivoTxt, fechaInput)
+        # archivoXlsx = "%s%s%s.xlsx" % (pathXlsxEntrada, fechaInput, archivoXlsxInput)
+        # archivoTxtOutput = "%s%s%s.txt" % (pathTxtSalida, archivoTxt, fechaInput)
+
+        archivoXlsx = archivoXlsxInput
+        pathLogSalida = ("%slog_%s%s.txt") % (PATH_LOG, procesoInput, fechaInput)
 
         if os.path.isfile(archivoXlsx):
             print("Archivo: %s encontrado." % archivoXlsx)
@@ -31,9 +33,8 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
             try:
                 if procesoInput == "FUGA":
                     mesSiguiente = formatearFechaMesSiguiente(fechaInput)
-                    archivoTxtOutput = "%s%s%s.txt" % (
-                        pathTxtSalida,
-                        archivoTxt,
+                    salidaTxt = "%s%s.txt" % (
+                        FUGA_CONFIG_XLSX['SALIDA_TXT'],
                         mesSiguiente.strftime("%Y%m"),
                     )
                     dataXlsx, encabezadoXlsx = leerArchivoFuga(archivoXlsx, fechaInput)
@@ -59,6 +60,7 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, archivoTxt):
                     logProceso = LOG_PROCESO_CALIDAD
 
                 if dataXlsx:
+                    archivoTxtOutput = '%s/%s' % (pathArchivoTxt, salidaTxt)
                     salidaArchivoTxt(archivoTxtOutput, dataXlsx, encabezadoXlsx)
                     if procesoInput == "ASISTENCIA":
                         archivoTxtOutput = "%s%s%s.txt" % (
@@ -96,9 +98,11 @@ if procesos.get(procesoInput):
             or procesoInput == "CALIDAD"
         ):
             fechaEntrada = str(sys.argv[2])
-            archivoXls = procesos[procesoInput]["ENTRADA_XLSX"]
-            archivoTxt = procesos[procesoInput]["SALIDA_TXT"]
-            procesoGeneral(procesoInput, fechaEntrada, archivoXls, archivoTxt)
+            # archivoXls = procesos[procesoInput]["ENTRADA_XLSX"]
+            # archivoTxt = procesos[procesoInput]["SALIDA_TXT"]
+            archivoXls = str(sys.argv[3])
+            pathArchivoTxt = str(sys.argv[4])
+            procesoGeneral(procesoInput, fechaEntrada, archivoXls, pathArchivoTxt)
         elif procesoInput == "GESTION":
             fechaEntrada = str(sys.argv[2])
             fechaRangoUno = str(sys.argv[3])
