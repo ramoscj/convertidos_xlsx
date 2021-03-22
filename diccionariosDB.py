@@ -74,10 +74,10 @@ def buscarPolizasReliquidar(mesAnterior):
         db = conectorDB()
         cursor = db.cursor()
         polizasParaRequilidar = dict()
-        sql = """SELECT codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre FROM retenciones_por_reliquidar WHERE fecha_proceso = ?"""
+        sql = """SELECT codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre FROM retenciones_por_reliquidar WHERE fecha_proceso = ?"""
         cursor.execute(sql, (mesAnterior))
-        for (codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) in cursor:
-            polizasParaRequilidar[numero_poliza] = {'COBRANZA_PRO': cobranza_pro, 'COBRANZA_REL_PRO': cobranza_rel_pro, 'PACPAT_PRO': pacpat_pro, 'PACPAT_REL_PRO': pacpat_rel_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': codigo_empleado, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente, 'FECHA_CIERRE': fecha_cierre}
+        for (codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) in cursor:
+            polizasParaRequilidar[numero_poliza] = {'COBRANZA_PRO': cobranza_pro, 'PACPAT_PRO': pacpat_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': codigo_empleado, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente, 'FECHA_CIERRE': fecha_cierre}
         return polizasParaRequilidar
     except Exception as e:
         raise Exception('Error buscar Polizas para buscarPolizasReliquidar: %s' % e)

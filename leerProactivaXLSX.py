@@ -73,7 +73,7 @@ def insertarPolizaNoAprobada(dataPolizas:list):
         db = conectorDB()
         cursor = db.cursor()
         polizasInsertar = convertirALista(dataPolizas)
-        sql = """INSERT INTO retenciones_por_reliquidar (codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, cobranza_rel_pro, pacpat_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?);"""
+        sql = """INSERT INTO retenciones_por_reliquidar (codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?);"""
         cursor.executemany(sql, polizasInsertar)
         db.commit()
         return True
@@ -117,7 +117,7 @@ def insertarCampanaEjecutivos(camapanasEjecutivos: dict, fechaProceso):
         LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'INSERTAR_CAMPANAS_EJECUTIVOS': '-----------------------------------------------------' })
         campanasExistentes = CamapanasPorPeriodo(fechaProceso)
         if limpiarTablaCamapanasEjecutivos(fechaProceso):
-            LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'LIMPIAR_CAMAPAÑAS_EJECUTIVOS': 'InsertarCampanaEjecutivos;Se eliminaron {campanas} camapañas existentes'.format(campanas= campanasExistentes)})
+            LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'LIMPIAR_CAMAPAÑAS_EJECUTIVOS': 'InsertarCampanaEjecutivos;Se eliminaron {campanas} Camapaña(s) existentes'.format(campanas= campanasExistentes)})
 
         sql = """INSERT INTO proactiva_campanas_ejecutivos (id_periodo_ejecutivo, nombre_cliente, fecha_creacion, nombre_campana, numero_poliza, fecha_cierre, estado_retencion, estado_ut) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
         cursor.executemany(sql, campanasPorPeriodo)
@@ -194,13 +194,13 @@ def polizasReliquidadas(periodo, complementoCliente):
                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'PROCESO_ACTIVACION_RELIQUIDACION': mensaje})
 
         if cobranzaRelPro > 0 or pacpatRelPro > 0:
-            polizasAprobadaReliquidar[numeroPoliza] = {'COBRANZA_PRO': 0, 'COBRANZA_REL_PRO': cobranzaRelPro, 'PACPAT_PRO': 0, 'PACPAT_REL_PRO': pacpatRelPro, 'ESTADO_PRO': poliza['ESTADO_PRO'], 'ESTADO_UT_PRO': poliza['ESTADO_UT_PRO'], 'CODIGO_EMPLEADO': poliza['CODIGO_EMPLEADO'], 'CAMPAÑA_ID': poliza['CAMPAÑA_ID'], 'NOMBRE_CAMAPANA': nombreCampana, 'POLIZA': numeroPoliza, 'ID_CLIENTE': poliza['ID_CLIENTE']}
+            polizasAprobadaReliquidar[numeroPoliza] = {'COBRANZA_REL_PRO': cobranzaRelPro, 'PACPAT_REL_PRO': pacpatRelPro, 'ESTADO_PRO': poliza['ESTADO_PRO'], 'ESTADO_UT_PRO': poliza['ESTADO_UT_PRO'], 'CODIGO_EMPLEADO': poliza['CODIGO_EMPLEADO'], 'CAMPAÑA_ID': poliza['CAMPAÑA_ID'], 'NOMBRE_CAMAPANA': nombreCampana, 'POLIZA': numeroPoliza, 'ID_CLIENTE': poliza['ID_CLIENTE']}
     
     if len(polizasAprobadaReliquidar) > 0:
         actualizarPolizasReliquidadas(polizasAprobadaReliquidar, fechaIncioMes)
-        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZAS_RELIQUIDADS': 'Existen {polizas} polizas que se van reliquidar'.format(polizas=len(polizasAprobadaReliquidar))})
+        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZAS_RELIQUIDADS': 'PolizasReliquidadas;Existen {polizas} polizas que se van reliquidar'.format(polizas=len(polizasAprobadaReliquidar))})
     else:
-        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZAS_RELIQUIDADS': 'No Existen polizas para reliquidar del periodo: {mesProceso}'.format(mesProceso=mesAnterior)})
+        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZAS_RELIQUIDADS': 'PolizasReliquidadas;No Existen polizas para reliquidar del periodo: {mesProceso}'.format(mesProceso=mesAnterior)})
 
     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZAS_RELIQUIDADS': '-----------------------------------------------------' })
     return polizasAprobadaReliquidar
@@ -268,7 +268,7 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
         if cobranzaPro == 0:
             if not polizasReliquidarDb.get(pk2):
                 if not polizasNoAprobadas.get(pk2):
-                    polizasNoAprobadas[pk2] = {'ID_EMPLEADO': idEmpleado, 'ID_CLIENTE': idCiente, 'NRO_POLIZA': numeroPolizaOriginal, 'ID_CAMPAÑA': campanaId, 'NOMBRE_CAMPANA': nombreCampana, 'COBRANZA_PRO': 1, 'COBRANZA_REL_PRO': 0, 'PACPAT_PRO': pacpatPro, 'PACPAT_REL_PRO': 0, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_INICIO_MES': fechaIncioMes, 'FECHA_CIERRE': fechaCierre}
+                    polizasNoAprobadas[pk2] = {'ID_EMPLEADO': idEmpleado, 'ID_CLIENTE': idCiente, 'NRO_POLIZA': numeroPolizaOriginal, 'ID_CAMPAÑA': campanaId, 'NOMBRE_CAMPANA': nombreCampana, 'COBRANZA_PRO': 1, 'PACPAT_PRO': pacpatPro, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_INICIO_MES': fechaIncioMes, 'FECHA_CIERRE': fechaCierre}
             else:
                 celdaCoordenada = setearCelda2(celdaNroPoliza, 0)
                 mensaje = '%s;Poliza para reliquidar esta duplicada en la DB;%s' % (celdaCoordenada, numeroPoliza)
@@ -288,7 +288,7 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
         if pacpatPro == 0:
             if not polizasReliquidarDb.get(pk2):
                 if not polizasNoAprobadas.get(pk2):
-                    polizasNoAprobadas[pk2] = {'ID_EMPLEADO': idEmpleado, 'ID_CLIENTE': idCiente, 'NRO_POLIZA': numeroPolizaOriginal, 'ID_CAMPAÑA': campanaId, 'NOMBRE_CAMPANA': nombreCampana, 'COBRANZA_PRO': cobranzaPro, 'COBRANZA_REL_PRO': 0, 'PACPAT_PRO': 1, 'PACPAT_REL_PRO': 0, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_INICIO_MES': fechaIncioMes, 'FECHA_CIERRE': fechaCierre}
+                    polizasNoAprobadas[pk2] = {'ID_EMPLEADO': idEmpleado, 'ID_CLIENTE': idCiente, 'NRO_POLIZA': numeroPolizaOriginal, 'ID_CAMPAÑA': campanaId, 'NOMBRE_CAMPANA': nombreCampana, 'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': 1, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_INICIO_MES': fechaIncioMes, 'FECHA_CIERRE': fechaCierre}
                 else:
                     polizasNoAprobadas[pk2]['PACPAT_PRO'] = 1
             else:
@@ -306,6 +306,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
     try:
         encabezadoXls = PROACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = PROACTIVA_CONFIG_XLSX['ENCABEZADO_TXT']
+        encabezadoReliquidacionesTxt = PROACTIVA_CONFIG_XLSX['ENCABEZADO_RELIQUIDACIONES']
         columna = PROACTIVA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
         coordenadaEcabezado = PROACTIVA_CONFIG_XLSX['COORDENADA_ENCABEZADO']
         xls = load_workbook(archivoEntrada, read_only=True, data_only=True)
@@ -322,7 +323,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
             i = 0
             correlativo = 1
             cantidadCampanas = 0
-            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplmentoCliente, periodo)
+            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplmentoCliente)
             LOG_PROCESO_PROACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
             ejecutivosExistentesDb = buscarEjecutivosDb2()
             LOG_PROCESO_PROACTIVA.setdefault('INICIO_LECTURA_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: '-----------------------------------------------------' })
@@ -439,12 +440,12 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': mensaje})
                                 continue
 
-                        filaSalidaXls[pk] = {'COBRANZA_PRO': cobranzaPro, 'COBRANZA_REL_PRO': 0, 'PACPAT_PRO': pacpatPro, 'PACPAT_REL_PRO': 0, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'ID_CLIENTE': idCliente}
+                        filaSalidaXls[pk] = {'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': pacpatPro, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'ID_CLIENTE': idCliente}
                         correlativo += 1
 
             if insertarPeriodoCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
                 if insertarCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
-                    mensaje = 'InsertarCampanaEjecutivos;Se insertaron correctamente: %s Campañas(s)' % (cantidadCampanas)
+                    mensaje = 'InsertarCampanaEjecutivos;Se insertaron correctamente: %s Campaña(s)' % (cantidadCampanas)
                     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'INSERTAR_CAMPANAS_EJECUTIVOS': mensaje})
                     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'INSERTAR_CAMPANAS_EJECUTIVOS': '-----------------------------------------------------' })
 
@@ -454,11 +455,11 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                     mensaje = 'InsertPolizasReliquidar;Se insertaron correctamente: %s Poliza(s)' % (len(polizasNoAprobadas))
                     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'INSERTAR_POLIZAS_RELIQUIDAR': mensaje})
 
-            filaSalidaXls.update(polizasReliquidadas(periodo, complementoCliente))
+            polizasReliquidadaTxt = polizasReliquidadas(periodo, complementoCliente)
 
             LOG_PROCESO_PROACTIVA.setdefault('FIN_CELDAS_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivoEntrada, len(tuple(hoja.rows)))})
             LOG_PROCESO_PROACTIVA.setdefault('PROCESO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Proceso del Archivo: %s Finalizado' % archivoEntrada})
-            return filaSalidaXls, encabezadoTxt
+            return filaSalidaXls, encabezadoTxt, polizasReliquidadaTxt, encabezadoReliquidacionesTxt
         else:
             LOG_PROCESO_PROACTIVA.setdefault('ENCABEZADO_PROACTIVA', archivo_correcto)
             raise

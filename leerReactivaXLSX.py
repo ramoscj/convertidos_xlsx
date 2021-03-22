@@ -8,8 +8,7 @@ from complementoCliente import (LOG_COMPLEMENTO_CLIENTE,
 from conexio_db import conectorDB
 from config_xlsx import (PATH_XLSX, REACTIVA_CONFIG_XLSX,
                          listaEstadoContactado, listaEstadoNoContactado)
-from diccionariosDB import (buscarEjecutivosDb, buscarPolizasReliquidar,
-                            buscarPolizasReliquidarAll)
+from diccionariosDB import buscarEjecutivosDb2, buscarPolizasReliquidar
 from escribir_txt import salidaArchivoTxt, salidaLogTxt
 from validaciones_texto import (formatearFechaMesAnterior, formatearIdCliente,
                                 formatearRutGion, primerDiaMes, setearCelda,
@@ -122,7 +121,7 @@ def campanaCanal(campana):
     return valorCamapana
         
 
-def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada):
+def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada, archivoComplmentoCliente):
 
     try:
         archivoSalida = REACTIVA_CONFIG_XLSX['SALIDA_TXT']
@@ -133,7 +132,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
 
-        complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_REACTIVA))
+        complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_REACTIVA), archivoComplmentoCliente)
         LOG_PROCESO_REACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'DIVISOR_PROCESO': '-----------------------------------------------------'})
         baseCertificacion = extraerBaseCertificacion()
@@ -155,7 +154,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
             # periodoMesAnterior = formatearFechaMesAnterior(periodo)
             fechaIncioMes = primerDiaMes(periodo)
             fechaFinMes = ultimoDiaMes(periodo)
-            ejecutivosExistentesDb = buscarEjecutivosDb()
+            ejecutivosExistentesDb = buscarEjecutivosDb2()
             i = 0
             correlativo = 1
             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'INICIO_CELDAS_REACTIVA': 'Iniciando lectura de Celdas del Archivo: %s' % archivoEntrada})
@@ -165,15 +164,15 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                 i += 1
                 if i >= 2:
 
+                    # idCliente = formatearIdCliente(nombreCliente)
+                    # nombreCliente = str(fila[columna['NOMBRE_CLIENTE']].value)
                     salienteEntrada = fila[columna['LLAMADA_SALIENTE']].value
                     estado = str(fila[columna['ESTADO']].value)
                     estadoUt = fila[columna['ESTADO_ULTIMA_TAREA']].value
                     estadoRetencion = fila[columna['ESTADO_RETENCION']].value
                     numeroPoliza = str(fila[columna['NRO_POLIZA']].value)
-                    nombreCliente = str(fila[columna['NOMBRE_CLIENTE']].value)
-                    nombreEjecutivo = str(fila[columna['NOMBRE_EJECUTIVO']].value).lower()
+                    nombreEjecutivo = fila[columna['NOMBRE_EJECUTIVO']].value
                     campanaId = str(fila[columna['CAMAPAÑA_ID']].value)
-                    idCliente = formatearIdCliente(nombreCliente)
                     pk = '%s_%s' % (campanaId, numeroPoliza)
 
                     fechaCreacion = setearFechaCelda(fila[columna['FECHA_CREACION']])
@@ -211,28 +210,28 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
                         estadoValidoReact = validarEstadoReact(estadoRetencion, estado)
                         contactoReact = validarContactoReact(saliente, estadoRetencion, estado, estadoUt)
-                        rut = ejecutivosExistentesDb.get(nombreEjecutivo)
-                        rutFormateado = formatearRutGion(rut['RUT'])
+                        rut = ejecutivosExistentesDb[nombreEjecutivo]['CODIGO_EMPLEADO']
+                        rutFormateado = rut
 
                         if campanaIdDuplicado.get(campanaId):
                             pkDataGestion = campanaIdDuplicado[campanaId]['PK']
                             if contactoReact == 1 and gestionReactTxt[pkDataGestion]['CONTACTO_REACT'] == 0:
-                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'ID_CLIENTE': idCliente, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
+                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
                                 gestionReactTxt[pkDataGestion].update(datosActualizados)
                         else:
                             campanaIdDuplicado[campanaId] = {'PK': pk}
 
                         if not gestionReactTxt.get(pk):
-                            gestionReactTxt[pk] = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'ID_CLIENTE': idCliente, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
+                            gestionReactTxt[pk] = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
                         else:
                             if estadoValidoReact == 1 and gestionReactTxt[pk]['ESTADO_VALIDO_REACT'] != 1:
-                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'ID_CLIENTE': idCliente, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
+                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
                                 gestionReactTxt[pk].update(datosActualizados)
                             elif contactoReact == 1 and gestionReactTxt[pk]['CONTACTO_REACT'] == 0:
-                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'ID_CLIENTE': idCliente, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
+                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
                                 gestionReactTxt[pk].update(datosActualizados)
                             elif estadoValidoReact != 4:
-                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'ID_CLIENTE': idCliente, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
+                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 1, 'RUT': rutFormateado, 'ID_CAMPANA': campanaId, 'CAMPANA': campanaDescripcion.get(saliente), 'POLIZA': numeroPoliza, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
                                 gestionReactTxt[pk].update(datosActualizados)
                         
                         if polizaExitoRepetido.get(numeroPoliza):
@@ -259,7 +258,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         if estadoValidoReact == 1:
                             if baseCertificacion.get(numeroPoliza):
 
-                                nombreBaseCertificacion = str(baseCertificacion[numeroPoliza]['EJECUTIVO']).lower()
+                                nombreBaseCertificacion = baseCertificacion[numeroPoliza]['EJECUTIVO']
                                 if not ejecutivosExistentesDb.get(nombreBaseCertificacion):
                                     valorErroneo = baseCertificacion[numeroPoliza]['EJECUTIVO']
                                     mensaje = '%s;EJECUTIVO_BASE_CERIFICACION no existe en la DB;%s' % (celdaCoordenada, valorErroneo)
@@ -296,8 +295,8 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         return False, False
         # raise
 
-x = leerArchivoReactiva('../test_xls/REACTIVA/Gestion Reactiva.xlsx', '202006', '20200615', '202007030')
-print(x[2])
+x = leerArchivoReactiva('../test_xls/REACTIVA/Gestion Reactiva.xlsx', '202101', '20201229', '20210126', '../test_xls/REACTIVA/COMPLEMENTO CLIENT vLite 20210211.xlsx')
+print(len(x))
 # print(LOG_PROCESO_REACTIVA)
 salidaLogTxt('../test_xls/REACTIVA/reactiva.log', LOG_PROCESO_REACTIVA)
 # print(salidaArchivoTxt('../test_xls/REACTIVA/%s%s.txt' % (REACTIVA_CONFIG_XLSX['SALIDA_TXT'],'202010'), x, y))

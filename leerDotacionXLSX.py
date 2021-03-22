@@ -11,7 +11,6 @@ LOG_PROCESO_DOTACION = dict()
 
 def leerArchivoDotacion(periodo):
     try:
-        LOG_PROCESO_DOTACION.setdefault('INICIO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: '-----------------------------------------------------'})
         LOG_PROCESO_DOTACION.setdefault('INICIO_LECTURA_DOTACION', {len(LOG_PROCESO_DOTACION)+1: 'Iniciando proceso de escritura del Archivo de DOTACION'})
         encabezadoTxt = DOTACION_CONFIG_XLSX['ENCABEZADO_TXT']
 

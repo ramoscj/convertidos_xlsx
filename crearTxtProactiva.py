@@ -16,15 +16,9 @@ if __name__ == "__main__":
 
         if validaFechaInput(fechaProceso):
 
-            # archivoXls = ("PROACTIVA/%s%s_%s.xlsx") % (
-            #     PATH_XLSX,
-            #     PROACTIVA_CONFIG_XLSX["ENTRADA_XLSX"],
-            #     fechaProceso
-            # )
-
             if os.path.isfile(archivoXls):
 
-                dataReactivaTxt, encabezadoTxt = leerArchivoProactiva(
+                dataReactivaTxt, encabezadoTxt, reliquidacionesTxt, encabezadoReliquidacionesTxt = leerArchivoProactiva(
                     archivoXls, fechaProceso, archivoComplmentoCliente
                 )
                 archivoTxtSalida = "%s/%s%s.txt" % (
@@ -35,6 +29,13 @@ if __name__ == "__main__":
 
                 if dataReactivaTxt:
                     salidaArchivoTxtProactiva(archivoTxtSalida, dataReactivaTxt, encabezadoTxt)
+                    if len(reliquidacionesTxt) > 0:
+                        archivoTxtSalida = "%s/%s%s.txt" % (
+                            PATH_TXT,
+                            PROACTIVA_CONFIG_XLSX["SALIDA_RELIQUIDACION"],
+                            fechaProceso,
+                        )
+                        salidaArchivoTxtProactiva(archivoTxtSalida, reliquidacionesTxt, encabezadoReliquidacionesTxt)
 
                 logProceso = LOG_PROCESO_PROACTIVA
                 pathLogSalida = ("PROACTIVA/%slog_%s%s.txt") % (

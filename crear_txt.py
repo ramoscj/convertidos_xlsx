@@ -48,11 +48,7 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, pathArchivoTxt):
                         ASISTENCIA_CONFIG_XLSX['SALIDA_TXT'],
                         fechaInput,
                     )
-                    dataXlsxDotacion, encabezadoXlsxDotacion = leerArchivoDotacion(
-                        fechaInput
-                    )
                     logProceso = LOG_PROCESO_ASISTENCIA
-                    logProceso.update(LOG_PROCESO_DOTACION)
 
                 elif procesoInput == "CAMPANHA_ESPECIAL":
                     dataXlsx, encabezadoXlsx = leerArchivoCampanhasEsp(
@@ -79,16 +75,6 @@ def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, pathArchivoTxt):
                     archivoTxtOutput = '%s/%s' % (pathArchivoTxt, salidaTxt)
                     salidaArchivoTxt(archivoTxtOutput, dataXlsx, encabezadoXlsx)
 
-                    if procesoInput == "ASISTENCIA" and dataXlsxDotacion:
-                        archivoTxtOutput = "%s/%s%s.txt" % (
-                            pathArchivoTxt,
-                            DOTACION_CONFIG_XLSX["SALIDA_TXT"],
-                            fechaInput,
-                        )
-                        salidaArchivoTxt(
-                            archivoTxtOutput, dataXlsxDotacion, encabezadoXlsxDotacion
-                        )
-
                 if salidaLogTxt(pathLogSalida, logProceso):
                     print("Archivo: %s creado !!" % pathLogSalida)
             except Exception as e:
@@ -103,6 +89,7 @@ procesos = {
     "GESTION": GESTION_CONFIG_XLSX,
     "CAMPANHA_ESPECIAL": CAMPANHAS_CONFIG_XLSX,
     "CALIDAD": CALIDAD_CONFIG_XLSX,
+    "DOTACION": DOTACION_CONFIG_XLSX
 }
 procesoInput = str(sys.argv[1]).upper()
 
@@ -114,12 +101,31 @@ if procesos.get(procesoInput):
             or procesoInput == "CAMPANHA_ESPECIAL"
             or procesoInput == "CALIDAD"
         ):
-            # archivoXls = procesos[procesoInput]["ENTRADA_XLSX"]
-            # archivoTxt = procesos[procesoInput]["SALIDA_TXT"]
             fechaEntrada = str(sys.argv[2])
             archivoXls = str(sys.argv[3])
             pathArchivoTxt = str(sys.argv[4])
             procesoGeneral(procesoInput, fechaEntrada, archivoXls, pathArchivoTxt)
+
+        elif procesoInput == "DOTACION":
+            fechaEntrada = str(sys.argv[2])
+            archivoXls = ""
+            pathArchivoTxt = str(sys.argv[3])
+            pathLogSalida = ("%slog_%s%s.txt") % (PATH_LOG, procesoInput, fechaEntrada)
+            dataXlsxDotacion, encabezadoXlsxDotacion = leerArchivoDotacion(
+                fechaEntrada
+            )
+            salidaTxt = "%s%s.txt" % (
+                DOTACION_CONFIG_XLSX['SALIDA_TXT'],
+                fechaEntrada,
+            )
+            logProceso = LOG_PROCESO_DOTACION
+
+            if dataXlsxDotacion:
+                archivoTxtOutput = '%s/%s' % (pathArchivoTxt, salidaTxt)
+                salidaArchivoTxt(archivoTxtOutput, dataXlsxDotacion, encabezadoXlsxDotacion)
+            if salidaLogTxt(pathLogSalida, logProceso):
+                    print("Archivo: %s creado !!" % pathLogSalida)
+
         elif procesoInput == "GESTION":
             fechaEntrada = str(sys.argv[2])
             fechaRangoUno = str(sys.argv[3])
@@ -127,11 +133,7 @@ if procesos.get(procesoInput):
             archivoXls = str(sys.argv[5])
             archivoPropietariosXls = str(sys.argv[6])
             pathSalidaTxt = str(sys.argv[7])
-            # pathXlsxEntrada = PATH_XLSX
-            # archivoXls = ("%s%s.xlsx") % (
-            #     pathXlsxEntrada,
-            #     procesos[procesoInput]["ENTRADA_XLSX"],
-            # )
+
             if os.path.isfile(archivoXls):
                 print("Archivo: %s encontrado." % archivoXls)
                 print("Iniciando Lectura...")
