@@ -17,12 +17,8 @@ from validaciones_texto import formatearFechaMesSiguiente, validaFechaInput
 
 
 def procesoGeneral(procesoInput, fechaInput, archivoXlsxInput, pathArchivoTxt):
-    # pathTxtSalida = PATH_TXT
-    # pathXlsxEntrada = PATH_XLSX
 
     if validaFechaInput(fechaInput):
-        # archivoXlsx = "%s%s%s.xlsx" % (pathXlsxEntrada, fechaInput, archivoXlsxInput)
-        # archivoTxtOutput = "%s%s%s.txt" % (pathTxtSalida, archivoTxt, fechaInput)
 
         archivoXlsx = archivoXlsxInput
         pathLogSalida = ("%slog_%s%s.txt") % (PATH_LOG, procesoInput, fechaInput)
@@ -93,83 +89,87 @@ procesos = {
 }
 procesoInput = str(sys.argv[1]).upper()
 
-if procesos.get(procesoInput):
-    if len(sys.argv) == procesos[procesoInput]["ARGUMENTOS_PROCESO"] + 1:
-        if (
-            procesoInput == "FUGA"
-            or procesoInput == "ASISTENCIA"
-            or procesoInput == "CAMPANHA_ESPECIAL"
-            or procesoInput == "CALIDAD"
-        ):
-            fechaEntrada = str(sys.argv[2])
-            archivoXls = str(sys.argv[3])
-            pathArchivoTxt = str(sys.argv[4])
-            procesoGeneral(procesoInput, fechaEntrada, archivoXls, pathArchivoTxt)
+def main():
+    if procesos.get(procesoInput):
+        if len(sys.argv) == procesos[procesoInput]["ARGUMENTOS_PROCESO"] + 1:
+            if (
+                procesoInput == "FUGA"
+                or procesoInput == "ASISTENCIA"
+                or procesoInput == "CAMPANHA_ESPECIAL"
+                or procesoInput == "CALIDAD"
+            ):
+                fechaEntrada = str(sys.argv[2])
+                archivoXls = str(sys.argv[3])
+                pathArchivoTxt = str(sys.argv[4])
+                procesoGeneral(procesoInput, fechaEntrada, archivoXls, pathArchivoTxt)
 
-        elif procesoInput == "DOTACION":
-            fechaEntrada = str(sys.argv[2])
-            archivoXls = ""
-            pathArchivoTxt = str(sys.argv[3])
-            pathLogSalida = ("%slog_%s%s.txt") % (PATH_LOG, procesoInput, fechaEntrada)
-            dataXlsxDotacion, encabezadoXlsxDotacion = leerArchivoDotacion(
-                fechaEntrada
-            )
-            salidaTxt = "%s%s.txt" % (
-                DOTACION_CONFIG_XLSX['SALIDA_TXT'],
-                fechaEntrada,
-            )
-            logProceso = LOG_PROCESO_DOTACION
+            elif procesoInput == "DOTACION":
+                fechaEntrada = str(sys.argv[2])
+                pathArchivoTxt = str(sys.argv[3])
+                pathLogSalida = ("%slog_%s%s.txt") % (PATH_LOG, procesoInput, fechaEntrada)
+                dataXlsxDotacion, encabezadoXlsxDotacion = leerArchivoDotacion(
+                    fechaEntrada
+                )
+                salidaTxt = "%s%s.txt" % (
+                    DOTACION_CONFIG_XLSX['SALIDA_TXT'],
+                    fechaEntrada,
+                )
 
-            if dataXlsxDotacion:
-                archivoTxtOutput = '%s/%s' % (pathArchivoTxt, salidaTxt)
-                salidaArchivoTxt(archivoTxtOutput, dataXlsxDotacion, encabezadoXlsxDotacion)
-            if salidaLogTxt(pathLogSalida, logProceso):
+                if dataXlsxDotacion:
+                    archivoTxtOutput = '%s/%s' % (pathArchivoTxt, salidaTxt)
+                    salidaArchivoTxt(archivoTxtOutput, dataXlsxDotacion, encabezadoXlsxDotacion)
+
+                logProceso = LOG_PROCESO_DOTACION
+                if salidaLogTxt(pathLogSalida, logProceso):
                     print("Archivo: %s creado !!" % pathLogSalida)
 
-        elif procesoInput == "GESTION":
-            fechaEntrada = str(sys.argv[2])
-            fechaRangoUno = str(sys.argv[3])
-            fechaRangoDos = str(sys.argv[4])
-            archivoXls = str(sys.argv[5])
-            archivoPropietariosXls = str(sys.argv[6])
-            pathSalidaTxt = str(sys.argv[7])
+            elif procesoInput == "GESTION":
+                fechaEntrada = str(sys.argv[2])
+                fechaRangoUno = str(sys.argv[3])
+                fechaRangoDos = str(sys.argv[4])
+                archivoXls = str(sys.argv[5])
+                archivoPropietariosXls = str(sys.argv[6])
+                pathSalidaTxt = str(sys.argv[7])
 
-            if os.path.isfile(archivoXls):
-                print("Archivo: %s encontrado." % archivoXls)
-                print("Iniciando Lectura...")
-                pathTxtSalida = PATH_TXT
-                archivoTxt = ("%s/%s%s.txt") % (
-                    pathSalidaTxt,
-                    GESTION_CONFIG_XLSX["SALIDA_TXT"],
-                    fechaEntrada,
-                )
-                pathLogSalida = ("%slog_%s_%s.txt") % (
-                    PATH_LOG,
-                    procesoInput,
-                    fechaEntrada,
-                )
-                dataXlsx, encabezadoXlsx = leerArchivoGestion(
-                    archivoXls, fechaEntrada, fechaRangoUno, fechaRangoDos, archivoPropietariosXls
-                )
-                if dataXlsx and salidaArchivoTxt(archivoTxt, dataXlsx, encabezadoXlsx):
-                    LOG_PROCESO_GESTION.setdefault(
-                        "SALIDA_TXT",
-                        {
-                            len(LOG_PROCESO_GESTION)
-                            + 1: "Archivo: %s creado!! " % archivoTxt
-                        },
+                if os.path.isfile(archivoXls):
+                    print("Archivo: %s encontrado." % archivoXls)
+                    print("Iniciando Lectura...")
+                    pathTxtSalida = PATH_TXT
+                    archivoTxt = ("%s/%s%s.txt") % (
+                        pathSalidaTxt,
+                        GESTION_CONFIG_XLSX["SALIDA_TXT"],
+                        fechaEntrada,
                     )
-                erroresProceso = LOG_PROCESO_GESTION
-                if salidaLogTxt(pathLogSalida, erroresProceso):
-                    print("Archivo: %s creado !!" % pathLogSalida)
-            else:
-                print("Error: Archivo %s no encontrado" % archivoXls)
+                    pathLogSalida = ("%slog_%s_%s.txt") % (
+                        PATH_LOG,
+                        procesoInput,
+                        fechaEntrada,
+                    )
+                    dataXlsx, encabezadoXlsx = leerArchivoGestion(
+                        archivoXls, fechaEntrada, fechaRangoUno, fechaRangoDos, archivoPropietariosXls
+                    )
+                    if dataXlsx and salidaArchivoTxt(archivoTxt, dataXlsx, encabezadoXlsx):
+                        LOG_PROCESO_GESTION.setdefault(
+                            "SALIDA_TXT",
+                            {
+                                len(LOG_PROCESO_GESTION)
+                                + 1: "Archivo: %s creado!! " % archivoTxt
+                            },
+                        )
+                    erroresProceso = LOG_PROCESO_GESTION
+                    if salidaLogTxt(pathLogSalida, erroresProceso):
+                        print("Archivo: %s creado !!" % pathLogSalida)
+                else:
+                    print("Error: Archivo %s no encontrado" % archivoXls)
+        else:
+            print(
+                "Error: El programa "
+                '"%s"'
+                " necesita %s parametros para su ejecucion"
+                % (procesoInput, procesos[procesoInput]["ARGUMENTOS_PROCESO"])
+            )
     else:
-        print(
-            "Error: El programa "
-            '"%s"'
-            " necesita %s parametros para su ejecucion"
-            % (procesoInput, procesos[procesoInput]["ARGUMENTOS_PROCESO"])
-        )
-else:
-    print('Error: Proceso "' "%s" '" no encontrado' % procesoInput)
+        print('Error: Proceso "' "%s" '" no encontrado' % procesoInput)
+
+if __name__ == "__main__":
+    main()

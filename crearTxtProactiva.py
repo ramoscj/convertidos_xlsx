@@ -18,6 +18,8 @@ if __name__ == "__main__":
 
             if os.path.isfile(archivoXls):
 
+                print("Archivo: %s encontrado." % archivoXls)
+                print("Iniciando Lectura...")
                 dataReactivaTxt, encabezadoTxt, reliquidacionesTxt, encabezadoReliquidacionesTxt = leerArchivoProactiva(
                     archivoXls, fechaProceso, archivoComplmentoCliente
                 )

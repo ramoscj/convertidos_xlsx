@@ -23,13 +23,18 @@ python .\crear_txt.py fuga 202006 '.\INPUTS\202006_Fuga_Agencia.xlsx' .\OUTPUTS
 python .\crear_txt.py asistencia 202011 '.\INPUTS\202011_Asistencia_Plataformas.xlsx' .\OUTPUTS
 python .\crear_txt.py campanha_especial 202011 '.\INPUTS\202011_CampañasEspeciales_CRO.xlsx' .\OUTPUTS
 python .\crear_txt.py calidad 202011 '.\INPUTS\202011_Calidad_CRO.xlsx' .\OUTPUTS
+python .\crear_txt.py dotacion 202011  .\OUTPUTS
 python .\crear_txt.py gestion 202011 20201026 20201123 '.\INPUTS\Gestión CRO.xlsx' '.\INPUTS\Propietarios CRO.xlsx' .\OUTPUTS
 ```
-La unica variante es para generar el archivo de **GESTION** que se deben ingresar tres **FECHAS** la primera es la del periodo a procesar (YYYYMM) y las otras dos son el rango de fecha del periodo (YYYYMMDD) y aparte del archivo con la DATA, se debe indicar el directorio del archivo de PROPIETARIOS.xlsx que es necesario para el proceso seguido del directorio donde se generara la SALIDA.txt
+**Las variantes para la ejeucion de los procesos son:**
++ El proceso de **GESTION** que se deben ingresar tres **FECHAS** la primera es la del periodo a procesar (YYYYMM) y las otras dos son el rango de fecha del periodo (YYYYMMDD) y aparte del archivo con la DATA, se debe indicar el directorio del archivo de PROPIETARIOS.xlsx que es necesario para el proceso seguido del directorio donde se generara la SALIDA.txt.
++ El proceso de **DOTACION** que para la ejecucion solo necesita la fecha del periodo a ejecutar mas el directorio donde se generara el archivo.
 
+**Archivos que genera cada ejecución:**
 + **python crear_txt.py fuga**: Genera los archivos de FUGA
 + **python crear_txt.py asistencia**: Genera los archivos de ASISTENCIA y DOTACION
 + **python crear_txt.py campanha_especial**: Genera el archivo de PILOTO
++ **python crear_txt.py calidad**: Genera el archivo de CALIDAD
 + **python crear_txt.py calidad**: Genera el archivo de CALIDAD
 + **python crear_txt.py gestion**: Genera el archivo de GESTION
 
@@ -44,6 +49,15 @@ El archivo que controla la ejecucion es "crearTxtProactiva.py" y para ejecutarlo
 python crearTxtProactiva.py 202012 '.\PROACTIVA\INPUTS\Gestión CoRet Proactiva_202012.xlsx' '.\COMPLEMENTO_CLIENTE\COMPLEMENTO CLIENT vLite 202012.xlsx' .\PROACTIVA\OUTPUTS
 ```
 **NOTA**: Si los nombre de los archivos contienen espacios se deben ingresar entre comillas simples ('') y el directorio donde se genera la salida.txt no debe llevar el ultimo "/" ya que esta predeterminado en la configuracion.
+
+## Proceso REACTIVA
+El archivo que controla la ejecucion es "crearTxtReactiva.py" y para ejecutarlo se debe escribir el siguiente comando en la consola (CMD). El formato que debe tener el parametro **FECHA** debe ser YYYMM y el del rango de **FECHAS_OUTBOUND** deber tener el formato YYYMMDD (las dos).
+
+**python crearTxtReactiva.py** + fecha del proceso + fecha_outbound1  + fecha_outbound2 + archivo REACTIVA.xlsx + archivo BASE_CERTIFICACION.xlsx + archivo COMPLEMENTO_CLIENTE.xlsx + carpeta donde se generara la "salida.txt".
+
+```python
+python .\crearTxtReactiva.py 202001 20201229 20210126 '\REACTIVA\Gestion Reactiva.xlsx' '\REACTIVA\Base Certificacion.xlsx' '\REACTIVA\COMPLEMENTO CLIENT vLite 20210211.xlsx' \REACTIVA
+```
 
 ## Instalacion de la Base de Datos
 

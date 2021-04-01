@@ -5,7 +5,6 @@ from tqdm import tqdm
 
 from conexio_db import conectorDB
 from config_xlsx import ASISTENCIA_CONFIG_XLSX
-from diccionariosDB import buscarRutEjecutivosDb
 from validaciones_texto import (formatearRut, primerDiaMes, setearCelda,
                                 setearCelda2, ultimoDiaMes,
                                 validarEncabezadoXlsx)
@@ -27,29 +26,27 @@ def updateEjecutivoFechaDesv(periodo):
         cursor.close()
         db.close()
 
-def insertarEjecutivo(rut, nombre, nombreRrh, plataforma, periodo):
+def insertarEjecutivo(idEmpleado, plataforma, periodo):
     try:
         db = conectorDB()
         cursor = db.cursor()
         primerDia = primerDiaMes(periodo)
         sql = """MERGE ejecutivos AS target
-                USING (VALUES (?)) AS source (rut)
-                ON (source.rut = target.rut)
+                USING (VALUES (?)) AS source (id_empleado)
+                ON (source.id_empleado = target.id_empleado)
                 WHEN MATCHED
                 THEN UPDATE
-                    SET target.nombre = ?,
-                        target.nombre_rrh = ?,
-                        target.plataforma = ?,
+                    SET target.plataforma = ?,
                         target.fecha_desvinculacion = NULL
                 WHEN NOT MATCHED
-                THEN INSERT (rut, nombre, nombre_rrh, plataforma, fecha_ingreso, fecha_desvinculacion)
-                    VALUES (?, ?, ?, ?, ?, NULL);"""
-        valores = (rut, nombre, nombreRrh, plataforma, rut, nombre, nombreRrh, plataforma, primerDia)
+                THEN INSERT (id_empleado, plataforma, fecha_ingreso, fecha_desvinculacion)
+                    VALUES (?, ?, ?, NULL);"""
+        valores = (idEmpleado, plataforma, idEmpleado, plataforma, primerDia)
         cursor.execute(sql, valores)
         db.commit()
         return True
     except Exception as e:
-        raise Exception('Error al insertar ejecutivo: %s - %s' % (rut ,e))
+        raise Exception('Error al insertar ejecutivo: %s - %s' % (idEmpleado ,e))
     finally:
         cursor.close()
         db.close()
@@ -71,15 +68,16 @@ def leerArchivoAsistencia(archivo, periodo):
         encabezadoXls = ASISTENCIA_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = ASISTENCIA_CONFIG_XLSX['ENCABEZADO_TXT']
         columna = ASISTENCIA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
+        coordenadaEcabezado = ASISTENCIA_CONFIG_XLSX['COORDENADA_ENCABEZADO']
         xls = load_workbook(archivo, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
         correlativo = 1
-        archivo_correcto = validarEncabezadoXlsx(hoja['A2:C2'], encabezadoXls, archivo)
+        archivo_correcto = validarEncabezadoXlsx(hoja[coordenadaEcabezado], encabezadoXls, archivo)
         if type(archivo_correcto) is not dict:
             LOG_PROCESO_ASISTENCIA.setdefault(len(LOG_PROCESO_ASISTENCIA)+1, {'ENCABEZADO_ASISTENCIA': 'Encabezado del Archivo: %s OK' % archivo})
             filaSalidaXls = dict()
-            totalColumnas = calcularDiasHablies(hoja.iter_rows(min_row=1, min_col=5, max_row=1))
+            totalColumnas = calcularDiasHablies(hoja.iter_rows(min_row=1, min_col=2, max_row=1))
             totalFilas = len(tuple(hoja.iter_rows(min_row=3, min_col=1)))
             LOG_PROCESO_ASISTENCIA.setdefault(len(LOG_PROCESO_ASISTENCIA)+1, {'INICIO_CELDAS_ASISTENCIA': 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
 
@@ -87,21 +85,19 @@ def leerArchivoAsistencia(archivo, periodo):
             for fila in tqdm(iterable=hoja.iter_rows(min_row=3, min_col=1), total = totalFilas, desc='Leyendo AsistenciaCRO' , unit=' Fila'):
             # for fila in hoja.rows:
                 diasVacaciones = 0
-                if fila[columna['EJECUTIVO']].value is not None and fila[columna['RUT']].value is not None and fila[columna['PLATAFORMA']].value is not None:
+                if fila[columna['ID_EMPLEADO']].value is not None and fila[columna['PLATAFORMA']].value is not None:
 
-                    nombreEjecutivo = str(fila[columna['EJECUTIVO']].value).lower()
-                    nombreEjecutivoRrh = str(fila[columna['NOMBRE_RRH']].value)
-                    rut = formatearRut(str(fila[columna['RUT']].value).upper())
+                    idEmpleado = fila[columna['ID_EMPLEADO']].value
                     plataforma = str(fila[columna['PLATAFORMA']].value).upper()
 
-                    insertarEjecutivo(rut, nombreEjecutivo, nombreEjecutivoRrh, plataforma, periodo)
-                    ejecutivosExistentesDb = buscarRutEjecutivosDb()
+                    insertarEjecutivo(idEmpleado, plataforma, periodo)
+                    # ejecutivosExistentesDb = buscarRutEjecutivosDb()
 
-                    if not filaSalidaXls.get(rut):
+                    if not filaSalidaXls.get(idEmpleado):
                         conteoVhcAplica = 0
                         vhcAplica = 0
-                        filaSalidaXls[rut] = {'CRR': correlativo}
-                        for celda in range(4, totalColumnas+4):
+                        filaSalidaXls[idEmpleado] = {'CRR': correlativo}
+                        for celda in range(2, totalColumnas+2):
                             if str(fila[celda].value).upper() == 'V' or str(fila[celda].value).upper() == 'VAC':
                                 diasVacaciones += 1
                                 conteoVhcAplica += 1
@@ -110,13 +106,13 @@ def leerArchivoAsistencia(archivo, periodo):
                             if conteoVhcAplica == 5:
                                 vhcAplica = 1
                                 conteoVhcAplica = 0
-                        filaSalidaXls[rut].setdefault('VHC_MES', diasVacaciones)
-                        filaSalidaXls[rut].setdefault('DIAS_HABILES_MES', totalColumnas)
-                        filaSalidaXls[rut].setdefault('CARGA', vhcAplica)
-                        filaSalidaXls[rut].setdefault('RUT', rut)
+                        filaSalidaXls[idEmpleado].setdefault('VHC_MES', diasVacaciones)
+                        filaSalidaXls[idEmpleado].setdefault('DIAS_HABILES_MES', totalColumnas)
+                        filaSalidaXls[idEmpleado].setdefault('CARGA', vhcAplica)
+                        filaSalidaXls[idEmpleado].setdefault('ID_EMPLEADO', idEmpleado)
                         correlativo += 1
                     else:
-                        errorRut = '%s - Ejecutivo duplicado: %s' % (setearCelda2(fila[columna['RUT']],0), rut)
+                        errorRut = '%s - Ejecutivo duplicado: %s' % (setearCelda2(fila[columna['ID_EMPLEADO']],0), idEmpleado)
                         LOG_PROCESO_ASISTENCIA.setdefault(len(LOG_PROCESO_ASISTENCIA)+1, {'EJECUTIVO_DUPLICADO_%s' % str(len(LOG_PROCESO_ASISTENCIA)+1): errorRut})
             LOG_PROCESO_ASISTENCIA.setdefault('FIN_CELDAS_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
             LOG_PROCESO_ASISTENCIA.setdefault('PROCESO_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
@@ -130,5 +126,5 @@ def leerArchivoAsistencia(archivo, periodo):
         LOG_PROCESO_ASISTENCIA.setdefault('PROCESO_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Error al procesar Archivo: %s' % archivo})
         return False, False
 
-# leerArchivoAsistencia('INPUTS/202003_Asistencia_CRO.xlsx', '202003')
+# leerArchivoAsistencia('PROACTIVA/INPUTS/202012_Asistencia Plataforma.xlsx', '202012')
 # print(LOG_PROCESO_ASISTENCIA)

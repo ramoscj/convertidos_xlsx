@@ -7,10 +7,10 @@ def buscarEjecutivosDb():
         db = conectorDB()
         cursor = db.cursor()
         ejecutivos = dict()
-        sql = """SELECT id, rut, nombre FROM ejecutivos"""
+        sql = """SELECT id, id_empleado, plataforma FROM ejecutivos"""
         cursor.execute(sql)
-        for (id, rut, nombre) in cursor:
-            ejecutivos[nombre] = {'ID': id, 'RUT': rut, 'NOMBRE': nombre}
+        for (id, id_empleado, plataforma) in cursor:
+            ejecutivos[id_empleado] = {'ID': id, 'ID_EMEPLEADO': id_empleado, 'PLATAFORMA': plataforma}
         return ejecutivos
     except Exception as e:
         raise Exception('Error buscarEjecutivosDb: %s' % e)
@@ -34,15 +34,17 @@ def buscarCamphnasDb():
         cursor.close()
         db.close()
 
-def buscarRutEjecutivosDb():
+def buscarRutEjecutivosDb(ultimoDiaMes, primerDiaMes):
     try:
         db = conectorDB()
         cursor = db.cursor()
         ejecutivos = dict()
-        sql = """SELECT rut, nombre, nombre_rrh, plataforma FROM ejecutivos"""
-        cursor.execute(sql)
-        for (rut, nombre, nombre_rrh, plataforma) in cursor:
-            ejecutivos[rut] = {'RUT': rut, 'NOMBRE': nombre, 'PLATAFORMA': ''.join((plataforma).split()), 'NOMBRE_RRH': nombre_rrh}
+        sql = """SELECT id_empleado, plataforma, fecha_ingreso, fecha_desvinculacion FROM ejecutivos WHERE isnull(fecha_desvinculacion, ?) >= ?"""
+        cursor.execute(sql, (ultimoDiaMes, primerDiaMes))
+        for (id_empleado, plataforma, fecha_ingreso, fecha_desvinculacion) in cursor:
+            if fecha_desvinculacion is not None:
+                fecha_desvinculacion = fecha_desvinculacion.strftime("%d-%m-%Y")
+            ejecutivos[id_empleado] = {'ID_EMPLEADO': id_empleado, 'PLATAFORMA': plataforma, 'FECHA_INGRESO': fecha_ingreso.strftime("%d-%m-%Y"), 'FECHA_DESVINCULACION': fecha_desvinculacion}
         return ejecutivos
     except Exception as e:
         raise Exception('Error buscarRutEjecutivosDb: %s' % e)
@@ -74,10 +76,10 @@ def buscarPolizasReliquidar(mesAnterior):
         db = conectorDB()
         cursor = db.cursor()
         polizasParaRequilidar = dict()
-        sql = """SELECT codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre FROM retenciones_por_reliquidar WHERE fecha_proceso = ?"""
+        sql = """SELECT codigo_empleado, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre FROM retenciones_por_reliquidar WHERE fecha_proceso = ?"""
         cursor.execute(sql, (mesAnterior))
-        for (codigo_empleado, id_cliente, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) in cursor:
-            polizasParaRequilidar[numero_poliza] = {'COBRANZA_PRO': cobranza_pro, 'PACPAT_PRO': pacpat_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': codigo_empleado, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente, 'FECHA_CIERRE': fecha_cierre}
+        for (codigo_empleado, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, fecha_proceso, fecha_reliquidacion, fecha_cierre) in cursor:
+            polizasParaRequilidar[numero_poliza] = {'COBRANZA_PRO': cobranza_pro, 'PACPAT_PRO': pacpat_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': codigo_empleado, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'FECHA_CIERRE': fecha_cierre}
         return polizasParaRequilidar
     except Exception as e:
         raise Exception('Error buscar Polizas para buscarPolizasReliquidar: %s' % e)
@@ -90,11 +92,11 @@ def buscarPolizasReliquidarAll():
         db = conectorDB()
         cursor = db.cursor()
         polizasParaRequilidar = dict()
-        sql = """SELECT codigo_empleado, id_cliente, numero_poliza FROM retenciones_por_reliquidar"""
+        sql = """SELECT codigo_empleado, numero_poliza, campana_id FROM retenciones_por_reliquidar"""
         cursor.execute(sql)
-        for (codigo_empleado, id_cliente, numero_poliza) in cursor:
-            pk = '%s_%s_%s' % (id_cliente, codigo_empleado, numero_poliza)
-            polizasParaRequilidar[pk] = {'RUT': codigo_empleado, 'POLIZA': numero_poliza, 'ID_CLIENTE': id_cliente}
+        for (codigo_empleado, numero_poliza, campana_id) in cursor:
+            pk = '{0}_{1}_{2}'.format(campana_id, codigo_empleado, numero_poliza)
+            polizasParaRequilidar[pk] = {'RUT': codigo_empleado, 'POLIZA': numero_poliza, 'CAMPANA_ID': campana_id}
         return polizasParaRequilidar
     except Exception as e:
         raise Exception('Error buscar Polizas para buscarPolizasReliquidarAll: %s' % e)
@@ -153,4 +155,53 @@ def buscarEjecutivosDb2():
         cursor.close()
         db.close()
 
-# print(CamapanasPorPeriodo('01/12/2020'))
+def listaEstadoUtContacto():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        listaEstadoUt = dict()
+        sql = """SELECT descripcion FROM estadout_pro_reac WHERE estado_contacto = 1"""
+        cursor.execute(sql)
+        for (descripcion,) in cursor:
+            listaEstadoUt.setdefault(descripcion, 1)
+        return listaEstadoUt
+    except Exception as e:
+        raise Exception('Error listaEstadoUtContacto: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def listaEstadoUtNoContacto():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        listaEstadoUt = dict()
+        sql = """SELECT descripcion FROM estadout_pro_reac WHERE estado_contacto = 0"""
+        cursor.execute(sql)
+        for (descripcion,) in cursor:
+            listaEstadoUt.setdefault(descripcion, 1)
+        return listaEstadoUt
+    except Exception as e:
+        raise Exception('Error listaEstadoUtNoContacto: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def listaEstadoUtAll():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        listaEstadoUt = dict()
+        sql = """SELECT descripcion FROM estadout_pro_reac"""
+        cursor.execute(sql)
+        for (descripcion,) in cursor:
+            listaEstadoUt.setdefault(descripcion, 1)
+        return listaEstadoUt
+    except Exception as e:
+        raise Exception('Error def listaEstadoUtAll(): %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+# x = buscarRutEjecutivosDb('31/01/2021', '01/01/2021')
+# print(x)

@@ -218,3 +218,10 @@ def setearCampanasPorEjecutivo(dataLista: [], idEjecutivo):
         data += valores
         lista.append(data)
     return lista
+
+def convertirDataReact(dataReact: dict):
+    dataFinal = dict()
+    for valores in dataReact.values():
+        pk = '{0}_{1}'.format(valores['ID_CAMPANA'], valores['POLIZA'])
+        dataFinal[pk] = {'ESTADO_VALIDO_REACT': valores['ESTADO_VALIDO_REACT'], 'CONTACTO_REACT': valores['CONTACTO_REACT'], 'EXITO_REPETIDO_REACT': valores['EXITO_REPETIDO_REACT'], 'ID_EMPLEADO': valores['ID_EMPLEADO'], 'ID_CAMPANA': valores['ID_CAMPANA'], 'CAMPANA': valores['CAMPANA'], 'POLIZA': valores['POLIZA'], 'REPETICIONES': valores['REPETICIONES']}
+    return dataFinal
