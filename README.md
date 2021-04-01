@@ -35,7 +35,7 @@ python .\crear_txt.py gestion 202011 20201026 20201123 '.\INPUTS\Gestión CRO.xl
 + **python crear_txt.py asistencia**: Genera los archivos de ASISTENCIA y DOTACION
 + **python crear_txt.py campanha_especial**: Genera el archivo de PILOTO
 + **python crear_txt.py calidad**: Genera el archivo de CALIDAD
-+ **python crear_txt.py calidad**: Genera el archivo de CALIDAD
++ **python crear_txt.py dotacion**: Genera el archivo de DOTACION
 + **python crear_txt.py gestion**: Genera el archivo de GESTION
 
 **NOTA**: Si los nombre de los archivos contienen espacios se deben ingresar entre comillas simples ('') y el directorio donde se genera la salida.txt no debe llevar el ultimo "/" ya que esta predeterminado en la configuracion.
