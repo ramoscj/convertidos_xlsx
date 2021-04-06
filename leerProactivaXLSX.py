@@ -193,7 +193,7 @@ def polizasReliquidadas(periodo, complementoCliente):
                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'PROCESO_ACTIVACION_RELIQUIDACION': mensaje})
 
         if cobranzaRelPro > 0 or pacpatRelPro > 0:
-            polizasAprobadaReliquidar[numeroPoliza] = {'COBRANZA_REL_PRO': cobranzaRelPro, 'PACPAT_REL_PRO': pacpatRelPro, 'ESTADO_PRO': poliza['ESTADO_PRO'], 'ESTADO_UT_PRO': poliza['ESTADO_UT_PRO'], 'CODIGO_EMPLEADO': poliza['CODIGO_EMPLEADO'], 'CAMPAÑA_ID': poliza['CAMPAÑA_ID'], 'NOMBRE_CAMAPANA': nombreCampana, 'POLIZA': numeroPoliza}
+            polizasAprobadaReliquidar[numeroPoliza] = {'COBRANZA_REL_PRO': cobranzaRelPro, 'PACPAT_REL_PRO': pacpatRelPro, 'CODIGO_EMPLEADO': poliza['CODIGO_EMPLEADO'], 'CAMPAÑA_ID': poliza['CAMPAÑA_ID'], 'NOMBRE_CAMAPANA': nombreCampana, 'POLIZA': numeroPoliza}
     
     if len(polizasAprobadaReliquidar) > 0:
         actualizarPolizasReliquidadas(polizasAprobadaReliquidar, fechaIncioMes)
@@ -434,7 +434,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': mensaje})
                                 continue
 
-                        filaSalidaXls[pk] = {'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': pacpatPro, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': 1}
+                        filaSalidaXls[pk] = {'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': pacpatPro, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'REPETICIONES': 1, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza}
                         correlativo += 1
 
             if insertarPeriodoCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):

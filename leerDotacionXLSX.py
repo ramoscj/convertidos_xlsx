@@ -18,7 +18,7 @@ def leerArchivoDotacion(periodo):
         ejecutivosDB = buscarRutEjecutivosDb(ultimoDiaMes(periodo), primerDiaMes(periodo))
         for  idEjecutivo, valor in tqdm(iterable= ejecutivosDB.items(), total= len(ejecutivosDB), desc='Leyendo DotacionCRO' , unit=' Fila'):
             
-            filaSalidaXls[idEjecutivo] = {'ID_EMPLEADO': ejecutivosDB[idEjecutivo]['ID_EMPLEADO'], 'DIRECCION': '', 'COMUNA': '', 'TELEFONO': '', 'CELULAR': '', 'FECHA_INGRESO': ejecutivosDB[idEjecutivo]['FECHA_INGRESO'], 'FECHA_NACIMIENTO': '', 'FECHA_DESVINCULACION': ejecutivosDB[idEjecutivo]['FECHA_DESVINCULACION'], 'CORREO_ELECTRONICO': '', 'RUT_JEFE': '', 'EMPRESA': 'METLIFE', 'SUCURSAL': '', 'CARGO': ejecutivosDB[idEjecutivo]['PLATAFORMA'], 'NIVEL_CARGO': '1', 'CANAL_NEGOCIO': 'MTLFCC', 'ROL_PAGO': formatearPlataformaCRO(ejecutivosDB[idEjecutivo]['PLATAFORMA'])}
+            filaSalidaXls[idEjecutivo] = {'ID_EMPLEADO': ejecutivosDB[idEjecutivo]['ID_EMPLEADO'], 'NOMBRES': 'A', 'APELLIDO_PARTERNO': 'B', 'APELLIDO_MATERNO': 'C', 'DIRECCION': '', 'COMUNA': '', 'TELEFONO': '', 'CELULAR': '', 'FECHA_INGRESO': ejecutivosDB[idEjecutivo]['FECHA_INGRESO'], 'FECHA_NACIMIENTO': '', 'FECHA_DESVINCULACION': ejecutivosDB[idEjecutivo]['FECHA_DESVINCULACION'], 'CORREO_ELECTRONICO': '', 'RUT_JEFE': '', 'EMPRESA': 'METLIFE', 'SUCURSAL': '', 'CARGO': ejecutivosDB[idEjecutivo]['PLATAFORMA'], 'NIVEL_CARGO': '1', 'CANAL_NEGOCIO': 'MTLFCC', 'ROL_PAGO': formatearPlataformaCRO(ejecutivosDB[idEjecutivo]['PLATAFORMA'])}
 
         LOG_PROCESO_DOTACION.setdefault('PROCESO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: 'Proceso del Archivo: DOTACION Finalizado - %s filas escritas' % len(ejecutivosDB)})
         return filaSalidaXls, encabezadoTxt

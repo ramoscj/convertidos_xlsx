@@ -19,9 +19,6 @@ from validaciones_texto import (formatearFechaMesAnterior, formatearIdCliente,
 LOG_PROCESO_REACTIVA = dict()
 
 def extraerBaseCertificacion(archivoCertificacionXls):
-    # pathXlsxEntrada = '../test_xls/REACTIVA/'
-    # pathXlsxEntrada = PATH_XLSX
-    # archivo = '%s%s.xlsx' % (pathXlsxEntrada, archivoBaseCertificacion['NOMBRE_ARCHIVO'])
     archivo = archivoCertificacionXls
     archivoBaseCertificacion = REACTIVA_CONFIG_XLSX['ARCHIVO_BASE_CERTIFICACION']
     LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'INICIO_BASE_CERTIFICACION': 'Iniciando proceso de lectura del Archivo: %s' % archivo})

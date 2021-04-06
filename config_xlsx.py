@@ -27,7 +27,7 @@ FUGA_CONFIG_XLSX = {
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
     'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'TIPO_FUGA', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'ID_EMPLEADO', 'CODIGOPLAN', 'TIPOPRODUCTO', 'PRODUCTO', 'FECHAPROCESO', 'CONSIDERAR'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_FUGA_TXT': ['CRR', 'FUGA_MES_ANTERIOR', 'STOCK', 'ID_EMPLEADO', 'UNIDAD'],
+    'ENCABEZADO_FUGA_TXT': ['CRR', 'FUGA_MES_ANTERIOR', 'STOCK', 'RUT', 'UNIDAD'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'LPATTR_PER_RES': 0, 'TIPO': 4, 'LPATTR_COD_STAT': 5, 'ID_EMPLEADO': 10, 'CONSIDERAR_FUGA': 15}
 }
@@ -46,7 +46,7 @@ ASISTENCIA_CONFIG_XLSX = {
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
     'ENCABEZADO_XLSX': ['ID EMPLEADO', 'PLATAFORMA'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'VHC_MES', 'DIAS_HABILES_MES', 'VHC_APLICA', 'ID_EMPLEADO'],
+    'ENCABEZADO_TXT': ['CRR', 'VHC_MES', 'DIAS_HABILES_MES', 'VHC_APLICA', 'RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'ID_EMPLEADO': 0, 'PLATAFORMA': 1}
 }
@@ -69,7 +69,7 @@ GESTION_CONFIG_XLSX = {
     # Nombre de las columnas del encabezado que tendra el archivo de PropietariosCRO (se usa para validar que el archivo este correcto)
     'ENCABEZADO_PROPIETARIOS_XLSX': ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'ESTADO DE ÚLTIMA TAREA', 'ESTADO', 'FECHA', 'ACTIVITIES: EMPLOYEE ID'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'ESTADO', 'ESTADO_UT', 'ID_CAMPANA', 'CAMPANA','ID_EMPLEADO'],
+    'ENCABEZADO_TXT': ['CRR', 'ESTADO', 'ESTADO_UT', 'ID_CAMPANA', 'CAMPANA','RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'CAMPAÑA_ID': 0, 'FECHA_DE_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'ESTADO_UT': 3, 'ESTADO': 4, 'FECHA_DE_CIERRE': 5, 'ID_EMPLEADO': 6},
     # Columnas que se utilizaran durante el procesamiento del archivo PropietariosCRO XLSX
@@ -90,7 +90,7 @@ CAMPANHAS_CONFIG_XLSX = {
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
     'ENCABEZADO_XLSX': ['ID EMPLEADO', 'PLATAFORMA', 'CANTIDAD GESTIONES CAMPAÑAS ESPECIALES'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'NUMERO_GESTIONES', 'ID_EMPLEADO'],
+    'ENCABEZADO_TXT': ['CRR', 'NUMERO_GESTIONES', 'RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'ID_EMPLEADO': 0, 'NUMERO_GESTIONES': 2 }
 }
@@ -109,7 +109,7 @@ CALIDAD_CONFIG_XLSX = {
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
     'ENCABEZADO_XLSX': ['ID EMPLEADO', 'PLATAFORMA', 'CALIDAD'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'CALIDAD', 'ID_EMPLEADO'],
+    'ENCABEZADO_TXT': ['CRR', 'CALIDAD', 'RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'ID_EMPLEADO': 0, 'CALIDAD': 2 }
 }
@@ -142,10 +142,10 @@ PROACTIVA_CONFIG_XLSX = {
     'SALIDA_RELIQUIDACION': 'ICOM_RELIQUIDACION_CORPRO',
 
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'COBRANZA_PRO', 'PACPAT_PRO', 'ESTADO_PRO', 'ESTADO_UT_PRO', 'ID_EMPLEADO', 'ID_CAMPANA', 'CAMPANA', 'POLIZA'],
+    'ENCABEZADO_TXT': ['CRR', 'COBRANZA_PRO', 'PACPAT_PRO', 'ESTADO_PRO', 'ESTADO_UT_PRO', 'REPETICION_PRO', 'RUT', 'ID_CAMPANA', 'CAMPANA', 'POLIZA'],
 
     # Nombre de las columnas de encabezado que tendra el archivo de POLIZAS RELOQUIDADAS
-    'ENCABEZADO_RELIQUIDACIONES': ['CRR', 'COBRANZA_REL_PRO', 'PACPAT_REL_PRO', 'ESTADO_PRO', 'ESTADO_UT_PRO', 'ID_EMPLEADO', 'ID_CAMPANA', 'CAMPANA', 'POLIZA'],
+    'ENCABEZADO_RELIQUIDACIONES': ['CRR', 'COBRANZA_REL_PRO', 'PACPAT_REL_PRO', 'RUT', 'ID_CAMPANA', 'CAMPANA', 'POLIZA'],
 
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
     'ENCABEZADO_XLSX': ['FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'CAMPAIGN MEMBER: ID EMPLEADO', 'ESTADO', 'FECHA DE CIERRE', 'PÓLIZA: NUMERO DE PÓLIZA', 'FECHA DE EXPIRACIÓN DEL CO-RET', 'ESTADO DE RETENCIÓN', 'MIEMBRO DE CAMPAÑA ID.', 'ESTADO DE ÚLTIMA TAREA'],
@@ -188,15 +188,15 @@ REACTIVA_CONFIG_XLSX = {
     'SALIDA_TXT':{
         'GESTION':{
             'NOMBRE_SALIDA': 'GESTION_REACT',
-            'ENCABEZADO': ['ESTADO_VALIDO_REACT', 'CONTACTO_REACT', 'EXITO_REPETIDO_REACT', 'ID_EMPLEADO', 'ID_CAMPANA', 'CAMPANA', 'POLIZA', 'REPETICIONES']
+            'ENCABEZADO': ['CRR', 'ESTADO_VALIDO_REACT', 'CONTACTO_REACT', 'EXITO_REPETIDO_REACT', 'REPETICION_REACT', 'RUT', 'ID_CAMPANA', 'CAMPANA', 'POLIZA']
         },
         'POLIZA':{
             'NOMBRE_SALIDA': 'POLIZA_REACT',
-            'ENCABEZADO': ['ESTADO_POLIZA_REACT','POLIZA']
+            'ENCABEZADO': ['CRR', 'ESTADO_POLIZA_REACT','POLIZA']
         },
         'CERTIFICACION':{
             'NOMBRE_SALIDA': 'CERTIFICACION_REACT',
-            'ENCABEZADO': ['GRAB_CERTIFICADA_REACT', 'ID_EMPLEADO', 'CAMPANA', 'POLIZA']
+            'ENCABEZADO': ['CRR', 'GRAB_CERTIFICADA_REACT', 'RUT', 'CAMPANA', 'POLIZA']
         },
     },
 
