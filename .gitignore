@@ -9,3 +9,6 @@ test_xls/
 *.sql
 *.pyc
 *.txt
+
+# Archivos extras
+test.py
