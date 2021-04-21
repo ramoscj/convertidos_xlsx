@@ -3,7 +3,7 @@ import csv
 
 def salidaArchivoTxt(ArchivoSalidaTxt, dataXlsx, encabezadoXlsx):
     try:
-        with open(ArchivoSalidaTxt, 'w', newline='') as txt:
+        with open(ArchivoSalidaTxt, 'w', newline='', encoding='UTF-8') as txt:
             writer = csv.writer(txt, delimiter=';')
             writer.writerow(encabezadoXlsx)
             for pk, registro in tqdm(iterable=dataXlsx.items(), total = len(dataXlsx), desc='Escribiendo DATA', unit='Row'):
@@ -14,7 +14,7 @@ def salidaArchivoTxt(ArchivoSalidaTxt, dataXlsx, encabezadoXlsx):
 
 def salidaArchivoTxtProactiva(ArchivoSalidaTxt, dataXlsx, encabezadoXlsx):
     try:
-        with open(ArchivoSalidaTxt, 'w', newline='') as txt:
+        with open(ArchivoSalidaTxt, 'w', newline='', encoding='UTF-8') as txt:
             writer = csv.writer(txt, delimiter=';')
             writer.writerow(encabezadoXlsx)
             j = 1
