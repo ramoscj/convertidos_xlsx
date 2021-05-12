@@ -3,7 +3,6 @@ import string
 
 from dateutil.relativedelta import relativedelta
 
-
 def validaFechaInput(fecha_x):
     try:
         f1 = fecha_x[0:4]
@@ -225,6 +224,10 @@ def convertirDataReact(dataReact: dict):
         dataFinal[pk] = {'ESTADO_VALIDO_REACT': valores['ESTADO_VALIDO_REACT'], 'CONTACTO_REACT': valores['CONTACTO_REACT'], 'EXITO_REPETIDO_REACT': valores['EXITO_REPETIDO_REACT'], 'REPETICIONES': valores['REPETICIONES'], 'ID_EMPLEADO': valores['ID_EMPLEADO'], 'ID_CAMPANA': valores['ID_CAMPANA'], 'CAMPANA': valores['CAMPANA'], 'POLIZA': valores['POLIZA']}
     return dataFinal
 
-# x = dict()
-# x[123]= {'ID_EMPLEADO': 123, 'NUMERO_POLIZA': 1, 'CAMPAÑA_ID': 1, 'NOMBRE_CAMPAÑA': 1, 'ESTADO_RETENCION': 1, 'RETENCION_COBRANZA': 1, 'RETENCION_ACTIVACION': 1, 'ESTADO_VALIDO': 1, 'ESTADO_VALIDOUT': 1, 'FECHA_INICIO_MES': 1, 'FECHA_CIERRE': 1, 'RELIQUIDACION': 1}
-# print(setearCampanasPorEjecutivo(x[123], 123))
+def fechaMesAnterior(fecha):
+    try:
+        fechaSalida = fecha-relativedelta(months=1)
+        return fechaSalida
+    except Exception as e:
+        errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
+        raise Exception(errorMsg)

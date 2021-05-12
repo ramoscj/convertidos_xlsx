@@ -87,23 +87,6 @@ def buscarPolizasReliquidar(mesAnterior):
         cursor.close()
         db.close()
 
-def buscarPolizasReliquidarAll():
-    try:
-        db = conectorDB()
-        cursor = db.cursor()
-        polizasParaRequilidar = dict()
-        sql = """SELECT codigo_empleado, numero_poliza, campana_id FROM retenciones_por_reliquidar"""
-        cursor.execute(sql)
-        for (codigo_empleado, numero_poliza, campana_id) in cursor:
-            pk = '{0}_{1}_{2}'.format(campana_id, codigo_empleado, numero_poliza)
-            polizasParaRequilidar[pk] = {'RUT': codigo_empleado, 'POLIZA': numero_poliza, 'CAMPANA_ID': campana_id}
-        return polizasParaRequilidar
-    except Exception as e:
-        raise Exception('Error buscar Polizas para buscarPolizasReliquidarAll: %s' % e)
-    finally:
-        cursor.close()
-        db.close()
-
 def periodoCampanasEjecutivos(fechaPeriodo):
     try:
         db = conectorDB()
@@ -145,7 +128,7 @@ def buscarEjecutivosDb2():
             ejecutivos[idEmpleado] = {'ID': id, 'CODIGO_EMPLEADO': idEmpleado, 'PLATAFORMA': plataforma}
         return ejecutivos
     except Exception as e:
-        raise Exception('Error buscarEjecutivosDb2: %s' % e)
+        raise Exception('Error buscarEjecutivosDb2(): %s' % e)
     finally:
         cursor.close()
         db.close()
@@ -161,7 +144,7 @@ def listaEstadoUtContacto():
             listaEstadoUt.setdefault(descripcion, 1)
         return listaEstadoUt
     except Exception as e:
-        raise Exception('Error listaEstadoUtContacto: %s' % e)
+        raise Exception('Error listaEstadoUtContacto(): %s' % e)
     finally:
         cursor.close()
         db.close()
@@ -198,6 +181,22 @@ def listaEstadoUtAll():
         cursor.close()
         db.close()
 
+def listaEstadoUtDesc():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        listaEstadoUt = dict()
+        sql = """SELECT id, descripcion FROM estadout_pro_reac order by id"""
+        cursor.execute(sql)
+        for (id, descripcion) in cursor:
+            listaEstadoUt.setdefault(id, descripcion)
+        return listaEstadoUt
+    except Exception as e:
+        raise Exception('Error def listaEstadoUtDesc(): %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
 def ReliquidacionesPorPeriodo(fechaPeriodo):
     try:
         db = conectorDB()
@@ -207,7 +206,7 @@ def ReliquidacionesPorPeriodo(fechaPeriodo):
         cantidadCampanas = cursor.execute(sql, (fechaPeriodo)).fetchone()
         return cantidadCampanas[0]
     except Exception as e:
-        raise Exception('Error buscar Polizas ReliquidacionesPorPeriodo: %s' % e)
+        raise Exception('Error buscar Polizas ReliquidacionesPorPeriodo(): %s' % e)
     finally:
         cursor.close()
         db.close()
@@ -223,10 +222,27 @@ def listaEstadoRetencionProactiva():
             listaSalida.setdefault(estado_retencion, id)
         return listaSalida
     except Exception as e:
-        raise Exception('Error def listaEstadoUtAll(): %s' % e)
+        raise Exception('Error def listaEstadoRetencionProactiva(): %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def listaEstadoRetencionDesc():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        listaSalida = dict()
+        sql = """SELECT id, estado_retencion FROM proactiva_estados_retencion order by id"""
+        cursor.execute(sql)
+        for (id, estado_retencion) in cursor:
+            listaSalida.setdefault(id, estado_retencion)
+        return listaSalida
+    except Exception as e:
+        raise Exception('Error def listaEstadoRetencionDesc(): %s' % e)
     finally:
         cursor.close()
         db.close()
 
 # x = ReliquidacionesPorPeriodo('01/12/2020')
-# print(CamapanasPorPeriodo('01/01/2021'))
+# x = listaEstadoRetencionDesc()
+# print(x.get('Queda vigente sin pagar'))

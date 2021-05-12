@@ -27,7 +27,7 @@ def salidaArchivoTxtProactiva(ArchivoSalidaTxt, dataXlsx, encabezadoXlsx):
     except Exception as e:
         raise Exception('Error al escribir archivo: %s | %s' % (ArchivoSalidaTxt, e))
 
-def salidaLogTxt(ArchivoSalidaTxt, dataXlsx):
+def salidaLogTxt(ArchivoSalidaTxt, dataXlsx, encoding='UTF-8'):
     try:
         with open(ArchivoSalidaTxt, 'w', newline='') as txt:
             writer = csv.writer(txt, delimiter='\n')
