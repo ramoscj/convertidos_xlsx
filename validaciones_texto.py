@@ -3,7 +3,6 @@ import string
 
 from dateutil.relativedelta import relativedelta
 
-
 def validaFechaInput(fecha_x):
     try:
         f1 = fecha_x[0:4]
@@ -206,17 +205,16 @@ def convertirALista(dataLista: dict):
 
 def convertirListaCampana(dataLista: dict, ejecutivosExistentes, fechaPeriodo):
     lista = []
-    for valores in dataLista.values():
-        if not ejecutivosExistentes.get(valores['ID_EJECUTIVO']):
-            lista.append([valores['ID_EJECUTIVO'], fechaPeriodo])
+    for idEmpleado in dataLista.keys():
+        if not ejecutivosExistentes.get(str(idEmpleado)):
+            lista.append([str(idEmpleado), fechaPeriodo])
     return lista
 
-def setearCampanasPorEjecutivo(dataLista: [], idEjecutivo):
+def setearCampanasPorEjecutivo(dataLista: dict, idEjecutivo):
     lista = []
-    for valores in dataLista:
-        data = [idEjecutivo]
-        data += valores
-        lista.append(data)
+    nombreCampana = str(dataLista['NOMBRE_CAMPAÑA'])[0:30].rstrip()
+    data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['CAMPAÑA_ID'], nombreCampana, dataLista['ESTADO_RETENCION'], dataLista['RETENCION_COBRANZA'], dataLista['RETENCION_ACTIVACION'], dataLista['ESTADO_VALIDO'], dataLista['ESTADO_VALIDOUT'], dataLista['FECHA_CIERRE'], dataLista['RELIQUIDACION'], dataLista['NUMERO_POLIZA_CERTIFICADO']]
+    lista.append(data)
     return lista
 
 def convertirDataReact(dataReact: dict):
@@ -225,3 +223,11 @@ def convertirDataReact(dataReact: dict):
         pk = '{0}_{1}'.format(valores['ID_CAMPANA'], valores['POLIZA'])
         dataFinal[pk] = {'ESTADO_VALIDO_REACT': valores['ESTADO_VALIDO_REACT'], 'CONTACTO_REACT': valores['CONTACTO_REACT'], 'EXITO_REPETIDO_REACT': valores['EXITO_REPETIDO_REACT'], 'REPETICIONES': valores['REPETICIONES'], 'ID_EMPLEADO': valores['ID_EMPLEADO'], 'ID_CAMPANA': valores['ID_CAMPANA'], 'CAMPANA': valores['CAMPANA'], 'POLIZA': valores['POLIZA']}
     return dataFinal
+
+def fechaMesAnterior(fecha):
+    try:
+        fechaSalida = fecha-relativedelta(months=1)
+        return fechaSalida
+    except Exception as e:
+        errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
+        raise Exception(errorMsg)
