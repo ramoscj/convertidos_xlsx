@@ -64,12 +64,6 @@ def validarEstadoRetencion(estado):
         valorEstado = listaEstadoRetencion.get(estado)
     return valorEstado
 
-def estadoCertificadoPoliza(numeroPoliza):
-    resto, separador, nroCertificado = str(numeroPoliza).partition("_")
-    if str(nroCertificado):
-        return nroCertificado
-    return str(0)
-
 def aprobarCobranza(nroPolizaCertificado, fechaCierre, nroPolizaCliente, fecUltimoPago):
     if fecUltimoPago is not None and fechaCierre is not None:
         if nroPolizaCliente == nroPolizaCertificado and  fecUltimoPago >= fechaCierre:
@@ -374,8 +368,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                     estadoRetencion = fila[columna['ESTADO_RETENCION']].value
                     campanaId = str(fila[columna['CAMAPAÑA_ID']].value)
                     estadoUltimaTarea = fila[columna['ESTADO_ULTIMA_TAREA']].value
-                    numeroPoliza = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
-                    numeroPolizaCertificado = estadoCertificadoPoliza(str(fila[columna['NRO_POLIZA']].value))
+                    numeroPoliza, numeroPolizaCertificado = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
                     pk = '{0}_{1}_{2}'.format(campanaId, codigoEjecutivo, numeroPoliza)
 
                     if numeroPoliza is None:
@@ -477,19 +470,20 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
 
                         cobranzaPro = 0
                         pacpatPro = 0
+                        estadoRetencionValido = None
 
                         if estadoRetencion is not None:
     
                             listaConsiderarRetencion = {'Mantiene su producto': mantieneSuProducto, 'Realiza pago en línea': realizaPagoEnLinea, 'Realiza Activación PAC/PAT': realizaActivacion}
                             estadoRetencionValido = listaConsiderarRetencion.get(estadoRetencion)
-                            if estadoRetencionValido and estado == 'Terminado con Exito':
+                            if estadoRetencionValido is not None and estado == 'Terminado con Exito':
                                 if complementoCliente.get(numeroPoliza):
                                     valoresEntrada = {'ESTADO_RETENCION': estadoRetencionValido, 'NOMBRE_CAMPAÑA': nombreCampana, 'NUMERO_POLIZA': numeroPoliza, 'FECHA_CIERRE': fechaCierre, 'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'CAMPAÑA_ID': campanaId, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_INICIO_MES': fechaIncioMes, 'CELDA_NROPOLIZA': fila[columna['NRO_POLIZA']]}
                                     cobranzaPro, pacpatPro, noAprobada = validarRetencionesPolizas(valoresEntrada, complementoCliente)
                                     polizasNoAprobadas += noAprobada
                                     cantidadCampanasValidas += 1
 
-                            elif estadoRetencionValido and estado != 'Terminado con Exito':
+                            elif estadoRetencionValido is not None and estado != 'Terminado con Exito':
                                 estadoRetencionValido = validarEstadoRetencion(estado)
                                 celdaCoordenada = setearCelda2(fila[0:columna['ESTADO']+1], len(fila[0:columna['ESTADO']])-1, i)
                                 mensaje = '{0};ESTADO no corresponde con la RETENCION;{1}/{2}'.format(celdaCoordenada, estado, estadoRetencion)
@@ -499,7 +493,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                         else:
                             estadoRetencionValido = validarEstadoRetencion(estado)
 
-                        filaSalidaXls[pk] = {'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': pacpatPro, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'REPETICIONES': repeticionPorCampana, 'ESTADO_RETENCION_PRO': estadoRetencionValido, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza}
+                        filaSalidaXls[pk] = {'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': pacpatPro, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'REPETICIONES': repeticionPorCampana, 'ESTADO_RETENCION_PRO': estadoRetencionValido, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana[0:30].rstrip(), 'POLIZA': numeroPoliza}
 
             if insertarPeriodoCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
                 if insertarCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
