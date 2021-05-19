@@ -64,12 +64,6 @@ def validarEstadoRetencion(estado):
         valorEstado = listaEstadoRetencion.get(estado)
     return valorEstado
 
-def estadoCertificadoPoliza(numeroPoliza):
-    resto, separador, nroCertificado = str(numeroPoliza).partition("_")
-    if str(nroCertificado) != '':
-        return int(nroCertificado)
-    return 0
-
 def aprobarCobranza(nroPolizaCertificado, fechaCierre, nroPolizaCliente, fecUltimoPago):
     if fecUltimoPago is not None and fechaCierre is not None:
         if nroPolizaCliente == nroPolizaCertificado and  fecUltimoPago >= fechaCierre:
@@ -375,7 +369,6 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                     campanaId = str(fila[columna['CAMAPAÑA_ID']].value)
                     estadoUltimaTarea = fila[columna['ESTADO_ULTIMA_TAREA']].value
                     numeroPoliza, numeroPolizaCertificado = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
-                    # numeroPolizaCertificado = estadoCertificadoPoliza(fila[columna['NRO_POLIZA']].value)
                     pk = '{0}_{1}_{2}'.format(campanaId, codigoEjecutivo, numeroPoliza)
 
                     if numeroPoliza is None:
