@@ -184,10 +184,13 @@ def formatearFechaMesAnterior(fecha):
 
 def formatearNumeroPoliza(numeroPoliza):
     polizaSalida = None
+    nroCertificado = 0
     if numeroPoliza is not None and numeroPoliza != '':
         nroPolizaSolo, separador, nroCertificado = str(numeroPoliza).partition("_")
-        polizaSalida = nroPolizaSolo
-    return polizaSalida
+        polizaSalida = int(nroPolizaSolo)
+        if nroCertificado == '':
+            nroCertificado = 0
+    return polizaSalida, int(nroCertificado)
 
 def formatearIdCliente(idCliente):
     campana, separador, codCliente = str(idCliente).partition(":")
@@ -231,3 +234,6 @@ def fechaMesAnterior(fecha):
     except Exception as e:
         errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
         raise Exception(errorMsg)
+
+# x = '12_2'
+# print(formatearNumeroPoliza(x))
