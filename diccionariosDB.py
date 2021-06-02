@@ -76,10 +76,10 @@ def buscarPolizasReliquidar(mesAnterior):
         db = conectorDB()
         cursor = db.cursor()
         polizasParaRequilidar = dict()
-        sql = """SELECT id_ejecutivo, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, periodo, fecha_reliquidacion, fecha_cierre, numero_poliza_certificado FROM proactiva_campanas_ejecutivos LEFT JOIN proactiva_campanas_periodo_ejecutivos pcpe ON proactiva_campanas_ejecutivos.id_periodo_ejecutivo = pcpe.id WHERE pcpe.periodo = ? AND reliquidacion = 1 AND fecha_reliquidacion is NULL"""
+        sql = """SELECT id_ejecutivo, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, cobranza_rel_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, periodo, fecha_reliquidacion, fecha_cierre, numero_poliza_certificado FROM proactiva_campanas_ejecutivos LEFT JOIN proactiva_campanas_periodo_ejecutivos pcpe ON proactiva_campanas_ejecutivos.id_periodo_ejecutivo = pcpe.id WHERE pcpe.periodo = ? AND reliquidacion = 1 AND fecha_reliquidacion is NULL"""
         cursor.execute(sql, (mesAnterior))
-        for (id_ejecutivo, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, periodo, fecha_reliquidacion, fecha_cierre, numero_poliza_certificado) in cursor:
-            polizasParaRequilidar[numero_poliza] = {'COBRANZA_PRO': cobranza_pro, 'PACPAT_PRO': pacpat_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': id_ejecutivo, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'FECHA_CIERRE': fecha_cierre, 'NUMERO_POLIZA_CERTIFICADO': numero_poliza_certificado}
+        for (id_ejecutivo, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, cobranza_rel_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, periodo, fecha_reliquidacion, fecha_cierre, numero_poliza_certificado) in cursor:
+            polizasParaRequilidar[numero_poliza] = {'COBRANZA_RL_PRO': cobranza_rel_pro, 'PACPAT_RL_PRO': pacpat_rel_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': id_ejecutivo, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'FECHA_CIERRE': fecha_cierre, 'NUMERO_POLIZA_CERTIFICADO': numero_poliza_certificado}
         return polizasParaRequilidar
     except Exception as e:
         raise Exception('Error buscarPolizasReliquidar: %s' % e)
