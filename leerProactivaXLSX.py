@@ -119,7 +119,7 @@ def insertarCampanaEjecutivos(campanasEjecutivos: dict, fechaProceso):
             LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'LIMPIAR_CAMAPAÑAS_EJECUTIVOS': 'EliminarCampanaEjecutivos;Se eliminaron {0} Camapaña(s) existentes'.format(campanasExistentes)})
 
         if len(campanasPorPeriodo) > 0:
-            sql = """INSERT INTO proactiva_campanas_ejecutivos (id_periodo_ejecutivo, numero_poliza, campana_id, nombre_campana, estado_retencion, cobranza_pro, pacpat_pro, estado_pro, estado_ut_pro, fecha_cierre, reliquidacion, numero_poliza_certificado, fecha_reliquidacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL);"""
+            sql = """INSERT INTO proactiva_campanas_ejecutivos (id_periodo_ejecutivo, numero_poliza, campana_id, nombre_campana, estado_retencion, cobranza_pro, pacpat_pro, cobranza_rel_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_cierre, reliquidacion, numero_poliza_certificado, fecha_reliquidacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL);"""
             cursor.executemany(sql, campanasPorPeriodo)
             db.commit()
         return True
@@ -197,13 +197,13 @@ def polizasReliquidadas(periodo, complementoCliente):
         cobranzaRelPro = 0
         pacpatRelPro = 0
 
-        if poliza['COBRANZA_PRO'] > 0:
+        if poliza['COBRANZA_RL_PRO'] > 0:
             cobranzaRelPro = aprobarCobranza(numeroPolizaCertificado, fechaCierre, complementoCliente[numeroPoliza]['NRO_CERT'] , complementoCliente[numeroPoliza]['FEC_ULT_PAG'])
             if cobranzaRelPro == 0:
                 mensaje = 'PolizaReliquidacion;No cumple condicion de retencion COBRO para Reliquidacion;%s' % (numeroPoliza)
                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'PROCESO_COBRANZA_RELIQUIDACION': mensaje})
 
-        if poliza['PACPAT_PRO'] > 0:
+        if poliza['PACPAT_RL_PRO'] > 0:
             estadoMandato = complementoCliente[numeroPoliza]['ESTADO_MANDATO']
             fecMandato = complementoCliente[numeroPoliza]['FECHA_MANDATO']
 
@@ -286,20 +286,22 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
     numeroPolizaCliente = complementoCliente[numeroPoliza]['NRO_CERT']
     pk2 = '{0}_{1}_{2}'.format(campanaId, idEmpleado, numeroPoliza)
 
-    valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'CAMPAÑA_ID': campanaId, 'NOMBRE_CAMPAÑA': nombreCampana, 'ESTADO_RETENCION': estadoRetencion, 'RETENCION_COBRANZA': 0, 'RETENCION_ACTIVACION': 0, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_CIERRE': fechaCierre, 'RELIQUIDACION': seReliquida, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado}
+    valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'CAMPAÑA_ID': campanaId, 'NOMBRE_CAMPAÑA': nombreCampana, 'ESTADO_RETENCION': estadoRetencion, 'RETENCION_COBRANZA': 0, 'RETENCION_ACTIVACION': 0, 'RETENCION_RL_COBRANZA': 0, 'RETENCION_RL_ACTIVACION': 0, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_CIERRE': fechaCierre, 'RELIQUIDACION': seReliquida, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado}
     agregarCampanasPorEjecutivo(idEmpleado, pk2, valoresPoliza)
 
     if cobranzaPro > 0:
         cobranzaPro = aprobarCobranza(numeroPolizaCertificado, fechaCierre, numeroPolizaCliente, fecUltimoPago)
         if cobranzaPro == 0:
             if campanasPorEjecutivos[idEmpleado].get(pk2):
-                campanasPorEjecutivos[idEmpleado][pk2]['RETENCION_COBRANZA'] = 1
+                campanasPorEjecutivos[idEmpleado][pk2]['RETENCION_RL_COBRANZA'] = 1
                 campanasPorEjecutivos[idEmpleado][pk2]['RELIQUIDACION'] = 1
                 controPolizaNoAprobada = True
 
             celdaCoordenada = setearCelda2(celdaNroPoliza, 0)
             mensaje = '%s;Poliza no cumple condicion de retencion COBRANZA;%s' % (celdaCoordenada, numeroPoliza)
             LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'PROCESO_COBRANZA': mensaje})
+        else:
+            campanasPorEjecutivos[idEmpleado][pk2]['RETENCION_COBRANZA'] = cobranzaPro
 
     if pacpatPro > 0:
         estadoMandato = complementoCliente[numeroPoliza]['ESTADO_MANDATO']
@@ -314,13 +316,15 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
 
         if pacpatPro == 0:
             if campanasPorEjecutivos[idEmpleado].get(pk2):
-                campanasPorEjecutivos[idEmpleado][pk2]['RETENCION_ACTIVACION'] = 1
+                campanasPorEjecutivos[idEmpleado][pk2]['RETENCION_RL_ACTIVACION'] = 1
                 campanasPorEjecutivos[idEmpleado][pk2]['RELIQUIDACION'] = 1
                 controPolizaNoAprobada = True
 
             celdaCoordenada = setearCelda2(celdaNroPoliza, 0)
             mensaje = '{0};Poliza no cumple condicion de retencion {1};{2}'.format(celdaCoordenada, mensajeValidacion, numeroPoliza)
             LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'PROCESO_COBRANZA': mensaje})
+        else:
+            campanasPorEjecutivos[idEmpleado][pk2]['RETENCION_ACTIVACION'] = pacpatPro
 
     if controPolizaNoAprobada:
         polizaNoAprobada = 1

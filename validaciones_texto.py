@@ -216,7 +216,7 @@ def convertirListaCampana(dataLista: dict, ejecutivosExistentes, fechaPeriodo):
 def setearCampanasPorEjecutivo(dataLista: dict, idEjecutivo):
     lista = []
     nombreCampana = str(dataLista['NOMBRE_CAMPAÑA'])[0:30].rstrip()
-    data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['CAMPAÑA_ID'], nombreCampana, dataLista['ESTADO_RETENCION'], dataLista['RETENCION_COBRANZA'], dataLista['RETENCION_ACTIVACION'], dataLista['ESTADO_VALIDO'], dataLista['ESTADO_VALIDOUT'], dataLista['FECHA_CIERRE'], dataLista['RELIQUIDACION'], dataLista['NUMERO_POLIZA_CERTIFICADO']]
+    data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['CAMPAÑA_ID'], nombreCampana, dataLista['ESTADO_RETENCION'], dataLista['RETENCION_COBRANZA'], dataLista['RETENCION_ACTIVACION'], dataLista['RETENCION_RL_COBRANZA'], dataLista['RETENCION_RL_ACTIVACION'],dataLista['ESTADO_VALIDO'], dataLista['ESTADO_VALIDOUT'], dataLista['FECHA_CIERRE'], dataLista['RELIQUIDACION'], dataLista['NUMERO_POLIZA_CERTIFICADO']]
     lista.append(data)
     return lista
 
