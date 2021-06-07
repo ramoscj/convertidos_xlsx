@@ -243,6 +243,22 @@ def listaEstadoRetencionDesc():
         cursor.close()
         db.close()
 
+def listaEstadoUtCro():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        listaEstadoUt = dict()
+        sql = """SELECT descripcion, id FROM estadout_cro order by id"""
+        cursor.execute(sql)
+        for (descripcion, id) in cursor:
+            listaEstadoUt.setdefault(str(descripcion).upper(), id)
+        return listaEstadoUt
+    except Exception as e:
+        raise Exception('Error def listaEstadoUtCro(): %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
 # x = ReliquidacionesPorPeriodo('01/12/2020')
 # x = listaEstadoRetencionDesc()
-# print(x.get('Queda vigente sin pagar'))
+# print(listaEstadoUtCro())

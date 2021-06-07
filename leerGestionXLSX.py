@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from conexio_db import conectorDB
 from config_xlsx import GESTION_CONFIG_XLSX, PATH_XLSX
-from diccionariosDB import buscarCamphnasDb, buscarRutEjecutivosDb
+from diccionariosDB import buscarCamphnasDb, buscarRutEjecutivosDb, listaEstadoUtCro
 from escribir_txt import salidaArchivoTxt
 from validaciones_texto import (primerDiaMes, setearCelda, setearFechaCelda,
                                 setearFechaInput, ultimoDiaMes, primerDiaMes,
@@ -80,9 +80,10 @@ def getEstado(celdaFila):
         return error
 
 def getEstadoUt(celdaFila):
-    listaEstadoUt = {'Campaña exitosa': 1, 'Teléfono ocupado': 2, 'Sin respuesta': 3, 'Campaña completada con 5 intentos': 4, 'Buzón de voz': 5, 'Llamado reprogramado': 6, 'Contacto por correo': 7, 'Teléfono apagado': 8, 'Número equivocado': 9, 'Numero invalido': 10, 'Solicita renuncia': 11, 'No quiere escuchar': 12, 'Cliente desconoce venta': 13, 'Temporalmente fuera de servicio': 14, 'Cliente vive en el extranjero': 15, 'Sin teléfono registrado': 16, 'Cliente no retenido': 17, 'No contesta': 18, 'Pendiente de envío de Póliza': 19}
-    if listaEstadoUt.get(celdaFila.value):
-        return listaEstadoUt[celdaFila.value]
+    listaEstadoUt = listaEstadoUtCro()
+    estadoUt = str(celdaFila.value).upper()
+    if listaEstadoUt.get(estadoUt):
+        return listaEstadoUt[estadoUt]
     elif celdaFila.value is None:
         return 0
     else:
@@ -145,10 +146,10 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                     idEmpleado = str(fila[columna['ID_EMPLEADO']].value)
 
                     if type(fechaCreacion) is not datetime.date:
-                        valorErroneo = str(fila[columna['FECHA_CREACION']].value)
-                        celdaCoordenada = setearCelda2(fila[0:columna['FECHA_CREACION']+1], len(fila[0:columna['FECHA_CREACION']])-1, i)
-                        mensaje = '%s;FECHA_CREACION no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
-                        LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_CREACION': mensaje})
+                        valorErroneo = str(fila[columna['FECHA_DE_CREACION']].value)
+                        celdaCoordenada = setearCelda2(fila[0:columna['FECHA_DE_CREACION']+1], len(fila[0:columna['FECHA_DE_CREACION']])-1, i)
+                        mensaje = '%s;FECHA_DE_CREACION no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
+                        LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_DE_CREACION': mensaje})
                         continue
 
                     if type(estado) is not int:
@@ -157,12 +158,12 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                         mensaje = '%s;ESTADO no existe;%s' % (celdaCoordenada, valorErroneo)
                         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'ERROR_ESTADO': mensaje})
                         continue
-                    if type(estadoUt) is not int and estado != 2 and estado != 0:
+                    if type(estadoUt) is not int:
                         valorErroneo = str(fila[columna['ESTADO_UT']].value)
                         celdaCoordenada = setearCelda2(fila[0:columna['ESTADO_UT']+1], len(fila[0:columna['ESTADO_UT']])-1, i)
                         mensaje = '%s;ESTADO_UT no existe;%s' % (celdaCoordenada, valorErroneo)
                         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'ERROR_ESTADOUT': estadoUt})
-                        continue
+                        raise Exception('Error en la columna ESTADO_UT')
                     elif type(estadoUt) is not int:
                         estadoUt = 0
 
@@ -181,7 +182,7 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                             else:
                                 fechaUltimaModificacion = fechaCierre
                                 if type(fechaUltimaModificacion) is not datetime.date:
-                                    errorCampana = 'Celda%s;FECHA_CIERRE No es valida;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), campanhaId)
+                                    errorCampana = 'Celda%s;FECHA_CIERRE No es valida;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), fechaUltimaModificacion)
                                     LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_CIERRE_ERROR': errorCampana})
                                     continue
                                 if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:

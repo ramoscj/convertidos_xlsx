@@ -181,7 +181,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LLAMADA_SALIENTE': '%s;Campaña InBound/OutBound NULL;%s' % (celdaCoordenada, numeroPoliza)})
                         continue
 
-                    if numeroPoliza is None:
+                    if fila[columna['NRO_POLIZA']].value is None:
                         celdaCoordenada = setearCelda2(fila[0:columna['NRO_POLIZA']+1], len(fila[0:columna['NRO_POLIZA']])-1, i)
                         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'POLIZA_NULO': '%s;Numero de poliza NULL;%s' % (celdaCoordenada, numeroPoliza)})
                         continue
@@ -244,7 +244,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                                 polizaExitoRepetido[numeroPoliza] = {'PK': pk}
 
                         if estado == 'Terminado con Exito':
-                            if complementoCliente.get(numeroPoliza) and complementoCliente[numeroPoliza]['ESTADO_POLIZA'] == 'Vigente':
+                            if complementoCliente.get(int(numeroPoliza)) and complementoCliente[int(numeroPoliza)]['ESTADO_POLIZA'] == 'Vigente':
                                 polizaReactTxt[numeroPoliza] = {'ESTADO_POLIZA_REACT': 1, 'NUMERO_POLIZA': numeroPoliza}
 
                         if estado == 'Terminado con Exito':

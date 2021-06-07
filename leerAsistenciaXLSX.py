@@ -69,6 +69,7 @@ def leerArchivoAsistencia(archivo, periodo):
         encabezadoTxt = ASISTENCIA_CONFIG_XLSX['ENCABEZADO_TXT']
         columna = ASISTENCIA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
         coordenadaEcabezado = ASISTENCIA_CONFIG_XLSX['COORDENADA_ENCABEZADO']
+        columnasAdicionales = ASISTENCIA_CONFIG_XLSX['COLUMNAS_ADICIONALES']
         xls = load_workbook(archivo, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
@@ -85,30 +86,35 @@ def leerArchivoAsistencia(archivo, periodo):
             for fila in tqdm(iterable=hoja.iter_rows(min_row=3, min_col=1), total = totalFilas, desc='Leyendo AsistenciaCRO' , unit=' Fila'):
             # for fila in hoja.rows:
                 diasVacaciones = 0
+                ausentismoMes = 1
                 if fila[columna['ID_EMPLEADO']].value is not None and fila[columna['PLATAFORMA']].value is not None:
 
                     idEmpleado = fila[columna['ID_EMPLEADO']].value
                     plataforma = str(fila[columna['PLATAFORMA']].value).upper()
 
                     insertarEjecutivo(idEmpleado, plataforma, periodo)
-                    # ejecutivosExistentesDb = buscarRutEjecutivosDb()
 
                     if not filaSalidaXls.get(idEmpleado):
                         conteoVhcAplica = 0
                         vhcAplica = 0
                         filaSalidaXls[idEmpleado] = {'CRR': correlativo}
-                        for celda in range(2, totalColumnas+2):
+                        for celda in range(2, totalColumnas + columnasAdicionales):
                             if str(fila[celda].value).upper() == 'V' or str(fila[celda].value).upper() == 'VAC':
                                 diasVacaciones += 1
                                 conteoVhcAplica += 1
                             else:
                                 conteoVhcAplica = 0
+
                             if conteoVhcAplica == 5:
                                 vhcAplica = 1
                                 conteoVhcAplica = 0
+
+                            if type(fila[celda].value) is int and fila[celda].value == 1:
+                                ausentismoMes = 0
                         filaSalidaXls[idEmpleado].setdefault('VHC_MES', diasVacaciones)
                         filaSalidaXls[idEmpleado].setdefault('DIAS_HABILES_MES', totalColumnas)
                         filaSalidaXls[idEmpleado].setdefault('CARGA', vhcAplica)
+                        filaSalidaXls[idEmpleado].setdefault('AUSENTISMO_MES', ausentismoMes)
                         filaSalidaXls[idEmpleado].setdefault('ID_EMPLEADO', idEmpleado)
                         correlativo += 1
                     else:
