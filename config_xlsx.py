@@ -46,9 +46,11 @@ ASISTENCIA_CONFIG_XLSX = {
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
     'ENCABEZADO_XLSX': ['ID EMPLEADO', 'PLATAFORMA'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'VHC_MES', 'DIAS_HABILES_MES', 'VHC_APLICA', 'RUT'],
+    'ENCABEZADO_TXT': ['CRR', 'VHC_MES', 'DIAS_HABILES_MES', 'VHC_APLICA', 'AUSENTISMO_MES', 'RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
-    'COLUMNAS_PROCESO_XLSX': {'ID_EMPLEADO': 0, 'PLATAFORMA': 1}
+    'COLUMNAS_PROCESO_XLSX': {'ID_EMPLEADO': 0, 'PLATAFORMA': 1},
+    # Numero de columnas adicionales que contienen valores que no son dias
+    'COLUMNAS_ADICIONALES': 2
 }
 
 GESTION_CONFIG_XLSX = {
