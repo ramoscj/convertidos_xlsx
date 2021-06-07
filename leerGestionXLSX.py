@@ -158,7 +158,8 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
                         mensaje = '%s;ESTADO no existe;%s' % (celdaCoordenada, valorErroneo)
                         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'ERROR_ESTADO': mensaje})
                         continue
-                    if type(estadoUt) is not int:
+
+                    if type(estadoUt) is not int and estado != 0:
                         valorErroneo = str(fila[columna['ESTADO_UT']].value)
                         celdaCoordenada = setearCelda2(fila[0:columna['ESTADO_UT']+1], len(fila[0:columna['ESTADO_UT']])-1, i)
                         mensaje = '%s;ESTADO_UT no existe;%s' % (celdaCoordenada, valorErroneo)
