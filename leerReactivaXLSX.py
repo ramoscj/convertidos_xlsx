@@ -14,7 +14,7 @@ from validaciones_texto import (formatearFechaMesAnterior, formatearIdCliente,
                                 formatearRutGion, primerDiaMes, setearCelda,
                                 setearCelda2, setearFechaCelda,
                                 setearFechaInput, ultimoDiaMes,
-                                validarEncabezadoXlsx, convertirDataReact)
+                                validarEncabezadoXlsx, convertirDataReact, formatearNumeroPoliza)
 
 LOG_PROCESO_REACTIVA = dict()
 
@@ -168,7 +168,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                     estado = str(fila[columna['ESTADO']].value)
                     estadoUt = fila[columna['ESTADO_ULTIMA_TAREA']].value
                     estadoRetencion = fila[columna['ESTADO_RETENCION']].value
-                    numeroPoliza = str(fila[columna['NRO_POLIZA']].value)
+                    numeroPoliza, numeroPolizaCertificado = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
                     idEmpleado = str(fila[columna['ID_EMPLEADO']].value)
                     campanaId = str(fila[columna['CAMAPAÑA_ID']].value)
                     pk = '%s_%s' % (campanaId, numeroPoliza)
