@@ -114,7 +114,7 @@ def validarContactoReact(saliente, estadoRetencion, estado, estadoUt):
     return contactoReact
 
 def campanaCanal(campana):
-    if campana == 'Inbound CoRet':
+    if str(campana).upper() == 'INBOUND':
         valorCamapana = 0
     else:
         valorCamapana = 1
@@ -251,7 +251,6 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
                             grabCertificadaReact = 0
                             ejecutivoBaseCertificacion = idEmpleado
-                            campanaBaseCertificacion = nombreCampana
 
                             if baseCertificacion.get(numeroPoliza):
 
@@ -266,10 +265,15 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                                 campanaBaseCertificacion = campanaCanal(baseCertificacion[numeroPoliza]['CANAL'])
                                 fechaLlamado = baseCertificacion[numeroPoliza]['FECHA_LLAMADO']
 
-                                if campanaBaseCertificacion == 0 and fechaLlamado >= fechaIncioMes and fechaLlamado <= fechaFinMes or campanaBaseCertificacion == 1 and fechaLlamado >= fechaInicioPeriodo and fechaLlamado <= fechaFinPeriodo:
-                                    grabCertificadaReact = 1
 
-                            certificacionReactTxt[numeroPoliza] = {'GRAB_CERTIFICADA_REACT': grabCertificadaReact, 'ID_EMPLEADO': ejecutivoBaseCertificacion, 'CANPANA': campanaBaseCertificacion, 'POLIZA': numeroPoliza}
+                                if saliente == 0 and campanaBaseCertificacion == 0 and idEmpleado == ejecutivoBaseCertificacion:
+                                    if fechaLlamado >= fechaIncioMes and fechaLlamado <= fechaFinMes:
+                                        grabCertificadaReact = 1
+                                elif saliente == 1 and campanaBaseCertificacion == 1 and idEmpleado == ejecutivoBaseCertificacion:
+                                    if fechaLlamado >= fechaInicioPeriodo and fechaLlamado <= fechaFinPeriodo:
+                                        grabCertificadaReact = 1
+
+                            certificacionReactTxt[numeroPoliza] = {'GRAB_CERTIFICADA_REACT': grabCertificadaReact, 'ID_EMPLEADO': ejecutivoBaseCertificacion, 'CANPANA': nombreCampana, 'POLIZA': numeroPoliza}
 
                     correlativo += 1
 
@@ -290,10 +294,3 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
         return False
-        # raise
-
-# x = leerArchivoReactiva('../test_xls/REACTIVA/Gestion Reactiva.xlsx', '202101', '20201229', '20210126', '../test_xls/REACTIVA/COMPLEMENTO CLIENT vLite 20210211.xlsx')
-# salidaLogTxt('../test_xls/REACTIVA/reactiva.log', LOG_PROCESO_REACTIVA)
-# print(salidaArchivoTxt('../test_xls/REACTIVA/%s%s.txt' % (x[0]['NOMBRE_ARCHIVO'],'202101'), x[0]['DATA'], x[0]['ENCABEZADO']))
-# print(salidaArchivoTxt('../test_xls/REACTIVA/%s%s.txt' % (x[1]['NOMBRE_ARCHIVO'],'202101'), x[1]['DATA'], x[1]['ENCABEZADO']))
-# print(salidaArchivoTxt('../test_xls/REACTIVA/%s%s.txt' % (x[2]['NOMBRE_ARCHIVO'],'202101'), x[2]['DATA'], x[2]['ENCABEZADO']))
