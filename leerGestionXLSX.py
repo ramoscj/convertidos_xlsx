@@ -170,26 +170,29 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
 
                     if nombreCampahna == 'Inbound CRO':
                         if estado != 0:
-                            if propietarioCro.get(campanhaId):
-                                fechaUltimaModificacion = propietarioCro[campanhaId]['FECHA']
-                                if fechaUltimaModificacion is None:
-                                    errorCampana = 'Celda%s;FECHA NULL Archivo Propietario;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), campanhaId)
-                                    LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_PROPIETARIO_NONE': errorCampana})
-                                    continue
-                                if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:
+                            # if propietarioCro.get(campanhaId):
+                            #     fechaUltimaModificacion = propietarioCro[campanhaId]['FECHA']
+                            #     if fechaUltimaModificacion is None:
+                            #         errorCampana = 'Celda%s;FECHA NULL Archivo Propietario;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), campanhaId)
+                            #         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_PROPIETARIO_NONE': errorCampana})
+                            #         continue
+                            #     if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:
+                            #         ejecutivoCorrecto = propietarioCro[campanhaId]['ID_EMPLEADO']
+                            #     else:
+                            #         continue
+                            # else:
+                            fechaUltimaModificacion = fechaCierre
+                            if type(fechaUltimaModificacion) is not datetime.date:
+                                errorCampana = 'Celda%s;FECHA_CIERRE No es valida;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), fechaUltimaModificacion)
+                                LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_CIERRE_ERROR': errorCampana})
+                                continue
+                            if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:
+                                if propietarioCro.get(campanhaId):
                                     ejecutivoCorrecto = propietarioCro[campanhaId]['ID_EMPLEADO']
                                 else:
-                                    continue
-                            else:
-                                fechaUltimaModificacion = fechaCierre
-                                if type(fechaUltimaModificacion) is not datetime.date:
-                                    errorCampana = 'Celda%s;FECHA_CIERRE No es valida;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), fechaUltimaModificacion)
-                                    LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_CIERRE_ERROR': errorCampana})
-                                    continue
-                                if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:
                                     ejecutivoCorrecto = idEmpleado
-                                else:
-                                    continue
+                            else:
+                                continue
                         else:
                             continue
                     else:

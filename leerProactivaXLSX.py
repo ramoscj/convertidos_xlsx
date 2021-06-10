@@ -488,7 +488,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                                     cantidadCampanasValidas += 1
 
                             elif estadoRetencionValido is not None and estado != 'Terminado con Exito':
-                                estadoRetencionValido = validarEstadoRetencion(estado)
+                                estadoRetencionValido = listaEstadoRetencion.get(estadoRetencion)
                                 celdaCoordenada = setearCelda2(fila[0:columna['ESTADO']+1], len(fila[0:columna['ESTADO']])-1, i)
                                 mensaje = '{0};ESTADO no corresponde con la RETENCION;{1}/{2}'.format(celdaCoordenada, estado, estadoRetencion)
                                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'ESTADO_RETENCION_NO_VALIDO': mensaje})
