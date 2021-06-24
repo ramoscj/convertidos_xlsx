@@ -186,9 +186,6 @@ REACTIVA_CONFIG_XLSX = {
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'FECHA_CREACION': 0, 'ESTADO': 2, 'FECHA_CIERRE': 4, 'NRO_POLIZA': 5, 'ESTADO_RETENCION': 6, 'CAMAPAÑA_ID': 8, 'ESTADO_ULTIMA_TAREA': 9, 'LLAMADA_SALIENTE': 10, 'ID_EMPLEADO': 11},
 
-    # Estados de Retencion
-    'ESTADOS_RETENCION': {'Cliente no vigente': 1, 'Cliente al día': 2, 'Lo va a pensar': 3, 'Solicita contacto por correo': 4, 'Pendiente de endoso': 5, 'Mantiene su producto': 6, 'Desiste el producto': 7, 'Anulado por cambio de producto': 8, 'Sin gestión por cierre': 9, 'Término programado de producto': 10, 'Queda vigente sin pagar': 11, 'Espera de carta de anulación': 12},
-
     # Configuracion de archivos de salida
     'SALIDA_TXT':{
         'GESTION':{
@@ -204,6 +201,10 @@ REACTIVA_CONFIG_XLSX = {
             'ENCABEZADO': ['CRR', 'GRAB_CERTIFICADA_REACT', 'RUT', 'CAMPANA', 'POLIZA']
         },
     },
+
+    # Valor para el nombre de la campaña
+    'INBOUND_VALOR': 1,
+    'OUTBOUND_VALOR': 0,
 
     # Directorio del LOG
     'PATH_LOG': 'REACTIVA\PROCESO_LOG',

@@ -206,17 +206,30 @@ def convertirALista(dataLista: dict):
         listaFinal.append(list(lista))
     return listaFinal
 
-def convertirListaCampana(dataLista: dict, ejecutivosExistentes, fechaPeriodo):
+def convertirListaProactiva(dataLista: dict, ejecutivosExistentes, fechaPeriodo):
     lista = []
     for idEmpleado in dataLista.keys():
         if not ejecutivosExistentes.get(str(idEmpleado)):
             lista.append([str(idEmpleado), fechaPeriodo])
     return lista
 
-def setearCampanasPorEjecutivo(dataLista: dict, idEjecutivo):
+def convertirListaReactiva(dataLista: dict, ejecutivosExistentes, fechaPeriodo):
+    lista = []
+    for idEmpleado in dataLista.keys():
+        if not ejecutivosExistentes.get(str(idEmpleado)):
+            lista.append([str(idEmpleado), fechaPeriodo])
+    return lista
+
+def setearCampanasProactiva(dataLista: dict, idEjecutivo):
     lista = []
     nombreCampana = str(dataLista['NOMBRE_CAMPAÑA'])[0:30].rstrip()
     data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['CAMPAÑA_ID'], nombreCampana, dataLista['ESTADO_RETENCION'], dataLista['RETENCION_COBRANZA'], dataLista['RETENCION_ACTIVACION'], dataLista['RETENCION_RL_COBRANZA'], dataLista['RETENCION_RL_ACTIVACION'],dataLista['ESTADO_VALIDO'], dataLista['ESTADO_VALIDOUT'], dataLista['FECHA_CIERRE'], dataLista['RELIQUIDACION'], dataLista['NUMERO_POLIZA_CERTIFICADO']]
+    lista.append(data)
+    return lista
+
+def setearCampanasReactiva(dataLista: dict, idEjecutivo):
+    lista = []
+    data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['ESTADO_RETENCION'], dataLista['FECHA_CIERRE'], dataLista['ESTAD0_UT'], dataLista['IN_OUT'], dataLista['VALIDACION_CERTIFICACION'], dataLista['EXITO_REPETIDO'], dataLista['ESTADO_POLIZA'], dataLista['ESTADO_FINAL']]
     lista.append(data)
     return lista
 

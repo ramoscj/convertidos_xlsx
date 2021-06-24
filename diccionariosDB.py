@@ -79,7 +79,8 @@ def buscarPolizasReliquidar(mesAnterior):
         sql = """SELECT id_ejecutivo, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, cobranza_rel_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, periodo, fecha_reliquidacion, fecha_cierre, numero_poliza_certificado FROM proactiva_campanas_ejecutivos LEFT JOIN proactiva_campanas_periodo_ejecutivos pcpe ON proactiva_campanas_ejecutivos.id_periodo_ejecutivo = pcpe.id WHERE pcpe.periodo = ? AND reliquidacion = 1 AND fecha_reliquidacion is NULL"""
         cursor.execute(sql, (mesAnterior))
         for (id_ejecutivo, numero_poliza, campana_id, nombre_campana, cobranza_pro, pacpat_pro, cobranza_rel_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, periodo, fecha_reliquidacion, fecha_cierre, numero_poliza_certificado) in cursor:
-            polizasParaRequilidar[numero_poliza] = {'COBRANZA_RL_PRO': cobranza_rel_pro, 'PACPAT_RL_PRO': pacpat_rel_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': id_ejecutivo, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'FECHA_CIERRE': fecha_cierre, 'NUMERO_POLIZA_CERTIFICADO': numero_poliza_certificado}
+            pk = '{0}_{1}_{2}'.format(campana_id, campana_id, numero_poliza)
+            polizasParaRequilidar[pk] = {'COBRANZA_RL_PRO': cobranza_rel_pro, 'PACPAT_RL_PRO': pacpat_rel_pro, 'ESTADO_PRO': estado_pro, 'ESTADO_UT_PRO': estado_ut_pro, 'CODIGO_EMPLEADO': id_ejecutivo, 'NOMBRE_CAMPANA': nombre_campana, 'CAMPAÑA_ID': campana_id, 'POLIZA': numero_poliza, 'FECHA_CIERRE': fecha_cierre, 'NUMERO_POLIZA_CERTIFICADO': numero_poliza_certificado}
         return polizasParaRequilidar
     except Exception as e:
         raise Exception('Error buscarPolizasReliquidar: %s' % e)
@@ -87,7 +88,7 @@ def buscarPolizasReliquidar(mesAnterior):
         cursor.close()
         db.close()
 
-def periodoCampanasEjecutivos(fechaPeriodo):
+def periodoCampanasProactiva(fechaPeriodo):
     try:
         db = conectorDB()
         cursor = db.cursor()
@@ -103,11 +104,41 @@ def periodoCampanasEjecutivos(fechaPeriodo):
         cursor.close()
         db.close()
 
-def CamapanasPorPeriodo(fechaPeriodo):
+def periodoCampanasReactiva(fechaPeriodo):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        campanasEjecutivos = dict()
+        sql = """SELECT id, id_ejecutivo, periodo FROM reactiva_campanas_periodo_ejecutivos WHERE periodo = ?"""
+        cursor.execute(sql, (fechaPeriodo))
+        for (id, id_ejecutivo, periodo) in cursor:
+            campanasEjecutivos[id_ejecutivo] = {'ID': id, 'ID_EMPLEADO': id_ejecutivo, 'PERIODO': periodo}
+        return campanasEjecutivos
+    except Exception as e:
+        raise Exception('Error buscar Polizas para periodoCampanasEjecutivos: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def CampanasPorPeriodoProactiva(fechaPeriodo):
     try:
         db = conectorDB()
         cursor = db.cursor()
         sql = """SELECT count(*) FROM proactiva_campanas_ejecutivos LEFT JOIN proactiva_campanas_periodo_ejecutivos pcpe ON proactiva_campanas_ejecutivos.id_periodo_ejecutivo = pcpe.id
+        WHERE pcpe.periodo = ?"""
+        cantidadCampanas = cursor.execute(sql, (fechaPeriodo)).fetchone()
+        return cantidadCampanas[0]
+    except Exception as e:
+        raise Exception('Error buscar Camapañas CamapanasPorPeriodo: %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def CampanasPorPeriodoReactiva(fechaPeriodo):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        sql = """SELECT count(*) FROM reactiva_campanas_ejecutivos LEFT JOIN reactiva_campanas_periodo_ejecutivos pcpe ON reactiva_campanas_ejecutivos.id_periodo_ejecutivo = pcpe.id
         WHERE pcpe.periodo = ?"""
         cantidadCampanas = cursor.execute(sql, (fechaPeriodo)).fetchone()
         return cantidadCampanas[0]
@@ -227,7 +258,23 @@ def listaEstadoRetencionProactiva():
         cursor.close()
         db.close()
 
-def listaEstadoRetencionDesc():
+def listaEstadoRetencionReactiva():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        listaSalida = dict()
+        sql = """SELECT estado_retencion, id FROM reactiva_estados_retencion order by id"""
+        cursor.execute(sql)
+        for (estado_retencion, id) in cursor:
+            listaSalida.setdefault(estado_retencion, id)
+        return listaSalida
+    except Exception as e:
+        raise Exception('Error def listaEstadoRetencionReactiva(): %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def estadoRetencionProDesc():
     try:
         db = conectorDB()
         cursor = db.cursor()
@@ -260,5 +307,5 @@ def listaEstadoUtCro():
         db.close()
 
 # x = ReliquidacionesPorPeriodo('01/12/2020')
-# x = listaEstadoRetencionDesc()
-# print(listaEstadoUtCro())
+# x = buscarPolizasReliquidar('01/12/2020')
+# print(CampanasPorPeriodoReactiva('01/01/2021'))
