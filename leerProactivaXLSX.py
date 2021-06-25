@@ -74,13 +74,10 @@ def aprobarCobranza(nroPolizaCertificado, fechaCierre, nroPolizaCliente, fecUlti
 
 def aprobarActivacion(estadoMandato, fechaMandato, fechaCierre):
     estadoMandatoValido = PROACTIVA_CONFIG_XLSX['ESTADO_MANDATO_VALIDO']
+    estadoActivacion = 0
     if estadoMandatoValido.get(estadoMandato):
-        if fechaMandato is None:
-            return 1
-        elif fechaMandato is not None and fechaCierre is not None:
-            if fechaMandato >= fechaCierre:
-                return 1
-    return 0
+        estadoActivacion = 1
+    return estadoActivacion
 
 def insertarPeriodoCampanaEjecutivos(campanasEjecutivos: dict, fechaProceso):
     try:

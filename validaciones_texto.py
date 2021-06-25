@@ -229,7 +229,7 @@ def setearCampanasProactiva(dataLista: dict, idEjecutivo):
 
 def setearCampanasReactiva(dataLista: dict, idEjecutivo):
     lista = []
-    data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['ESTADO_RETENCION'], dataLista['FECHA_CIERRE'], dataLista['ESTAD0_UT'], dataLista['IN_OUT'], dataLista['VALIDACION_CERTIFICACION'], dataLista['EXITO_REPETIDO'], dataLista['ESTADO_POLIZA'], dataLista['ESTADO_FINAL']]
+    data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['ESTADO_RETENCION'], dataLista['ESTAD0_UT'], dataLista['IN_OUT'], dataLista['VALIDACION_CERTIFICACION'], dataLista['EXITO_REPETIDO'], dataLista['ESTADO_POLIZA'], dataLista['ESTADO_FINAL']]
     lista.append(data)
     return lista
 

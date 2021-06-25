@@ -107,14 +107,10 @@ def validarContactoReact(saliente, estadoRetencion, estado, estadoUt):
                 contactoReact = 0
         elif estadoRetencion != 'Mantiene su producto':
             if estadoUt is None:
-                # ESPERAR TABLA DE CONTACTABILDIAD DE ESTADO DE RETENCION
-                if listaEstadoRetencion.get(estadoRetencion):
-                    contactoReact = 0
+                if estado == 'Sin Gestion':
+                    contactoReact = 1
                 else:
-                    if estado == 'Terminado con Exito':
-                        contactoReact = 1
-                    else:
-                        contactoReact = 0
+                    contactoReact = 0
             elif listaEstadoContactado.get(estadoUt):
                 contactoReact = 1
             elif listaEstadoNoContactado.get(estadoUt):
@@ -189,7 +185,7 @@ def insertarCampanaEjecutivos(campanasEjecutivos: dict, fechaProceso):
             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LIMPIAR_CAMAPAÑAS_EJECUTIVOS': 'EliminarCampanaEjecutivos;Se eliminaron {0} Camapaña(s) existentes'.format(campanasExistentes)})
 
         if len(campanasPorPeriodo) > 0:
-            sql = """INSERT INTO reactiva_campanas_ejecutivos (id_periodo_ejecutivo, numero_poliza, estado_retencion, fecha_cierre, estado_ut, in_out, certificacion, exito_repetido, estado_poliza, estado_final) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+            sql = """INSERT INTO reactiva_campanas_ejecutivos (id_periodo_ejecutivo, numero_poliza, estado_retencion, estado_ut, in_out, certificacion, exito_repetido, estado_poliza, estado_final) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"""
             cursor.executemany(sql, campanasPorPeriodo)
             db.commit()
         return True
@@ -414,7 +410,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         if grabCertificadaReact == 1 and polizaReactTxt.get(numeroPoliza):
                             estadoFinalDb = 1
 
-                        valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'ESTADO_RETENCION': estadoRetencion, 'FECHA_CIERRE': fechaCreacion, 'ESTAD0_UT': estadoUt, 'IN_OUT': nombreCampana, 'VALIDACION_CERTIFICACION': ValidacionCertificacion, 'EXITO_REPETIDO': exitoDuplicadoPoliza, 'ESTADO_POLIZA': estadoPoliza, 'ESTADO_FINAL': estadoFinalDb}
+                        valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'ESTADO_RETENCION': estadoRetencion, 'ESTAD0_UT': estadoUt, 'IN_OUT': nombreCampana, 'VALIDACION_CERTIFICACION': ValidacionCertificacion, 'EXITO_REPETIDO': exitoDuplicadoPoliza, 'ESTADO_POLIZA': estadoPoliza, 'ESTADO_FINAL': estadoFinalDb}
                         agregarCampanasPorEjecutivo(idEmpleado, pk, valoresPoliza)
 
             if insertarPeriodoCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
@@ -439,4 +435,5 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
-        return False
+        # return False
+        raise

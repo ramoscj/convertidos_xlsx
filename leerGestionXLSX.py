@@ -170,17 +170,6 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
 
                     if nombreCampahna == 'Inbound CRO':
                         if estado != 0:
-                            # if propietarioCro.get(campanhaId):
-                            #     fechaUltimaModificacion = propietarioCro[campanhaId]['FECHA']
-                            #     if fechaUltimaModificacion is None:
-                            #         errorCampana = 'Celda%s;FECHA NULL Archivo Propietario;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), campanhaId)
-                            #         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1, {'FECHA_PROPIETARIO_NONE': errorCampana})
-                            #         continue
-                            #     if fechaUltimaModificacion >= fechaIncioMes and fechaUltimaModificacion <= fechaFinMes:
-                            #         ejecutivoCorrecto = propietarioCro[campanhaId]['ID_EMPLEADO']
-                            #     else:
-                            #         continue
-                            # else:
                             fechaUltimaModificacion = fechaCierre
                             if type(fechaUltimaModificacion) is not datetime.date:
                                 errorCampana = 'Celda%s;FECHA_CIERRE No es valida;%s' % (setearCelda(fila[columna['CAMPAÑA_ID']]), fechaUltimaModificacion)
@@ -225,8 +214,3 @@ def leerArchivoGestion(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntr
         LOG_PROCESO_GESTION.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_GESTION)+1: errorMsg})
         LOG_PROCESO_GESTION.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_GESTION)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
         return False, False
-
-# x,y = leerArchivoGestion('INPUTS\Gestión CRO.xlsx', '202012', '20201224', '20210122', 'INPUTS\Propietarios CRO.xlsx')
-# print(salidaArchivoTxt('test_xls/TEST_GESTION/test.txt', x, y))
-# print(extraerPropietariosCro('../test_xls/Propietarios CRO.xlsx'))
-# print(LOG_PROCESO_GESTION)
