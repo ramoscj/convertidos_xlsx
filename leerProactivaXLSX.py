@@ -204,13 +204,14 @@ def polizasReliquidadas(periodo, complementoCliente):
             estadoMandato = complementoCliente[numeroPoliza]['ESTADO_MANDATO']
             fecMandato = complementoCliente[numeroPoliza]['FECHA_MANDATO']
 
+            mensajeValidacion = 'MANDATOS'
+            pacpatRelPro = 0
             if estadoMandato is not None:
                 pacpatRelPro = aprobarActivacion(str(estadoMandato).upper(), fecMandato, fechaCierre)
-                mensajeValidacion = 'MANDATOS'
-            else:
+            elif estadoMandato is None and nombreCampana == 'CO RET - Fallo en Instalacion de Mandato':
                 pacpatRelPro = aprobarCobranza(numeroPolizaCertificado, fechaCierre, numeroPolizaCliente, fecUltimoPago)
                 mensajeValidacion = 'MANDATOS/COBRANZA'
-
+    
             if pacpatRelPro == 0:
                 mensaje = 'PolizaReliquidacion;No cumple condicion de retencion {0} para Reliquidacion;{1}'.format(mensajeValidacion, numeroPoliza)
                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'PROCESO_ACTIVACION_RELIQUIDACION': mensaje})
@@ -304,13 +305,14 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
         estadoMandato = complementoCliente[numeroPoliza]['ESTADO_MANDATO']
         fecMandato = complementoCliente[numeroPoliza]['FECHA_MANDATO']
 
+        mensajeValidacion = 'MANDATOS'
+        pacpatPro = 0
         if estadoMandato is not None:
             pacpatPro = aprobarActivacion(str(estadoMandato).upper(), fecMandato, fechaCierre)
-            mensajeValidacion = 'MANDATOS'
-        else:
+        elif estadoMandato is None and nombreCampana == 'CO RET - Fallo en Instalacion de Mandato':
             pacpatPro = aprobarCobranza(numeroPolizaCertificado, fechaCierre, numeroPolizaCliente, fecUltimoPago)
             mensajeValidacion = 'MANDATOS/COBRANZA'
-
+    
         if pacpatPro == 0:
             if campanasPorEjecutivos[idEmpleado].get(pk2):
                 campanasPorEjecutivos[idEmpleado][pk2]['RETENCION_RL_ACTIVACION'] = 1
