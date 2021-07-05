@@ -195,7 +195,7 @@ def polizasReliquidadas(periodo, complementoCliente):
         pacpatRelPro = 0
 
         if poliza['COBRANZA_RL_PRO'] > 0:
-            cobranzaRelPro = aprobarCobranza(numeroPolizaCertificado, fechaCierre, complementoCliente[numeroPoliza]['NRO_CERT'] , complementoCliente[numeroPoliza]['FEC_ULT_PAG'])
+            cobranzaRelPro = aprobarCobranza(numeroPolizaCertificado, fechaCierre, numeroPolizaCliente, fecUltimoPago)
             if cobranzaRelPro == 0:
                 mensaje = 'PolizaReliquidacion;No cumple condicion de retencion COBRO para Reliquidacion;%s' % (numeroPoliza)
                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'PROCESO_COBRANZA_RELIQUIDACION': mensaje})
@@ -208,7 +208,7 @@ def polizasReliquidadas(periodo, complementoCliente):
             pacpatRelPro = 0
             if estadoMandato is not None:
                 pacpatRelPro = aprobarActivacion(str(estadoMandato).upper(), fecMandato, fechaCierre)
-            elif estadoMandato is None and nombreCampana == 'CO RET - Fallo en Instalacion de Mandato':
+            elif estadoMandato is None and nombreCampana == 'CO RET - Fallo en Instalacion':
                 pacpatRelPro = aprobarCobranza(numeroPolizaCertificado, fechaCierre, numeroPolizaCliente, fecUltimoPago)
                 mensajeValidacion = 'MANDATOS/COBRANZA'
     
@@ -481,11 +481,17 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                         estadoRetencionValido = None
 
                         if estadoRetencion is not None:
-    
+
                             listaConsiderarRetencion = {'Mantiene su producto': mantieneSuProducto, 'Realiza pago en línea': realizaPagoEnLinea, 'Realiza Activación PAC/PAT': realizaActivacion}
                             estadoRetencionValido = listaConsiderarRetencion.get(estadoRetencion)
-                            if estadoRetencionValido is not None and estado == 'Terminado con Exito':
+
+                            if estado == 'Terminado con Exito':
                                 if complementoCliente.get(numeroPoliza):
+                                    if estadoRetencionValido is None:
+                                        if nombreCampana == 'CO RET - Cobranza':
+                                            estadoRetencionValido = mantieneSuProducto
+                                        elif nombreCampana == 'CO RET - Fallo en Instalacion de Mandato':
+                                            estadoRetencionValido = realizaActivacion
                                     valoresEntrada = {'ESTADO_RETENCION': estadoRetencionValido, 'NOMBRE_CAMPAÑA': nombreCampana, 'NUMERO_POLIZA': numeroPoliza, 'FECHA_CIERRE': fechaCierre, 'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'CAMPAÑA_ID': campanaId, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_INICIO_MES': fechaIncioMes, 'CELDA_NROPOLIZA': fila[columna['NRO_POLIZA']]}
                                     cobranzaPro, pacpatPro, noAprobada = validarRetencionesPolizas(valoresEntrada, complementoCliente)
                                     polizasNoAprobadas += noAprobada
