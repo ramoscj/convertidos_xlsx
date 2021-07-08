@@ -326,7 +326,6 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
         polizaNoAprobada = 1
     return cobranzaPro, pacpatPro, polizaNoAprobada
         
-1
 def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
     try:
         encabezadoXls = PROACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX']
