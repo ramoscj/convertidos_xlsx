@@ -436,4 +436,3 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
         return False
-        # raise
