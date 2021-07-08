@@ -248,5 +248,14 @@ def fechaMesAnterior(fecha):
         errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
         raise Exception(errorMsg)
 
+def fechaUnida(celdaFila):
+    try:
+        fecha = str(celdaFila.value).replace("-","")
+        fechaSalida = '{0}{1}{2}'.format(fecha[0:4], fecha[4:6], fecha[6:8])
+        return fechaSalida
+    except Exception as e:
+        errorMsg = "Celda%s - fechaUnida: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
+        return errorMsg
+
 # x = '12_2'
-# print(formatearNumeroPoliza(x))
+# print(fechaUnida('01-12-2021'))

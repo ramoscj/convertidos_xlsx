@@ -20,7 +20,7 @@ from validaciones_texto import (convertirDataReact,
                                 primerDiaMes, setearCampanasReactiva,
                                 setearCelda, setearCelda2, setearFechaCelda,
                                 setearFechaInput, ultimoDiaMes,
-                                validarEncabezadoXlsx)
+                                validarEncabezadoXlsx, fechaUnida)
 
 LOG_PROCESO_REACTIVA = dict()
 campanasPorEjecutivos = dict()
@@ -77,6 +77,7 @@ def extraerBaseCertificacion(archivoCertificacionXls):
             return baseCertificado
         else:
             LOG_PROCESO_REACTIVA.setdefault('ENCABEZADO_BASE_CERTIFICACION', validarArchivo)
+            raise
     except Exception as e:
         errorMsg = 'Error al leer archivo;%s | %s' % (archivo, e)
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_BASE_CERTIFICACION': errorMsg})
@@ -119,13 +120,6 @@ def validarContactoReact(saliente, estadoRetencion, estado, estadoUt):
                 mensaje = 'Error ESTADO_UT;ESTADO_UT no existe;%s' % estadoUt
                 LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ERROR_ESTADOUT': mensaje})
     return contactoReact
-
-def campanaCanal(campana):
-    if str(campana).upper() == 'INBOUND':
-        valorCamapana = 1
-    else:
-        valorCamapana = 0
-    return valorCamapana
 
 def exitoRepetidoPk(numeroPoliza, polizaExitoRepetido, gestionReactTxt):
     pkSalida = 0
@@ -220,6 +214,12 @@ def agregarCampanasPorEjecutivo(idEmpleado, pk, valoresCampanas: dict):
         campanasPorEjecutivos[idEmpleado] = {pk: valoresCampanas}
     return 1
 
+def formatearSaliente(valorEntrada):
+    valorSalida = outbound
+    if bool(valorEntrada):
+        valorSalida = inbound
+    return valorSalida
+
 def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada, archivoCertificacionXls, archivoComplmentoCliente):
 
     try:
@@ -243,7 +243,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
         if type(archivo_correcto) is not dict:
             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ENCABEZADO_REACTIVA': 'Encabezado del Archivo: %s OK' % archivoEntrada})
-            campanaDescripcion = {1 : 'Inbound', 0: 'Outbound'}
+            campanaDescripcion = {inbound : 'Inbound', outbound: 'Outbound'}
             campanaIdDuplicado = dict()
             gestionReactTxt = dict()
             polizaExitoRepetido = dict()
@@ -272,7 +272,10 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                     numeroPoliza, numeroPolizaCertificado = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
                     idEmpleado = str(fila[columna['ID_EMPLEADO']].value)
                     campanaId = str(fila[columna['CAMAPAÑA_ID']].value)
-                    pk = '%s_%s' % (campanaId, numeroPoliza)
+
+                    fechaCreacionUnida = fechaUnida(fila[columna['FECHA_CREACION']])
+                    saliente = formatearSaliente(salienteEntrada)
+                    pk = '{0}_{1}_{2}_{3}'.format(fechaCreacionUnida, numeroPoliza, saliente, idEmpleado)
 
                     fechaCreacion = setearFechaCelda(fila[columna['FECHA_CREACION']])
                     fechaCierre = setearFechaCelda(fila[columna['FECHA_CIERRE']])
@@ -304,10 +307,8 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ID_EMPLEADO': mensaje})
                         continue
 
-                    saliente = int(salienteEntrada)
                     nombreCampana = campanaDescripcion.get(saliente)
                     exitoDuplicadoPoliza = 0
-
                     if saliente == inbound and fechaCreacion >= fechaIncioMes and fechaCreacion <= fechaFinMes or saliente == outbound and fechaCreacion >= fechaInicioPeriodo and fechaCreacion <= fechaFinPeriodo:
 
                         estadoValidoReact = validarEstadoReact(estadoRetencion, estado)
@@ -361,16 +362,15 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                                     LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'EJECUTIVO_BASE_CERTIFICADO': mensaje})
                                     continue
 
-                                campanaBaseCertificacion = campanaCanal(baseCertificacion[pkBaseCertificacion]['CANAL'])
                                 fechaLlamado = baseCertificacion[pkBaseCertificacion]['FECHA_LLAMADO']
 
 
-                                if saliente == 1 and campanaBaseCertificacion == 1 and idEmpleado == ejecutivoBaseCertificacion:
+                                if saliente == inbound and idEmpleado == ejecutivoBaseCertificacion:
                                     if fechaLlamado >= fechaIncioMes and fechaLlamado <= fechaFinMes:
                                         grabCertificadaReact = 1
                                         gestionReactTxt[pk]['EXITO_REPETIDO_REACT'] = 1
-                                elif saliente == 0 and campanaBaseCertificacion == 0 and idEmpleado == ejecutivoBaseCertificacion:
-                                    if fechaLlamado >= fechaInicioPeriodo and fechaLlamado <= fechaFinPeriodo:
+                                elif saliente == outbound and idEmpleado == ejecutivoBaseCertificacion:
+                                    if fechaLlamado >= fechaIncioMes and fechaLlamado <= fechaFinMes:
                                         grabCertificadaReact = 1
                                         gestionReactTxt[pk]['EXITO_REPETIDO_REACT'] = 1
 
@@ -386,11 +386,11 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                                     continue
 
                                 exitoDuplicadoPoliza = 1
-                                if saliente == 1:
+                                if saliente == inbound:
                                     if fechaCreacion > gestionReactTxt[pkDataGestion]['FECHA_CREACION']:
                                         gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
 
-                                elif saliente == 0:
+                                elif saliente == outbound:
                                     if type(fechaCierre) is datetime.date and type(gestionReactTxt[pkDataGestion]['FECHA_CIERRE']) is datetime.date:
                                         if fechaCierre > gestionReactTxt[pkDataGestion]['FECHA_CIERRE']:
                                             gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
@@ -435,4 +435,5 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
-        return False
+        # return False
+        raise
