@@ -10,7 +10,7 @@ from config_xlsx import PATH_XLSX, REACTIVA_CONFIG_XLSX
 from diccionariosDB import (buscarRutEjecutivosDb,
                             listaEstadoRetencionReactiva,
                             listaEstadoUtContacto, listaEstadoUtNoContacto,
-                            periodoCampanasReactiva, CampanasPorPeriodoReactiva)
+                            periodoCampanasReactiva, CampanasPorPeriodoReactiva, estadoRetencionReacDesc)
 from escribir_txt import (salidaArchivoTxt, salidaArchivoTxtProactiva,
                           salidaLogTxt)
 from validaciones_texto import (convertirDataReact,
@@ -130,16 +130,16 @@ def exitoRepetidoPk(numeroPoliza, polizaExitoRepetido, gestionReactTxt):
 
 def aprobarActualizarRegistro(estado, estadoValidoReact, contactoReact, estadoValidoReactData, contactoReactData):
     controlCambioPk = False
-    indiceCambio = 0
+    indiceCambio = None
     if estadoValidoReact == 1 and estadoValidoReactData != 1:
         controlCambioPk = True
-        indiceCambio = 1
+        indiceCambio = 'EstadoRetencion'
     elif contactoReact == 1 and contactoReactData == 0:
-        controlCambioPk = True
+        controlCambioPk = 'Contactabilidad'
         indiceCambio = 2
     elif estado != 'Sin Gestion' and estadoValidoReactData == 4:
         controlCambioPk = True
-        indiceCambio = 3
+        indiceCambio = 'Estado'
     return controlCambioPk, indiceCambio
 
 def insertarPeriodoCampanaEjecutivos(campanasEjecutivos: dict, fechaProceso):
@@ -256,6 +256,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
             fechaIncioMes = primerDiaMes(periodo)
             fechaFinMes = ultimoDiaMes(periodo)
             ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
+            listaEstadoRetencionTexto = estadoRetencionReacDesc()
             i = 0
             cantidadCampanasValidas = 0
             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'INICIO_CELDAS_REACTIVA': 'Iniciando lectura de Celdas del Archivo: %s' % archivoEntrada})
@@ -321,13 +322,14 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ERROR_ESTADO_UT': mensaje})
                             continue
 
-                        if campanaIdDuplicado.get(campanaId):
-                            pkDataGestion = campanaIdDuplicado[campanaId]['PK']
-                            if contactoReact == 1 and gestionReactTxt[pkDataGestion]['CONTACTO_REACT'] == 0:
-                                datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
-                                gestionReactTxt[pkDataGestion].update(datosActualizados)
-                        else:
-                            campanaIdDuplicado[campanaId] = {'PK': pk}
+                        # if campanaIdDuplicado.get(campanaId):
+                        #     pkDataGestion = campanaIdDuplicado[campanaId]['PK']
+                        #     if contactoReact == 1 and gestionReactTxt[pkDataGestion]['CONTACTO_REACT'] == 0:
+                        #         datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
+                        #         gestionReactTxt[pkDataGestion].update(datosActualizados)
+                        #         print(campanaId)
+                        # else:
+                        #     campanaIdDuplicado[campanaId] = {'PK': pk}
 
                         if not gestionReactTxt.get(pk):
                             gestionReactTxt[pk] = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': 1,'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
@@ -335,11 +337,18 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         else:
 
                             controlCambioPk, indiceCambio = aprobarActualizarRegistro(estado, estadoValidoReact, contactoReact, gestionReactTxt[pk]['ESTADO_VALIDO_REACT'], gestionReactTxt[pk]['CONTACTO_REACT'])
+                            celdaCoordenada = setearCelda2(fila[0:columna['ID_EMPLEADO']+1], len(fila[0:columna['ID_EMPLEADO']])-1, i)
                             if controlCambioPk:
                                 datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': gestionReactTxt[pk]['REPETICIONES'] + 1, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
                                 gestionReactTxt[pk].update(datosActualizados)
-                                # Guardar en el log la razon del cambio
+                                # mensaje = '{0};POLIZA_DUPLICADA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3})'.format(celdaCoordenada, listaEstadoRetencionTexto(gestionReactTxt[pk]['ESTADO_VALIDO_REACT']), gestionReactTxt[pk]['CONTACTO_REACT'], pk)
+                                LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'REGISTRO_DUPLICADA': 'CAMBIO: {0}'.format(celdaCoordenada)})
                             else:
+                                # estadoReacTexto = gestionReactTxt[pk]['ESTADO_VALIDO_REACT']
+                                # if listaEstadoRetencionTexto(gestionReactTxt[pk]['ESTADO_VALIDO_REACT']):
+                                #     estadoReacTexto = listaEstadoRetencionTexto(gestionReactTxt[pk]['ESTADO_VALIDO_REACT'])
+                                # mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO:({1},{2}):PERMANECE:({3},{4})'.format(celdaCoordenada, estadoReacTexto, gestionReactTxt[pk]['CONTACTO_REACT'], estadoValidoReact, contactoReact)
+                                LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'REGISTRO_DUPLICADA': 'ELIMINADA: {0}'.format(celdaCoordenada)})
                                 gestionReactTxt[pk]['REPETICIONES'] += 1
                                 continue
 
@@ -412,6 +421,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
                         valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'ESTADO_RETENCION': estadoRetencion, 'ESTAD0_UT': estadoUt, 'IN_OUT': nombreCampana, 'VALIDACION_CERTIFICACION': ValidacionCertificacion, 'EXITO_REPETIDO': exitoDuplicadoPoliza, 'ESTADO_POLIZA': estadoPoliza, 'ESTADO_FINAL': estadoFinalDb}
                         agregarCampanasPorEjecutivo(idEmpleado, pk, valoresPoliza)
+                        
 
             if insertarPeriodoCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
                 if insertarCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
@@ -421,7 +431,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'FIN_CELDAS_REACTIVA': 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivoEntrada, len(tuple(hoja.rows)))})
             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Proceso del Archivo: %s Finalizado' % archivoEntrada})
-            salidaGestionReactTxt = convertirDataReact(gestionReactTxt) 
+            salidaGestionReactTxt = convertirDataReact(gestionReactTxt)
             dataSalida = [
                 {'NOMBRE_ARCHIVO': archivoSalida['GESTION']['NOMBRE_SALIDA'], 'DATA': salidaGestionReactTxt, 'ENCABEZADO': archivoSalida['GESTION']['ENCABEZADO']},
                 {'NOMBRE_ARCHIVO': archivoSalida['POLIZA']['NOMBRE_SALIDA'], 'DATA': polizaReactTxt, 'ENCABEZADO': archivoSalida['POLIZA']['ENCABEZADO']},

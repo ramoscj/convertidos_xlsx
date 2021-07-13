@@ -285,7 +285,23 @@ def estadoRetencionProDesc():
             listaSalida.setdefault(id, estado_retencion)
         return listaSalida
     except Exception as e:
-        raise Exception('Error def listaEstadoRetencionDesc(): %s' % e)
+        raise Exception('Error def estadoRetencionProDesc(): %s' % e)
+    finally:
+        cursor.close()
+        db.close()
+
+def estadoRetencionReacDesc():
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        listaSalida = dict()
+        sql = """SELECT id, estado_retencion FROM reactiva_estados_retencion order by id"""
+        cursor.execute(sql)
+        for (id, estado_retencion) in cursor:
+            listaSalida.setdefault(id, estado_retencion)
+        return listaSalida
+    except Exception as e:
+        raise Exception('Error def estadoRetencionReacDesc(): %s' % e)
     finally:
         cursor.close()
         db.close()

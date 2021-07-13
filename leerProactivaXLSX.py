@@ -448,6 +448,11 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                                     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA(RetencionDoble);ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaXls[pk]['ESTADO_PRO']), listaEstadoRetencionTexto.get(filaSalidaXls[pk]['ESTADO_RETENCION_PRO']), estado, estadoRetencion)})
                                     repeticionPorCampana = filaSalidaXls[pk]['REPETICIONES'] + 1
                                     filaSalidaXls.pop(pk)
+                                    if campanasPorEjecutivos[idEmpleado].get(pk):
+                                        if campanasPorEjecutivos[idEmpleado][pk]['RETENCION_ACTIVACION'] == 1 or campanasPorEjecutivos[idEmpleado][pk]['RETENCION_RL_COBRANZA'] == 1:
+                                            polizasNoAprobadas -= 1
+                                        campanasPorEjecutivos[idEmpleado].pop(pk)
+                                    cantidadCampanasValidas -= 1
                                 else:
                                     mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO({1},{2})_vs_PERMANECE({3},{4})'.format(celdaCoordenada, estado, estadoRetencion, getInversaEstado(filaSalidaXls[pk]['ESTADO_PRO']), listaEstadoRetencionTexto.get(filaSalidaXls[pk]['ESTADO_RETENCION_PRO']))
                                     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': mensaje})
