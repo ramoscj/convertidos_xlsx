@@ -28,7 +28,7 @@ inbound = REACTIVA_CONFIG_XLSX['INBOUND_VALOR']
 outbound = REACTIVA_CONFIG_XLSX['OUTBOUND_VALOR']
 listaEstadoRetencion = listaEstadoRetencionReactiva()
 
-def extraerBaseCertificacion(archivoCertificacionXls):
+def extraerBaseCertificacion(archivoCertificacionXls, fechaInicioPeriodo, fechaFinMes):
     archivo = archivoCertificacionXls
     archivoBaseCertificacion = REACTIVA_CONFIG_XLSX['ARCHIVO_BASE_CERTIFICACION']
     LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'INICIO_BASE_CERTIFICACION': 'Iniciando proceso de lectura del Archivo: %s' % archivo})
@@ -69,8 +69,15 @@ def extraerBaseCertificacion(archivoCertificacionXls):
                         mensaje = '%s;FECHA_LLAMADO no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
                         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'FECHA_LLAMADO': mensaje})
                         continue
+
+                    if fechaLlamado < fechaInicioPeriodo or fechaLlamado > fechaFinMes:
+                        continue
                     
                     pk = '{0}_{1}'.format(str(numeroPoliza), str(idEmpleado))
+
+                    if baseCertificado.get(pk):
+                        if baseCertificado[pk]['FECHA_LLAMADO'] >= fechaLlamado:
+                            continue
                     baseCertificado[pk] = {'NRO_POLIZA': int(numeroPoliza), 'FECHA_LLAMADO': fechaLlamado, 'ID_EMPLEADO': str(idEmpleado), 'CANAL': canal, 'TIPO_CERTIFICACION': tipoCertificacion}
 
             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_BASE_CERTIFICACION': 'Lectura del Archivo: %s Finalizado - %s Filas' % (archivo, len(tuple(hoja.rows)))})
@@ -96,29 +103,31 @@ def validarContactoReact(saliente, estadoRetencion, estado, estadoUt):
 
     listaEstadoNoContactado = listaEstadoUtNoContacto()
     listaEstadoContactado = listaEstadoUtContacto()
+    contactoReact = 0
     if saliente == inbound:
         contactoReact = 1
     elif saliente == outbound:
         if estadoRetencion == 'Mantiene su producto':
             contactoReact = 1
         elif estadoRetencion is None:
-            if estado == 'Terminado con Exito':
+            if estadoUt is not None:
+                if listaEstadoContactado.get(estadoUt):
+                    contactoReact = 1
+            elif estado != 'Sin Gestion':
                 contactoReact = 1
-            else:
-                contactoReact = 0
         elif estadoRetencion != 'Mantiene su producto':
             if estadoUt is None:
-                if estado == 'Sin Gestion':
+                if estado != 'Sin Gestion':
                     contactoReact = 1
-                else:
-                    contactoReact = 0
+                # else:
+                #     contactoReact = 0
             elif listaEstadoContactado.get(estadoUt):
                 contactoReact = 1
-            elif listaEstadoNoContactado.get(estadoUt):
-                contactoReact = 0
-            else:
-                mensaje = 'Error ESTADO_UT;ESTADO_UT no existe;%s' % estadoUt
-                LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ERROR_ESTADOUT': mensaje})
+            # elif listaEstadoNoContactado.get(estadoUt):
+            #     contactoReact = 0
+            # else:
+            #     mensaje = 'Error ESTADO_UT;ESTADO_UT no existe;%s' % estadoUt
+            #     LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ERROR_ESTADOUT': mensaje})
     return contactoReact
 
 def exitoRepetidoPk(numeroPoliza, polizaExitoRepetido, gestionReactTxt):
@@ -231,11 +240,16 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
 
+        fechaInicioPeriodo = setearFechaInput(fechaInicioEntrada)
+        fechaFinPeriodo = setearFechaInput(fechaFinEntrada)
+        fechaIncioMes = primerDiaMes(periodo)
+        fechaFinMes = ultimoDiaMes(periodo)
+
         complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_REACTIVA), archivoComplmentoCliente)
         LOG_PROCESO_REACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'DIVISOR_PROCESO': '-----------------------------------------------------'})
 
-        baseCertificacion = extraerBaseCertificacion(archivoCertificacionXls)
+        baseCertificacion = extraerBaseCertificacion(archivoCertificacionXls, fechaInicioPeriodo, fechaFinMes)
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'DIVISOR_PROCESO': '-----------------------------------------------------'})
 
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'INICIO_LECTURA_REACTIVA': 'Iniciando proceso de lectura del Archivo: %s' % archivoEntrada})
@@ -251,10 +265,6 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
             certificacionReactTxt = dict()
             dataCartolaDb = dict()
 
-            fechaInicioPeriodo = setearFechaInput(fechaInicioEntrada)
-            fechaFinPeriodo = setearFechaInput(fechaFinEntrada)
-            fechaIncioMes = primerDiaMes(periodo)
-            fechaFinMes = ultimoDiaMes(periodo)
             ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
             listaEstadoRetencionTexto = estadoRetencionReacDesc()
             i = 0
@@ -379,7 +389,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                                         grabCertificadaReact = 1
                                         gestionReactTxt[pk]['EXITO_REPETIDO_REACT'] = 1
                                 elif saliente == outbound and idEmpleado == ejecutivoBaseCertificacion:
-                                    if fechaLlamado >= fechaIncioMes and fechaLlamado <= fechaFinMes:
+                                    if fechaLlamado >= fechaInicioPeriodo and fechaLlamado <= fechaFinMes:
                                         grabCertificadaReact = 1
                                         gestionReactTxt[pk]['EXITO_REPETIDO_REACT'] = 1
 
@@ -396,12 +406,12 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
                                 exitoDuplicadoPoliza = 1
                                 if saliente == inbound:
-                                    if fechaCreacion > gestionReactTxt[pkDataGestion]['FECHA_CREACION']:
+                                    if fechaCreacion >= gestionReactTxt[pkDataGestion]['FECHA_CREACION']:
                                         gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
 
                                 elif saliente == outbound:
                                     if type(fechaCierre) is datetime.date and type(gestionReactTxt[pkDataGestion]['FECHA_CIERRE']) is datetime.date:
-                                        if fechaCierre > gestionReactTxt[pkDataGestion]['FECHA_CIERRE']:
+                                        if fechaCierre >= gestionReactTxt[pkDataGestion]['FECHA_CIERRE']:
                                             gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
                                     else:
                                         valorErroneo =  '%s-VS-%s' % (fechaCierre, gestionReactTxt[pkDataGestion]['FECHA_CIERRE'])
@@ -446,4 +456,3 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
         return False
-        # raise
