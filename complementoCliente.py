@@ -51,5 +51,3 @@ def extraerComplementoCliente(registrosLog, pathXlsxEntrada):
         errorMsg = 'Error al leer archivo;%s | %s' % (archivo, e)
         LOG_COMPLEMENTO_CLIENTE.setdefault(registrosLog, {'LECTURA_COMPLEMENTOCLIENTE': errorMsg})
         raise
-
-# print(extraerComplementoCliente(1, 2))

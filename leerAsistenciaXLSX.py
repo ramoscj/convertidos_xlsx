@@ -7,7 +7,7 @@ from conexio_db import conectorDB
 from config_xlsx import ASISTENCIA_CONFIG_XLSX
 from validaciones_texto import (formatearRut, primerDiaMes, setearCelda,
                                 setearCelda2, ultimoDiaMes,
-                                validarEncabezadoXlsx)
+                                validarEncabezadoXlsx, convertirALista)
 
 LOG_PROCESO_ASISTENCIA = dict()
 
@@ -26,11 +26,10 @@ def updateEjecutivoFechaDesv(periodo):
         cursor.close()
         db.close()
 
-def insertarEjecutivo(idEmpleado, plataforma, periodo):
+def insertarEjecutivo(empleadosLista):
     try:
         db = conectorDB()
         cursor = db.cursor()
-        primerDia = primerDiaMes(periodo)
         sql = """MERGE ejecutivos AS target
                 USING (VALUES (?)) AS source (id_empleado)
                 ON (source.id_empleado = target.id_empleado)
@@ -41,12 +40,11 @@ def insertarEjecutivo(idEmpleado, plataforma, periodo):
                 WHEN NOT MATCHED
                 THEN INSERT (id_empleado, plataforma, fecha_ingreso, fecha_desvinculacion)
                     VALUES (?, ?, ?, NULL);"""
-        valores = (idEmpleado, plataforma, idEmpleado, plataforma, primerDia)
-        cursor.execute(sql, valores)
+        cursor.executemany(sql, empleadosLista)
         db.commit()
         return True
     except Exception as e:
-        raise Exception('Error al insertar ejecutivo: %s - %s' % (idEmpleado ,e))
+        raise Exception('Error al insertarEjecutivo: {0}'.format(e))
     finally:
         cursor.close()
         db.close()
@@ -78,13 +76,15 @@ def leerArchivoAsistencia(archivo, periodo):
         if type(archivo_correcto) is not dict:
             LOG_PROCESO_ASISTENCIA.setdefault(len(LOG_PROCESO_ASISTENCIA)+1, {'ENCABEZADO_ASISTENCIA': 'Encabezado del Archivo: %s OK' % archivo})
             filaSalidaXls = dict()
+            empleadosLista = dict()
+            primerDia = primerDiaMes(periodo)
             totalColumnas = calcularDiasHablies(hoja.iter_rows(min_row=1, min_col=2, max_row=1))
             totalFilas = len(tuple(hoja.iter_rows(min_row=3, min_col=1)))
             LOG_PROCESO_ASISTENCIA.setdefault(len(LOG_PROCESO_ASISTENCIA)+1, {'INICIO_CELDAS_ASISTENCIA': 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
 
             updateEjecutivoFechaDesv(periodo)
             for fila in tqdm(iterable=hoja.iter_rows(min_row=3, min_col=1), total = totalFilas, desc='Leyendo AsistenciaCRO' , unit=' Fila'):
-            # for fila in hoja.rows:
+            # for fila in hoja.iter_rows(min_row=3, min_col=1):
                 diasVacaciones = 0
                 ausentismoMes = 1
                 if fila[columna['ID_EMPLEADO']].value is not None and fila[columna['PLATAFORMA']].value is not None:
@@ -92,7 +92,8 @@ def leerArchivoAsistencia(archivo, periodo):
                     idEmpleado = fila[columna['ID_EMPLEADO']].value
                     plataforma = str(fila[columna['PLATAFORMA']].value).upper()
 
-                    insertarEjecutivo(idEmpleado, plataforma, periodo)
+                    if not empleadosLista.get(idEmpleado):
+                        empleadosLista[idEmpleado] = {'ID_EMPLEADO': idEmpleado, 'PLATAFORMA': plataforma, 'ID_EMPLEADO2': idEmpleado, 'PLATAFORMA2': plataforma, 'PRIMER_DIA': primerDia}
 
                     if not filaSalidaXls.get(idEmpleado):
                         conteoVhcAplica = 0
@@ -122,6 +123,9 @@ def leerArchivoAsistencia(archivo, periodo):
                         LOG_PROCESO_ASISTENCIA.setdefault(len(LOG_PROCESO_ASISTENCIA)+1, {'EJECUTIVO_DUPLICADO_%s' % str(len(LOG_PROCESO_ASISTENCIA)+1): errorRut})
             LOG_PROCESO_ASISTENCIA.setdefault('FIN_CELDAS_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
             LOG_PROCESO_ASISTENCIA.setdefault('PROCESO_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
+            if len(empleadosLista) > 0:
+                listaEmpleadosFormateada = convertirALista(empleadosLista)
+                insertarEjecutivo(listaEmpleadosFormateada)
             return filaSalidaXls, encabezadoTxt
         else:
             LOG_PROCESO_ASISTENCIA.setdefault('ENCABEZADO_ASISTENCIA', archivo_correcto)

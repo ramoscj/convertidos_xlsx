@@ -99,10 +99,8 @@ def validarEstadoReact(estadoRetencion, estado):
         estadoValidoReact = listaEstadoRetencion.get(estadoRetencion)
     return estadoValidoReact
 
-def validarContactoReact(saliente, estadoRetencion, estado, estadoUt):
+def validarContactoReact(saliente, estadoRetencion, estado, estadoUt, listaEstadoContactado):
 
-    listaEstadoNoContactado = listaEstadoUtNoContacto()
-    listaEstadoContactado = listaEstadoUtContacto()
     contactoReact = 0
     if saliente == inbound:
         contactoReact = 1
@@ -119,15 +117,8 @@ def validarContactoReact(saliente, estadoRetencion, estado, estadoUt):
             if estadoUt is None:
                 if estado != 'Sin Gestion':
                     contactoReact = 1
-                # else:
-                #     contactoReact = 0
             elif listaEstadoContactado.get(estadoUt):
                 contactoReact = 1
-            # elif listaEstadoNoContactado.get(estadoUt):
-            #     contactoReact = 0
-            # else:
-            #     mensaje = 'Error ESTADO_UT;ESTADO_UT no existe;%s' % estadoUt
-            #     LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ERROR_ESTADOUT': mensaje})
     return contactoReact
 
 def exitoRepetidoPk(numeroPoliza, polizaExitoRepetido, gestionReactTxt):
@@ -267,6 +258,8 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
             ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
             listaEstadoRetencionTexto = estadoRetencionReacDesc()
+            listaEstadoContactado = listaEstadoUtContacto()
+            # listaEstadoNoContactado = listaEstadoUtNoContacto()
             i = 0
             cantidadCampanasValidas = 0
             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'INICIO_CELDAS_REACTIVA': 'Iniciando lectura de Celdas del Archivo: %s' % archivoEntrada})
@@ -323,7 +316,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                     if saliente == inbound and fechaCreacion >= fechaIncioMes and fechaCreacion <= fechaFinMes or saliente == outbound and fechaCreacion >= fechaInicioPeriodo and fechaCreacion <= fechaFinPeriodo:
 
                         estadoValidoReact = validarEstadoReact(estadoRetencion, estado)
-                        contactoReact = validarContactoReact(saliente, estadoRetencion, estado, estadoUt)
+                        contactoReact = validarContactoReact(saliente, estadoRetencion, estado, estadoUt, listaEstadoContactado)
 
                         if type(contactoReact) is not int:
                             valorErroneo = str(fila[columna['ESTADO_ULTIMA_TAREA']].value)
@@ -331,15 +324,6 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                             mensaje = '%s;No existe EstadoUT;%s' % (celdaCoordenada, valorErroneo)
                             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ERROR_ESTADO_UT': mensaje})
                             continue
-
-                        # if campanaIdDuplicado.get(campanaId):
-                        #     pkDataGestion = campanaIdDuplicado[campanaId]['PK']
-                        #     if contactoReact == 1 and gestionReactTxt[pkDataGestion]['CONTACTO_REACT'] == 0:
-                        #         datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
-                        #         gestionReactTxt[pkDataGestion].update(datosActualizados)
-                        #         print(campanaId)
-                        # else:
-                        #     campanaIdDuplicado[campanaId] = {'PK': pk}
 
                         if not gestionReactTxt.get(pk):
                             gestionReactTxt[pk] = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': 1,'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
