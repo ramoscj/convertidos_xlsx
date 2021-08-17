@@ -7,6 +7,7 @@ def salidaArchivoTxt(ArchivoSalidaTxt, dataXlsx, encabezadoXlsx):
             writer = csv.writer(txt, delimiter=';')
             writer.writerow(encabezadoXlsx)
             for pk, registro in tqdm(iterable=dataXlsx.items(), total = len(dataXlsx), desc='Escribiendo DATA', unit='Row'):
+            # for pk, registro in dataXlsx.items():
                 writer.writerow(registro.values())
         return True
     except Exception as e:
@@ -32,6 +33,7 @@ def salidaLogTxt(ArchivoSalidaTxt, dataXlsx, encoding='UTF-8'):
         with open(ArchivoSalidaTxt, 'w', newline='') as txt:
             writer = csv.writer(txt, delimiter='\n')
             for rut, x in tqdm(iterable=dataXlsx.items(), total = len(dataXlsx), desc='Escribiendo LOG', unit='Row'):
+            # for rut, x in dataXlsx.items():
                 writer.writerow(x.values())
         return True
     except Exception as e:

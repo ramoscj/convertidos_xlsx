@@ -42,47 +42,45 @@ def leerArchivoFuga(archivo, periodo):
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
-        archivo_correcto = validarEncabezadoXlsx(hoja[coordenadaEcabezado], encabezadoXls, archivo)
-        if type(archivo_correcto) is not dict:
-            LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'ENCABEZADO_FUGA': 'Encabezado del Archivo: %s OK' % archivo})
-            i = 0
-            correlativo = 1
-            filaSalidaFugaXls = dict()
-            filaSalidaStockXls = dict()
-            ejecutivosExistentesDb = buscarRutEjecutivosDb(ultimoDiaMes(periodo), primerDiaMes(periodo))
-            LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'INICIO_CELDAS_FUGA': 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
-            for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo FugaCRO' , unit=' Fila'):
 
-                if i >= 1:
-                    fechaLpattrs = validaFechaCelda(fila[columna['LPATTR_PER_RES']])
-                    if type(fechaLpattrs) is str:
-                            LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'FECHA_CREACION': fechaLpattrs})
-                            continue
-                    if periodo == str(fechaLpattrs.value) and fila[columna['ID_EMPLEADO']].value is not None:
+        LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'ENCABEZADO_FUGA': 'Encabezado del Archivo: %s OK' % archivo})
+        i = 0
+        correlativo = 1
+        filaSalidaFugaXls = dict()
+        filaSalidaStockXls = dict()
+        ejecutivosExistentesDb = buscarRutEjecutivosDb(ultimoDiaMes(periodo), primerDiaMes(periodo))
+        LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'INICIO_CELDAS_FUGA': 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
+        
+        for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo FugaCRO' , unit=' Fila'):
 
-                        idEmpleado = str(fila[columna['ID_EMPLEADO']].value)
-                        tipo = str(fila[columna['TIPO']].value).upper()
-                        considerarFuga = str(fila[columna['CONSIDERAR_FUGA']].value).upper()
-                        lpattrCodStat = str(fila[columna['LPATTR_COD_STAT']].value).upper()
+            if i >= 1:
+                fechaLpattrs = validaFechaCelda(fila[columna['LPATTR_PER_RES']])
+                if type(fechaLpattrs) is str:
+                        LOG_PROCESO_FUGA.setdefault(len(LOG_PROCESO_FUGA)+1, {'FECHA_CREACION': fechaLpattrs})
+                        continue
+                if periodo == str(fechaLpattrs.value) and fila[columna['ID_EMPLEADO']].value is not None:
 
-                        if ejecutivosExistentesDb.get(idEmpleado):
-                            unidad = ejecutivosExistentesDb[idEmpleado]['PLATAFORMA']
-                            if filaSalidaFugaXls.get(idEmpleado):
-                                filaSalidaFugaXls[idEmpleado] = existeRut(tipo, lpattrCodStat, considerarFuga, filaSalidaFugaXls[idEmpleado])
-                            else:
-                                filaSalidaFugaXls[idEmpleado] = validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, idEmpleado, unidad)
-                                correlativo += 1
+                    idEmpleado = str(fila[columna['ID_EMPLEADO']].value)
+                    tipo = str(fila[columna['TIPO']].value).upper()
+                    considerarFuga = str(fila[columna['CONSIDERAR_FUGA']].value).upper()
+                    lpattrCodStat = str(fila[columna['LPATTR_COD_STAT']].value).upper()
+
+                    if ejecutivosExistentesDb.get(idEmpleado):
+                        unidad = ejecutivosExistentesDb[idEmpleado]['PLATAFORMA']
+                        if filaSalidaFugaXls.get(idEmpleado):
+                            filaSalidaFugaXls[idEmpleado] = existeRut(tipo, lpattrCodStat, considerarFuga, filaSalidaFugaXls[idEmpleado])
                         else:
-                            errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['ID_EMPLEADO']]), idEmpleado)
-                            LOG_PROCESO_FUGA.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_FUGA)+1: errorRut})
-                i += 1
+                            filaSalidaFugaXls[idEmpleado] = validarFugaStock(correlativo, tipo, lpattrCodStat, considerarFuga, idEmpleado, unidad)
+                            correlativo += 1
+                    else:
+                        errorRut = 'Celda%s - No existe Ejecutivo: %s' % (setearCelda(fila[columna['ID_EMPLEADO']]), idEmpleado)
+                        LOG_PROCESO_FUGA.setdefault('EJECUTIVO_NO_EXISTE_%s' % i, {len(LOG_PROCESO_FUGA)+1: errorRut})
+            i += 1
 
-            LOG_PROCESO_FUGA.setdefault('FIN_CELDAS_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
-            LOG_PROCESO_FUGA.setdefault('PROCESO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
-            return filaSalidaFugaXls, encabezadoFugaTxt
-        else:
-            LOG_PROCESO_FUGA.setdefault('ENCABEZADO_FUGA', archivo_correcto)
-            raise Exception('Error en enbezado de archivo: %s' % archivo)
+        LOG_PROCESO_FUGA.setdefault('FIN_CELDAS_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivo, len(tuple(hoja.rows)))})
+        LOG_PROCESO_FUGA.setdefault('PROCESO_FUGA', {len(LOG_PROCESO_FUGA)+1: 'Proceso del Archivo: %s Finalizado' % archivo})
+        return filaSalidaFugaXls, encabezadoFugaTxt
+
     except Exception as e:
         errorMsg = 'Error: %s | %s' % (archivo, e)
         LOG_PROCESO_FUGA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_FUGA)+1: errorMsg})

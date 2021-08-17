@@ -325,7 +325,7 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
         polizaNoAprobada = 1
     return cobranzaPro, pacpatPro, polizaNoAprobada
         
-def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
+def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
     try:
         encabezadoXls = PROACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = PROACTIVA_CONFIG_XLSX['ENCABEZADO_TXT']
@@ -347,7 +347,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
             i = 0
             polizasNoAprobadas = 0
             cantidadCampanasValidas = 0
-            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplmentoCliente)
+            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplementoCliente)
             LOG_PROCESO_PROACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
             ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
             listaEstadoContactado = listaEstadoUtContacto()

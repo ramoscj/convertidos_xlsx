@@ -1,9 +1,13 @@
+import os
+
 # Directorio de archivos de entrada XLSX
 PATH_XLSX = 'INPUTS/'
 # Directorio de archivos de salida TXT
 PATH_TXT = 'OUTPUTS/'
 # Directorio de archivos LOG de salida
 PATH_LOG = 'PROCESO_LOG/'
+# Directorio Raiz del proyecto
+PATH_RAIZ = os.path.abspath(os.getcwd())
 
 # Parametros de conexion a la DB
 ACCESO_DB = {
@@ -11,6 +15,30 @@ ACCESO_DB = {
     'NOMBRE_DB': 'icom',
     'USUARIO': 'sa',
     'CLAVE': '5325106'
+    # 'SERVIDOR': 'tcp:icomdb01.database.windows.net,1433',
+    # 'NOMBRE_DB': 'IComMetlifeCC',
+    # 'USUARIO': 'callcenter',
+    # 'CLAVE': '+m3tl1f32021c4llc3nt3r*'
+}
+
+
+PROCESOS_GENERALES = {
+    'DOTACION' : {
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 4
+                },
+    'CRO' : {
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 9
+                },
+    'PROACTIVA' : {
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 4
+                },
+    'REACTIVA' : {
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 7
+                },
 }
 
 FUGA_CONFIG_XLSX = {
@@ -75,7 +103,9 @@ GESTION_CONFIG_XLSX = {
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
     'COLUMNAS_PROCESO_XLSX': {'CAMPAÑA_ID': 0, 'FECHA_DE_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'ESTADO_UT': 3, 'ESTADO': 4, 'FECHA_DE_CIERRE': 5, 'ID_EMPLEADO': 6},
     # Columnas que se utilizaran durante el procesamiento del archivo PropietariosCRO XLSX
-    'COLUMNAS_PROPIETARIOS_XLSX': {'CAMPAÑA_ID': 0, 'FECHA': 5, 'ID_EMPLEADO': 6}
+    'COLUMNAS_PROPIETARIOS_XLSX': {'CAMPAÑA_ID': 0, 'FECHA': 5, 'ID_EMPLEADO': 6},
+    # Coordenadas encabezado
+    'COORDENADA_ENCABEZADO_PROPIETARIO': 'A1:G1',
 }
 
 CAMPANHAS_CONFIG_XLSX = {
@@ -169,10 +199,10 @@ REACTIVA_CONFIG_XLSX = {
 
     # Nombre del archivo base de certificacion
     'ARCHIVO_BASE_CERTIFICACION': {
-
+        # Coordenadas encabezado
+        'COORDENADA_ENCABEZADO': 'A1:X1',
         # Archivo de entrada
         'NOMBRE_ARCHIVO': 'Base Certificacion',
-
         # Nombre de las columnas del encabezado que tendra el archivo de Base Certificacion
         'ENCABEZADO': ['PÓLIZA', 'REQUERIMIENTO', 'FECHA DE LLAMADO', 'HORA DE LLAMADO', 'ID EJECUTIVO', 'CANAL', 'SE ENCONTRÓ GRABACIÓN EN NICE', 'CLIENTE CONTACTADO', 'UTILIZA ARGUMENTO DE DESACTIVACIÓN DE MEDIO DE PAGO', 'CONFIRMA NOMBRE COMPLETO DE CLIENTE ', 'CONFIRMA RUT DEL CLIENTE', 'CONFIRMA TELÉFONO DE CONTACTO', 'EJECUTIVA DEJA SIN EFECTO CARTA EN FORMA VOLUNTARIA CLIENTE', 'MENCIONA NÚMERO DE PÓLIZA Y NOMBRE DEL PRODUCTO', 'MENCIONA QUE MANTENDRÁ COBERTURA VIGENTE', 'ENVÍA CARTA DE REVOCACIÓN ', 'EXPLICA COMO COMPLETAR CARTA DE REVOCACIÓN', 'TIPO DE CERTIFICACIÓN', 'FECHA CERTIFICACIÓN', 'EMAIL ENVIADO', 'GESTIÓN', 'UF', 'CARTA', 'EXISTE MIEMBRO DE CAMPAÑA - TERMINADO CON ÉXITO EN SALESFORCE'],
 
@@ -213,10 +243,10 @@ REACTIVA_CONFIG_XLSX = {
 COMPLEMENTO_CLIENTE_XLSX = {
     # Nombre del archivo Complemento Cliente
     'NOMBRE_ARCHIVO': 'COMPLEMENTO CLIENT vLite',
-
+    # Coordenadas encabezado
+    'COORDENADA_ENCABEZADO': 'A1:G1',
     # Nombre de las columnas del encabezado que tendra el archivo de Complemento Cliente
     'ENCABEZADO': ['NROPOLIZA', 'NROCERT', 'ESTADOPOLIZA', 'FEC_ULT_PAG', 'ESTADO_MANDATO', 'FECHA_MANDATO', 'FECHAPROCESO'],
-
     # # Columnas que se utilizaran durante el procesamiento del archivo Complemento Cliente
     'COLUMNAS': {'NRO_POLIZA': 0, 'NRO_CERT': 1, 'ESTADO_POLIZA': 2, 'FEC_ULT_PAG': 3, 'ESTADO_MANDATO': 4, 'FECHA_MANDATO': 5},
 }
