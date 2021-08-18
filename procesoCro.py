@@ -13,7 +13,7 @@ from leerFugaXLSX import LOG_PROCESO_FUGA, leerArchivoFuga
 from leerGestionXLSX import LOG_PROCESO_GESTION, leerArchivoGestion
 
 from validaciones_texto import (compruebaEncabezado, encontrarArchivo,
-                                encontrarDirectorio, validaFechaInput, setearFechaInput)
+                                encontrarDirectorio, validaFechaInput, setearFechaInput, formatearFechaMesSiguiente)
 
 
 def procesoGenerico(fechaInput, archivoXlsxInput, pathArchivoTxt, procesoInput, *valoresExtraGestion):
@@ -34,6 +34,8 @@ def procesoGenerico(fechaInput, archivoXlsxInput, pathArchivoTxt, procesoInput, 
         elif procesoInput == 'FUGA':
             dataXlsx, encabezadoXlsx = leerArchivoFuga(archivoXlsxInput, fechaInput)
             formatoSalidaTxt = FUGA_CONFIG_XLSX['SALIDA_TXT']
+            fechaMesSiguiente = formatearFechaMesSiguiente(fechaInput)
+            fechaInput = fechaMesSiguiente.strftime("%Y%m")
             logProceso = LOG_PROCESO_FUGA
         elif procesoInput == 'GESTION':
             dataXlsx, encabezadoXlsx = leerArchivoGestion(archivoXlsxInput, fechaInput, valoresExtraGestion[0], valoresExtraGestion[1], valoresExtraGestion[2])
