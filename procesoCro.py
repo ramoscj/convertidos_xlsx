@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import datetime
 
 from config_xlsx import (CALIDAD_CONFIG_XLSX, CAMPANHAS_CONFIG_XLSX, FUGA_CONFIG_XLSX, GESTION_CONFIG_XLSX,
@@ -100,6 +100,11 @@ def main():
         salidaTxtDirectorio = encontrarDirectorio(pathArchivosTxt)
         if not salidaTxtDirectorio:
             print('Error Directorio: {0} no existe!'.format(str(pathArchivosTxt)))
+            exit(1)
+
+        permisoPath = bool(os.access(pathArchivosTxt, os.W_OK))
+        if not permisoPath:
+            print('Error no tiene permisos de escritura en el directorio: {0}'.format(pathArchivosTxt))
             exit(1)
 
         archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsCalidad, archivoXlsCampanas, archivoXlsFuga, archivoXlsGestion, archivoXlsPropietarios])
