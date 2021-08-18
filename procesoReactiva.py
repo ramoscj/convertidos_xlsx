@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import datetime
 
 from config_xlsx import PATH_LOG, REACTIVA_CONFIG_XLSX, PROCESOS_GENERALES, PATH_RAIZ
@@ -73,6 +73,11 @@ def main():
         salidaTxtDirectorio = encontrarDirectorio(pathArchivoTxt)
         if not salidaTxtDirectorio:
             print('Error Directorio: {0} no existe!'.format(str(pathArchivoTxt)))
+            exit(1)
+
+        permisoPath = bool(os.access(pathArchivoTxt, os.W_OK))
+        if not permisoPath:
+            print('Error no tiene permisos de escritura en el directorio: {0}'.format(pathArchivoTxt))
             exit(1)
 
         archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoReactivaXls, archivoComplementoXls, archivoCertificacionXls])

@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import datetime
 
 from config_xlsx import (ASISTENCIA_CONFIG_XLSX, DOTACION_CONFIG_XLSX,
@@ -30,7 +30,6 @@ def procesoAsistencia(fechaInput, archivoXlsxInput, pathArchivoTxt):
             print("Archivo: {0}\{1} Creado!".format(PATH_RAIZ, pathLogSalida))
     except Exception as e:
         print(e)
-
 
 def procesoDotacion(fechaInput, pathArchivoTxt):
 
@@ -84,6 +83,7 @@ def main():
         pathArchivoTxtAsistencia = str(sys.argv[3])
         pathArchivoTxtDotacion = str(sys.argv[4])
         pathNoEncontrado = []
+        pathNoPermisos = []
         directorioNumero = []
 
         if validaFechaInput(fechaEntrada):
@@ -105,6 +105,17 @@ def main():
             for path in pathNoEncontrado:
                 print('Error en el Directorio {0}: {1} no existe!'.format(directorioNumero[i], str(path)))
                 i += 1
+            exit(1)
+        
+        permisoPathAsistencia = bool(os.access(pathArchivoTxtAsistencia, os.W_OK))
+        permisoPathDotacion = bool(os.access(pathArchivoTxtDotacion, os.W_OK))
+        if not permisoPathAsistencia or not permisoPathDotacion:
+            if not permisoPathAsistencia:
+                pathNoPermisos.append(pathArchivoTxtAsistencia)
+            if not permisoPathDotacion:
+                pathNoPermisos.append(pathArchivoTxtDotacion)
+            for permisos in pathNoPermisos:
+                print('Error no tiene permisos de escritura en el directorio: {0}'.format(permisos))
             exit(1)
 
         archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsAsistencia])
