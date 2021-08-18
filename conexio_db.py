@@ -1,7 +1,3 @@
-import datetime
-import os
-
-import mysql.connector
 import pyodbc
 
 from config_xlsx import ACCESO_DB
@@ -14,7 +10,6 @@ def conectorDB():
     except Exception as e:
         raise Exception('Error al conectar DB - %s' % e)
 
-# print(conectorDB())
 
 def insertar():
     try:
@@ -32,4 +27,4 @@ def insertar():
         cursor.close()
         db.close()
 
-# print(insertar())
+# print(conectorDB())

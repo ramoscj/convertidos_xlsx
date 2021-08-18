@@ -48,8 +48,7 @@ def getInversaEstado(estado):
     else:
         return False
 
-def getEstadoUt(celdaEstadoUt):
-    listaEstadoUt = listaEstadoUtAll()
+def getEstadoUt(celdaEstadoUt, listaEstadoUt):
     estadoUt = celdaEstadoUt
     if listaEstadoUt.get(str(estadoUt.value)):
         return listaEstadoUt[estadoUt.value]
@@ -197,7 +196,7 @@ def polizasReliquidadas(periodo, complementoCliente):
         if poliza['COBRANZA_RL_PRO'] > 0:
             cobranzaRelPro = aprobarCobranza(numeroPolizaCertificado, fechaCierre, numeroPolizaCliente, fecUltimoPago)
             if cobranzaRelPro == 0:
-                mensaje = 'PolizaReliquidacion;No cumple condicion de retencion COBRO para Reliquidacion;%s' % (numeroPoliza)
+                mensaje = 'PolizaReliquidacion;No cumple condicion de retencion COBRANZA para Reliquidacion;%s' % (numeroPoliza)
                 LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'PROCESO_COBRANZA_RELIQUIDACION': mensaje})
 
         if poliza['PACPAT_RL_PRO'] > 0:
@@ -326,7 +325,7 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
         polizaNoAprobada = 1
     return cobranzaPro, pacpatPro, polizaNoAprobada
         
-def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
+def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
     try:
         encabezadoXls = PROACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = PROACTIVA_CONFIG_XLSX['ENCABEZADO_TXT']
@@ -348,12 +347,13 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
             i = 0
             polizasNoAprobadas = 0
             cantidadCampanasValidas = 0
-            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplmentoCliente)
+            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplementoCliente)
             LOG_PROCESO_PROACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
             ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
             listaEstadoContactado = listaEstadoUtContacto()
             listaEstadoRetencionTexto = estadoRetencionProDesc()
             listaEstadoUtTexto = listaEstadoUtDesc()
+            listaEstadoUt = listaEstadoUtAll()
             LOG_PROCESO_PROACTIVA.setdefault('INICIO_LECTURA_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: '-----------------------------------------------------' })
             LOG_PROCESO_PROACTIVA.setdefault('ENCABEZADO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Encabezado del Archivo: %s OK' % archivoEntrada})
             LOG_PROCESO_PROACTIVA.setdefault('INICIO_CELDAS_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Iniciando lectura de Celdas del Archivo: %s' % archivoEntrada})
@@ -386,7 +386,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
                         fechaCierre = setearFechaCelda(fila[columna['FECHA_CIERRE']])
 
                     estadoValido = getEstado(fila[columna['ESTADO']])
-                    estadoUtValido = getEstadoUt(fila[columna['ESTADO_ULTIMA_TAREA']])
+                    estadoUtValido = getEstadoUt(fila[columna['ESTADO_ULTIMA_TAREA']], listaEstadoUt)
 
                     if type(fechaCreacion) is not datetime.date:
                         valorErroneo = str(fila[columna['FECHA_CREACION']].value)
@@ -529,4 +529,3 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplmentoCliente):
         LOG_PROCESO_PROACTIVA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_PROACTIVA)+1: errorMsg})
         LOG_PROCESO_PROACTIVA.setdefault('PROCESO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
         return False, False, False, False
-

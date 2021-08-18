@@ -1,7 +1,10 @@
 import datetime
 import string
+import os.path
 
 from dateutil.relativedelta import relativedelta
+
+from openpyxl import load_workbook
 
 def validaFechaInput(fecha_x):
     try:
@@ -12,7 +15,7 @@ def validaFechaInput(fecha_x):
         else:
             return False
     except Exception as e:
-        print("Error de fecha, formato correcto YYYYMMDD | %s" % e)
+        print("Error de fecha, formato correcto YYYYMM | %s" % e)
 
 def validaFechaCelda(celdaFila):
     try:
@@ -48,7 +51,7 @@ def setearFechaInput(fecha):
         fechaSalida = datetime.date(int(fechaAnho), int(fechaMes), int(fechaDia))
         return fechaSalida
     except Exception as e:
-        errorMsg = "Error %s, setearFechaInput YYYYMMDD | %s" % (fecha, e)
+        errorMsg = "Error de fecha %s, formato correcto YYYYMMDD setearFechaInput | %s" % (fecha, e)
         raise Exception(errorMsg)
 
 def formatearRut(rut):
@@ -75,6 +78,13 @@ def validarEncabezadoXlsx(filasXlsx: [], encabezadoXls: [], nombreArchivo):
         return columnasError
     else:
         return True
+
+def compruebaEncabezado(archivoXlsx, encabezadoXls, coordenadaEcabezado):
+    xls = load_workbook(archivoXlsx, read_only=True)
+    nombre_hoja = xls.sheetnames
+    hoja = xls[nombre_hoja[0]]
+    archivo_correcto = validarEncabezadoXlsx(hoja[coordenadaEcabezado], encabezadoXls, archivoXlsx)
+    return archivo_correcto
 
 def setearCelda(celda):
     resto, separador, celdaN = str(celda).partition(".")
@@ -257,5 +267,14 @@ def fechaUnida(celdaFila):
         errorMsg = "Celda%s - fechaUnida: %s | %s" % (setearCelda(celdaFila), str(celdaFila.value), e)
         return errorMsg
 
-# x = '12_2'
-# print(fechaUnida('01-12-2021'))
+def encontrarArchivo(archivoXlsx):
+    valor = False
+    if os.path.isfile(archivoXlsx):
+        valor = True
+    return valor
+
+def encontrarDirectorio(pathDestino):
+    valor = False
+    if os.path.isdir(pathDestino):
+        valor = True
+    return valor
