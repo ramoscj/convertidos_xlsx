@@ -332,14 +332,11 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         if controlCambioPk:
                             datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': gestionReactTxt[pk]['REPETICIONES'] + 1, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
                             gestionReactTxt[pk].update(datosActualizados)
-                            # mensaje = '{0};POLIZA_DUPLICADA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3})'.format(celdaCoordenada, listaEstadoRetencionTexto(gestionReactTxt[pk]['ESTADO_VALIDO_REACT']), gestionReactTxt[pk]['CONTACTO_REACT'], pk)
-                            LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'REGISTRO_DUPLICADA': 'CAMBIO: {0}'.format(celdaCoordenada)})
+                            mensaje = '{0};POLIZA_DUPLICADA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4},{5})_{6}'.format(celdaCoordenada, listaEstadoRetencionTexto.get(gestionReactTxt[pk]['ESTADO_VALIDO_REACT']), gestionReactTxt[pk]['CONTACTO_REACT'], listaEstadoRetencionTexto.get(estadoValidoReact), contactoReact, estadoRetencion, indiceCambio)
+                            LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'REGISTRO_DUPLICADA': mensaje})
                         else:
-                            # estadoReacTexto = gestionReactTxt[pk]['ESTADO_VALIDO_REACT']
-                            # if listaEstadoRetencionTexto(gestionReactTxt[pk]['ESTADO_VALIDO_REACT']):
-                            #     estadoReacTexto = listaEstadoRetencionTexto(gestionReactTxt[pk]['ESTADO_VALIDO_REACT'])
-                            # mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO:({1},{2}):PERMANECE:({3},{4})'.format(celdaCoordenada, estadoReacTexto, gestionReactTxt[pk]['CONTACTO_REACT'], estadoValidoReact, contactoReact)
-                            LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'REGISTRO_DUPLICADA': 'ELIMINADA: {0}'.format(celdaCoordenada)})
+                            mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO:({1},{2},{3}):PERMANECE:({4},{5})'.format(celdaCoordenada, listaEstadoRetencionTexto.get(estadoValidoReact), contactoReact, estadoRetencion, listaEstadoRetencionTexto.get(gestionReactTxt[pk]['ESTADO_VALIDO_REACT']), gestionReactTxt[pk]['CONTACTO_REACT'])
+                            LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'REGISTRO_DUPLICADA': mensaje})
                             gestionReactTxt[pk]['REPETICIONES'] += 1
                             continue
 
