@@ -10,7 +10,7 @@ from validaciones_texto import validaFechaInput, encontrarDirectorio, encontrarA
 def procesoProactiva(fechaInput, archivoXlsxInput, archivoComplementoCliente, pathArchivoTxt):
 
     hora = datetime.datetime.now()
-    pathLogSalida = "PROACTIVA/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, 'PROACTIVA', fechaInput, hora.strftime("H%HM%MS%S"))
+    pathLogSalida = "PROACTIVA/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, 'PROACTIVA', fechaInput, hora.strftime("%Y%m%d%H%M"))
     print("Iniciando proceso PROACTIVA...")
     try:
         dataProactivaXlsx, encabezadoXlsx, reliquidacionesTxt, encabezadoReliquidacionesTxt = leerArchivoProactiva(archivoXlsxInput, fechaInput, archivoComplementoCliente)

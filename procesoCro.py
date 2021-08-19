@@ -13,13 +13,38 @@ from leerFugaXLSX import LOG_PROCESO_FUGA, leerArchivoFuga
 from leerGestionXLSX import LOG_PROCESO_GESTION, leerArchivoGestion
 
 from validaciones_texto import (compruebaEncabezado, encontrarArchivo,
-                                encontrarDirectorio, validaFechaInput, setearFechaInput, formatearFechaMesSiguiente)
+                                encontrarDirectorio, validaFechaInput, setearFechaInput, formatearFechaMesAnterior)
 
+procesos = {
+        "FUGA": {
+                'PROCESO': PROCESOS_GENERALES['FUGA']['ARGUMENTOS_PROCESO'],
+                'ENCABEZADO': FUGA_CONFIG_XLSX['ENCABEZADO_XLSX'],
+                'COORDENADA_ENCABEZADO': FUGA_CONFIG_XLSX['COORDENADA_ENCABEZADO'],
+                },
+    "GESTION": {
+                'PROCESO': PROCESOS_GENERALES['GESTION']['ARGUMENTOS_PROCESO'],
+                'ENCABEZADO': GESTION_CONFIG_XLSX['ENCABEZADO_XLSX'],
+                'COORDENADA_ENCABEZADO': GESTION_CONFIG_XLSX['COORDENADA_ENCABEZADO'],
+                'ENCABEZADO_PROPIETARIOS' :GESTION_CONFIG_XLSX['ENCABEZADO_PROPIETARIOS_XLSX'],
+                'COORDENADA_PROPIETARIOS' :GESTION_CONFIG_XLSX['COORDENADA_ENCABEZADO_PROPIETARIO'],
+                },
+    "CAMPANHA_ESPECIAL": {
+                'PROCESO': PROCESOS_GENERALES['CAMPANHA_ESPECIAL']['ARGUMENTOS_PROCESO'],
+                'ENCABEZADO': CAMPANHAS_CONFIG_XLSX['ENCABEZADO_XLSX'],
+                'COORDENADA_ENCABEZADO': CAMPANHAS_CONFIG_XLSX['COORDENADA_ENCABEZADO'],
+                },
+    "CALIDAD": {
+                'PROCESO': PROCESOS_GENERALES['CALIDAD']['ARGUMENTOS_PROCESO'],
+                'ENCABEZADO': CALIDAD_CONFIG_XLSX['ENCABEZADO_XLSX'],
+                'COORDENADA_ENCABEZADO': CALIDAD_CONFIG_XLSX['COORDENADA_ENCABEZADO'],
+                }
+        
+}
 
 def procesoGenerico(fechaInput, archivoXlsxInput, pathArchivoTxt, procesoInput, *valoresExtraGestion):
 
     hora = datetime.datetime.now()
-    pathLogSalida = "CRO/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, procesoInput, fechaInput, hora.strftime("H%HM%MS%S"))
+    pathLogSalida = "CRO/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, procesoInput, fechaInput, hora.strftime("%Y%m%d%H%M"))
 
     print("Iniciando Lectura del archivo de {0}...".format(archivoXlsxInput))
     try:
@@ -27,15 +52,14 @@ def procesoGenerico(fechaInput, archivoXlsxInput, pathArchivoTxt, procesoInput, 
             dataXlsx, encabezadoXlsx = leerArchivoCalidad(archivoXlsxInput, fechaInput)
             formatoSalidaTxt = CALIDAD_CONFIG_XLSX['SALIDA_TXT']
             logProceso = LOG_PROCESO_CALIDAD
-        elif procesoInput == 'CAMPAÑAS ESPEACIALES':
+        elif procesoInput == 'CAMPANHA_ESPECIAL':
             dataXlsx, encabezadoXlsx = leerArchivoCampanhasEsp(archivoXlsxInput, fechaInput)
             formatoSalidaTxt = CAMPANHAS_CONFIG_XLSX['SALIDA_TXT']
             logProceso = LOG_PROCESO_CAMPANHAS
         elif procesoInput == 'FUGA':
-            dataXlsx, encabezadoXlsx = leerArchivoFuga(archivoXlsxInput, fechaInput)
+            fechaMesAnterior = formatearFechaMesAnterior(fechaInput)
+            dataXlsx, encabezadoXlsx = leerArchivoFuga(archivoXlsxInput, fechaMesAnterior.strftime("%Y%m"))
             formatoSalidaTxt = FUGA_CONFIG_XLSX['SALIDA_TXT']
-            fechaMesSiguiente = formatearFechaMesSiguiente(fechaInput)
-            fechaInput = fechaMesSiguiente.strftime("%Y%m")
             logProceso = LOG_PROCESO_FUGA
         elif procesoInput == 'GESTION':
             dataXlsx, encabezadoXlsx = leerArchivoGestion(archivoXlsxInput, fechaInput, valoresExtraGestion[0], valoresExtraGestion[1], valoresExtraGestion[2])
@@ -52,12 +76,10 @@ def procesoGenerico(fechaInput, archivoXlsxInput, pathArchivoTxt, procesoInput, 
     except Exception as e:
         print(e)
 
-def validarArchivosEntrada(archivosEntrada: []):
+def validarArchivosEntrada(archivosEntrada: [], encabezadosArchivos: [], coordenadasEncabezado: []):
 
     archivosValidos = True
     encabezadosValidos = True
-    encabezadosArchivos = [CALIDAD_CONFIG_XLSX['ENCABEZADO_XLSX'], CAMPANHAS_CONFIG_XLSX['ENCABEZADO_XLSX'], FUGA_CONFIG_XLSX['ENCABEZADO_XLSX'], GESTION_CONFIG_XLSX['ENCABEZADO_XLSX'], GESTION_CONFIG_XLSX['ENCABEZADO_PROPIETARIOS_XLSX']]
-    coordenadasEncabezado = [CALIDAD_CONFIG_XLSX['COORDENADA_ENCABEZADO'], CAMPANHAS_CONFIG_XLSX['COORDENADA_ENCABEZADO'], FUGA_CONFIG_XLSX['COORDENADA_ENCABEZADO'], GESTION_CONFIG_XLSX['COORDENADA_ENCABEZADO'], GESTION_CONFIG_XLSX['COORDENADA_ENCABEZADO_PROPIETARIO']]
     i = 0
     print("-----------------------------------------------------")
     for archivo in archivosEntrada:
@@ -78,22 +100,27 @@ def validarArchivosEntrada(archivosEntrada: []):
     print("-----------------------------------------------------")
     return archivosValidos, encabezadosValidos
 
-def main():
-    if len(sys.argv) == PROCESOS_GENERALES['CRO']['ARGUMENTOS_PROCESO'] + 1:
+def main(procesoInput):
+    if len(sys.argv) == PROCESOS_GENERALES[procesoInput]['ARGUMENTOS_PROCESO'] + 1:
 
-        fechaEntrada = str(sys.argv[1])
-        fechaRangoInicio = str(sys.argv[2])
-        fechaRangoFin = str(sys.argv[3])
-        archivoXlsCalidad = str(sys.argv[4])
-        archivoXlsCampanas = str(sys.argv[5])
-        archivoXlsFuga = str(sys.argv[6])
-        archivoXlsGestion = str(sys.argv[7])
-        archivoXlsPropietarios = str(sys.argv[8])
-        pathArchivosTxt = str(sys.argv[9])
-        procesosGenericos = ['CALIDAD', 'CAMPAÑAS ESPEACIALES', 'FUGA', 'GESTION']
-        archivosProcesosGenericos = [archivoXlsCalidad, archivoXlsCampanas, archivoXlsFuga, archivoXlsGestion]
+        fechaEntrada = str(sys.argv[2])
+        proceso = 0
 
-        if validaFechaInput(fechaEntrada) and setearFechaInput(fechaRangoInicio) and setearFechaInput(fechaRangoFin):
+        if procesoInput == 'CALIDAD' or procesoInput == 'CAMPANHA_ESPECIAL' or procesoInput == 'FUGA':
+            archivoXlsEntrada = str(sys.argv[3])
+            pathArchivosTxt = str(sys.argv[4])
+            proceso = 1
+        elif procesoInput == 'GESTION':
+            fechaRangoInicio = str(sys.argv[3])
+            fechaRangoFin = str(sys.argv[4])
+            archivoXlsGestion = str(sys.argv[5])
+            archivoXlsPropietarios = str(sys.argv[6])
+            pathArchivosTxt = str(sys.argv[7])
+            setearFechaInput(fechaRangoInicio)
+            setearFechaInput(fechaRangoFin)
+            proceso = 2
+
+        if validaFechaInput(fechaEntrada):
             print("Fecha para el periodo %s OK!" % fechaEntrada)
         else:
             print("Fecha ingresada {0} incorrecta...".format(fechaEntrada))
@@ -109,18 +136,25 @@ def main():
             print('Error no tiene permisos de escritura en el directorio: {0}'.format(pathArchivosTxt))
             exit(1)
 
-        archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsCalidad, archivoXlsCampanas, archivoXlsFuga, archivoXlsGestion, archivoXlsPropietarios])
-
-        if archivosValidos and encabezadosValidos:
-            i = 0
-            for proceso in procesosGenericos:
-                procesoGenerico(fechaEntrada, archivosProcesosGenericos[i], pathArchivosTxt, proceso, fechaRangoInicio, fechaRangoFin, archivoXlsPropietarios)
-                i +=1
-        else:
-            print("Error en Archivos de entrada")
+        if proceso == 1:
+            archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsEntrada], [procesos[procesoInput]['ENCABEZADO']], [procesos[procesoInput]['COORDENADA_ENCABEZADO']])
+            if archivosValidos and encabezadosValidos:
+                procesoGenerico(fechaEntrada, archivoXlsEntrada, pathArchivosTxt, procesoInput)
+            else:
+                print("Error en Archivo: {0}".format(archivoXlsEntrada))
+        elif proceso == 2:
+            archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsGestion, archivoXlsPropietarios], [procesos[procesoInput]['ENCABEZADO'], procesos[procesoInput]['ENCABEZADO_PROPIETARIOS']], [procesos[procesoInput]['COORDENADA_ENCABEZADO'], procesos[procesoInput]['COORDENADA_PROPIETARIOS']])
+            if archivosValidos and encabezadosValidos:
+                procesoGenerico(fechaEntrada, archivoXlsGestion, pathArchivosTxt, procesoInput, fechaRangoInicio, fechaRangoFin, archivoXlsPropietarios)
+            else:
+                print("Error en Archivo: {0}".format(archivoXlsEntrada))
 
     else:
-        print("Error: El programa CRO necesita {0} parametros para su ejecucion".format(PROCESOS_GENERALES['CRO']['ARGUMENTOS_PROCESO']))
+        print("Error: El programa {0} necesita {1} parametros para su ejecucion".format(procesoInput, PROCESOS_GENERALES[procesoInput]['ARGUMENTOS_PROCESO']))
 
 if __name__ == "__main__":
-    main()
+    procesoInput = str(sys.argv[1]).upper()
+    if procesos.get(procesoInput):
+        main(procesoInput)
+    else:
+        print('Error: Proceso "' "{0}" '" no encontrado'.format(procesoInput))

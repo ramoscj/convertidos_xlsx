@@ -15,7 +15,7 @@ hora = datetime.datetime.now()
 def procesoAsistencia(fechaInput, archivoXlsxInput, pathArchivoTxt):
     
     procesoInput = 'ASISTENCIA'
-    pathLogSalida = "CRO/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, procesoInput, fechaInput, hora.strftime("H%HM%MS%S"))
+    pathLogSalida = "CRO/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, procesoInput, fechaInput, hora.strftime("%Y%m%d%H%M"))
 
     print("Iniciando Lectura del archivo de {0}...".format(archivoXlsxInput))
     try:
@@ -34,7 +34,7 @@ def procesoAsistencia(fechaInput, archivoXlsxInput, pathArchivoTxt):
 def procesoDotacion(fechaInput, pathArchivoTxt):
 
     procesoInput = 'DOTACION'
-    pathLogSalidaDotacion = "CRO/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, procesoInput, fechaInput, hora.strftime("H%HM%MS%S"))
+    pathLogSalidaDotacion = "CRO/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, procesoInput, fechaInput, hora.strftime("%Y%m%d%H%M"))
     salidaTxtDotacion = "{0}/{1}{2}.txt".format(pathArchivoTxt, DOTACION_CONFIG_XLSX['SALIDA_TXT'], fechaInput)
 
     print("Iniciando proceso de Archivo DOTACION")
@@ -118,14 +118,14 @@ def main():
                 print('Error no tiene permisos de escritura en el directorio: {0}'.format(permisos))
             exit(1)
 
-        archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsAsistencia])
+        procesoDotacion(fechaEntrada, pathArchivoTxtDotacion)
+        print("-----------------------------------------------------")
 
+        archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsAsistencia])
         if archivosValidos and encabezadosValidos:
             procesoAsistencia(fechaEntrada, archivoXlsAsistencia, pathArchivoTxtAsistencia)
-            print("-----------------------------------------------------")
-            procesoDotacion(fechaEntrada, pathArchivoTxtDotacion)
         else:
-            print("Error en Archivos de entrada")
+            print("Error en Archivo: {0}".format(archivoXlsAsistencia))
 
     else:
         print("Error: El programa CRO necesita {0} parametros para su ejecucion".format(PROCESOS_GENERALES['CRO']['ARGUMENTOS_PROCESO']))

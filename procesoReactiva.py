@@ -10,7 +10,7 @@ from validaciones_texto import validaFechaInput, encontrarDirectorio, encontrarA
 def procesoReactiva(fechaInput, fechaRangoUno, fechaRangoDos, archivoXlsxInput, archivoCertificacionXls, archivoComplementoCliente, pathArchivoTxt):
     
     hora = datetime.datetime.now()
-    pathLogSalida = "REACTIVA/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, 'REACTIVA', fechaInput, hora.strftime("H%HM%MS%S"))
+    pathLogSalida = "REACTIVA/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, 'REACTIVA', fechaInput, hora.strftime("%Y%m%d%H%M"))
     print("Iniciando proceso REACTIVA...")
     try:
         dataReactivaTxt = leerArchivoReactiva(archivoXlsxInput, fechaInput, fechaRangoUno, fechaRangoDos, archivoCertificacionXls, archivoComplementoCliente)

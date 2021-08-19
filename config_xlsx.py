@@ -27,9 +27,21 @@ PROCESOS_GENERALES = {
                 # Argumentos que necesita el proceso para funcionar
                 'ARGUMENTOS_PROCESO': 4
                 },
-    'CRO' : {
+    'CALIDAD' : {   
                 # Argumentos que necesita el proceso para funcionar
-                'ARGUMENTOS_PROCESO': 9
+                'ARGUMENTOS_PROCESO': 4
+                },
+    'CAMPANHA_ESPECIAL' : {   
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 4
+                },
+    'FUGA' : {   
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 4
+                },
+    'GESTION' : {   
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 7
                 },
     'PROACTIVA' : {
                 # Argumentos que necesita el proceso para funcionar
