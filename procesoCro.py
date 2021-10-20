@@ -2,7 +2,7 @@ import sys, os
 import datetime
 
 from config_xlsx import (CALIDAD_CONFIG_XLSX, CAMPANHAS_CONFIG_XLSX, FUGA_CONFIG_XLSX, GESTION_CONFIG_XLSX,
-                         PATH_LOG, PATH_RAIZ, PROCESOS_GENERALES)
+                         PATH_LOG, PATH_RAIZ, PROCESOS_GENERALES, CODM_XLSX, CAMPANHAS_PRIORITARIAS)
 from escribir_txt import salidaArchivoTxt, salidaLogTxt
 
 from leerDotacionXLSX import LOG_PROCESO_DOTACION, leerArchivoDotacion
@@ -11,12 +11,15 @@ from leerCampanhasEspecialesXLSX import (LOG_PROCESO_CAMPANHAS,
                                          leerArchivoCampanhasEsp)
 from leerFugaXLSX import LOG_PROCESO_FUGA, leerArchivoFuga
 from leerGestionXLSX import LOG_PROCESO_GESTION, leerArchivoGestion
+from leerCoDmXLSX import LOG_PROCESO_CODM, leerArchivoCoDm
+from leerCampanasPrioritariasXLSX import LOG_PROCESO_PRIORITARIAS, leerArchivoPrioritarias
 
 from validaciones_texto import (compruebaEncabezado, encontrarArchivo,
                                 encontrarDirectorio, validaFechaInput, setearFechaInput, formatearFechaMesAnterior)
 
 procesos = {
-        "FUGA": {
+
+    "FUGA": {
                 'PROCESO': PROCESOS_GENERALES['FUGA']['ARGUMENTOS_PROCESO'],
                 'ENCABEZADO': FUGA_CONFIG_XLSX['ENCABEZADO_XLSX'],
                 'COORDENADA_ENCABEZADO': FUGA_CONFIG_XLSX['COORDENADA_ENCABEZADO'],
@@ -37,7 +40,17 @@ procesos = {
                 'PROCESO': PROCESOS_GENERALES['CALIDAD']['ARGUMENTOS_PROCESO'],
                 'ENCABEZADO': CALIDAD_CONFIG_XLSX['ENCABEZADO_XLSX'],
                 'COORDENADA_ENCABEZADO': CALIDAD_CONFIG_XLSX['COORDENADA_ENCABEZADO'],
-                }
+                },
+    "CAMPANHA_PRIORITARIA": {
+                'PROCESO': PROCESOS_GENERALES['CAMPANHA_PRIORITARIA']['ARGUMENTOS_PROCESO'],
+                'ENCABEZADO': CAMPANHAS_PRIORITARIAS['ENCABEZADO_XLSX'],
+                'COORDENADA_ENCABEZADO': CAMPANHAS_PRIORITARIAS['COORDENADA_ENCABEZADO'],
+                },
+    "CODM":     {
+                'PROCESO': PROCESOS_GENERALES['CODM']['ARGUMENTOS_PROCESO'],
+                'ENCABEZADO': CODM_XLSX['ENCABEZADO_XLSX'],
+                'COORDENADA_ENCABEZADO': CODM_XLSX['COORDENADA_ENCABEZADO'],
+                },
         
 }
 
@@ -61,14 +74,25 @@ def procesoGenerico(fechaInput, archivoXlsxInput, pathArchivoTxt, procesoInput, 
             dataXlsx, encabezadoXlsx = leerArchivoFuga(archivoXlsxInput, fechaMesAnterior.strftime("%Y%m"))
             formatoSalidaTxt = FUGA_CONFIG_XLSX['SALIDA_TXT']
             logProceso = LOG_PROCESO_FUGA
+        elif procesoInput == 'CODM':
+            dataXlsx, encabezadoXlsx = leerArchivoCoDm(archivoXlsxInput, fechaInput, valoresExtraGestion[0], valoresExtraGestion[1])
+            formatoSalidaTxt = CODM_XLSX['SALIDA_TXT']
+            logProceso = LOG_PROCESO_CODM
         elif procesoInput == 'GESTION':
             dataXlsx, encabezadoXlsx = leerArchivoGestion(archivoXlsxInput, fechaInput, valoresExtraGestion[0], valoresExtraGestion[1], valoresExtraGestion[2])
             formatoSalidaTxt = GESTION_CONFIG_XLSX['SALIDA_TXT']
             logProceso = LOG_PROCESO_GESTION
+        elif procesoInput == 'CAMPANHA_PRIORITARIA':
+            dataXlsx, encabezadoXlsx = leerArchivoPrioritarias(archivoXlsxInput)
+            formatoSalidaTxt = CAMPANHAS_PRIORITARIAS['SALIDA_TXT']
+            logProceso = LOG_PROCESO_PRIORITARIAS
+
         
         salidaTxt = "{0}/{1}{2}.txt".format(pathArchivoTxt, formatoSalidaTxt, fechaInput)
 
         if dataXlsx:
+            salidaArchivoTxt(salidaTxt, dataXlsx, encabezadoXlsx)
+        elif procesoInput == 'CAMPANHA_PRIORITARIA':
             salidaArchivoTxt(salidaTxt, dataXlsx, encabezadoXlsx)
 
         if salidaLogTxt(pathLogSalida, logProceso):
@@ -106,10 +130,18 @@ def main(procesoInput):
         fechaEntrada = str(sys.argv[2])
         proceso = 0
 
-        if procesoInput == 'CALIDAD' or procesoInput == 'CAMPANHA_ESPECIAL' or procesoInput == 'FUGA':
+        if procesoInput == 'CALIDAD' or procesoInput == 'CAMPANHA_ESPECIAL' or procesoInput == 'FUGA' or procesoInput == 'CAMPANHA_PRIORITARIA':
             archivoXlsEntrada = str(sys.argv[3])
             pathArchivosTxt = str(sys.argv[4])
             proceso = 1
+        elif procesoInput == 'CODM':
+            fechaRangoInicio = str(sys.argv[3])
+            fechaRangoFin = str(sys.argv[4])
+            archivoXlsCODM = str(sys.argv[5])
+            pathArchivosTxt = str(sys.argv[6])
+            setearFechaInput(fechaRangoInicio)
+            setearFechaInput(fechaRangoFin)
+            proceso = 2
         elif procesoInput == 'GESTION':
             fechaRangoInicio = str(sys.argv[3])
             fechaRangoFin = str(sys.argv[4])
@@ -118,7 +150,7 @@ def main(procesoInput):
             pathArchivosTxt = str(sys.argv[7])
             setearFechaInput(fechaRangoInicio)
             setearFechaInput(fechaRangoFin)
-            proceso = 2
+            proceso = 3
 
         if validaFechaInput(fechaEntrada):
             print("Fecha para el periodo %s OK!" % fechaEntrada)
@@ -143,6 +175,12 @@ def main(procesoInput):
             else:
                 print("Error en Archivo: {0}".format(archivoXlsEntrada))
         elif proceso == 2:
+            archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsCODM], [procesos[procesoInput]['ENCABEZADO']], [procesos[procesoInput]['COORDENADA_ENCABEZADO']])
+            if archivosValidos and encabezadosValidos:
+                procesoGenerico(fechaEntrada, archivoXlsCODM, pathArchivosTxt, procesoInput, fechaRangoInicio, fechaRangoFin)
+            else:
+                print("Error en Archivo: {0}".format(archivoXlsEntrada))
+        elif proceso == 3:
             archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsGestion, archivoXlsPropietarios], [procesos[procesoInput]['ENCABEZADO'], procesos[procesoInput]['ENCABEZADO_PROPIETARIOS']], [procesos[procesoInput]['COORDENADA_ENCABEZADO'], procesos[procesoInput]['COORDENADA_PROPIETARIOS']])
             if archivosValidos and encabezadosValidos:
                 procesoGenerico(fechaEntrada, archivoXlsGestion, pathArchivosTxt, procesoInput, fechaRangoInicio, fechaRangoFin, archivoXlsPropietarios)

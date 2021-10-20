@@ -37,10 +37,10 @@ def extraerPropietariosCro(archivoPropietariosXls, periodo):
                     idEmpleado = str(fila[celda['ID_EMPLEADO']].value)
                     fecha = None
 
-                    if fila[celda['FECHA']].value is not None:
+                    if fila[celda['FECHA']].value is not None or str(fila[celda['FECHA']].value) != '':
                         fecha = setearFechaCelda(fila[celda['FECHA']])
 
-                    if fila[celda['ID_EMPLEADO']].value is None:
+                    if fila[celda['ID_EMPLEADO']].value is None or str(fila[celda['ID_EMPLEADO']].value) == '':
                         celdaCoordenada = setearCelda2(fila[0:celda['ID_EMPLEADO']+1], len(fila[0:celda['ID_EMPLEADO']])-1, i)
                         LOG_PROCESO_GESTION.setdefault(len(LOG_PROCESO_GESTION)+1 , {'EMPLEADO_PROPIETARIO_NULL': '{0};El ID_EMPLEADO es NULL;{1}'.format(celdaCoordenada, idEmpleado)})
                         continue
@@ -84,7 +84,7 @@ def getEstadoUt(celdaFila, listaEstadoUt):
     estadoUt = str(celdaFila.value).upper()
     if listaEstadoUt.get(estadoUt):
         return listaEstadoUt[estadoUt]
-    elif celdaFila.value is None:
+    elif celdaFila.value is None or str(celdaFila.value) == '':
         return 0
     else:
         celdaCoordenada = setearCelda(celdaFila)

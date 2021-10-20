@@ -51,6 +51,14 @@ PROCESOS_GENERALES = {
                 # Argumentos que necesita el proceso para funcionar
                 'ARGUMENTOS_PROCESO': 7
                 },
+    'CODM' : {
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 6
+                },
+    'CAMPANHA_PRIORITARIA' : {
+                # Argumentos que necesita el proceso para funcionar
+                'ARGUMENTOS_PROCESO': 4
+                },
 }
 
 FUGA_CONFIG_XLSX = {
@@ -59,7 +67,7 @@ FUGA_CONFIG_XLSX = {
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': 'FUGA',
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'TIPO_FUGA', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'ID_EMPLEADO', 'CODIGOPLAN', 'TIPOPRODUCTO', 'PRODUCTO', 'FECHAPROCESO', 'CONSIDERAR'],
+    'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'TIPO_FUGA', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'NUMEROEMPLEADO', 'CODIGOPLAN', 'TIPOPRODUCTO', 'PRODUCTO', 'FECHAPROCESO', 'CONSIDERAR'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
     'ENCABEZADO_FUGA_TXT': ['CRR', 'FUGA_MES_ANTERIOR', 'STOCK', 'RUT', 'UNIDAD'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
@@ -208,4 +216,30 @@ COMPLEMENTO_CLIENTE_XLSX = {
     'ENCABEZADO': ['NROPOLIZA', 'NROCERT', 'ESTADOPOLIZA', 'FEC_ULT_PAG', 'ESTADO_MANDATO', 'FECHA_MANDATO', 'FECHAPROCESO'],
     # # Columnas que se utilizaran durante el procesamiento del archivo Complemento Cliente
     'COLUMNAS': {'NRO_POLIZA': 0, 'NRO_CERT': 1, 'ESTADO_POLIZA': 2, 'FEC_ULT_PAG': 3, 'ESTADO_MANDATO': 4, 'FECHA_MANDATO': 5},
+}
+
+CAMPANHAS_PRIORITARIAS = {
+    # Coordenadas encabezado
+    'COORDENADA_ENCABEZADO': 'A1:B1',
+    # Nombre del archivo TXT que el proceso generara
+    'SALIDA_TXT': 'PRIORITARIA_CRO',
+    # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
+    'ENCABEZADO_XLSX': ['CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'CAMPAÑA PRIORITARIA'],
+    # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
+    'ENCABEZADO_TXT': ['CRR', 'PRIORITARIA_CRO', 'CAMPANA'],
+    # Columnas que se utilizaran durante el procesamiento del archivo XLSX
+    'COLUMNAS_PROCESO_XLSX': {'CAMPANA': 0, 'PRIORITARIA': 1}
+}
+
+CODM_XLSX = {
+    # Coordenadas encabezado
+    'COORDENADA_ENCABEZADO': 'A1:F1',
+    # Nombre del archivo TXT que el proceso generara
+    'SALIDA_TXT': 'CRO_DM',
+    # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
+    'ENCABEZADO_XLSX': ['MIEMBRO DE CAMPAÑA ID.', 'FECHA DE CREACIÓN', 'CAMPAÑAS: NOMBRE DE LA CAMPAÑA', 'ESTADO DE ÚLTIMA TAREA', 'ESTADO', 'CAMPAIGN MEMBER: ID EMPLEADO'],
+    # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
+    'ENCABEZADO_TXT': ['CRR', 'ESTADO', 'ESTADO_UT', 'CAMPANA', 'ID_CAMPANA', 'ID_EMPLEADO'],
+    # Columnas que se utilizaran durante el procesamiento del archivo XLSX
+    'COLUMNAS_PROCESO_XLSX': {'CAMPAÑA_ID': 0, 'FECHA_DE_CREACION': 1, 'NOMBRE_DE_CAMPAÑA': 2, 'ESTADO_UT': 3, 'ESTADO': 4, 'ID_EMPLEADO': 5}
 }

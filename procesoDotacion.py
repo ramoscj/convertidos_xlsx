@@ -128,7 +128,7 @@ def main():
             print("Error en Archivo: {0}".format(archivoXlsAsistencia))
 
     else:
-        print("Error: El programa CRO necesita {0} parametros para su ejecucion".format(PROCESOS_GENERALES['CRO']['ARGUMENTOS_PROCESO']))
+        print("Error: El programa CRO necesita {0} parametros para su ejecucion".format(PROCESOS_GENERALES['DOTACION']['ARGUMENTOS_PROCESO']))
 
 
 if __name__ == "__main__":

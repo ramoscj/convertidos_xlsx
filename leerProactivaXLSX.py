@@ -26,9 +26,12 @@ from validaciones_texto import (convertirALista, convertirListaProactiva,
 LOG_PROCESO_PROACTIVA = dict()
 campanasPorEjecutivos = dict()
 listaEstadoRetencion = listaEstadoRetencionProactiva()
+campanasValidasRetencion = dict()
+filaSalidaXls = dict()
 mantieneSuProducto = listaEstadoRetencion.get('Mantiene su producto')
 realizaPagoEnLinea = listaEstadoRetencion.get('Realiza pago en línea')
 realizaActivacion = listaEstadoRetencion.get('Realiza Activación PAC/PAT')
+listaValidaRetencion = {mantieneSuProducto: mantieneSuProducto, realizaPagoEnLinea: realizaPagoEnLinea, realizaActivacion: realizaActivacion}
 
 def getEstado(celdaEstado):
     listaContactado = {'Pendiente': 1, 'Terminado con Exito': 2 , 'Terminado sin Exito': 3}
@@ -246,6 +249,50 @@ def actualizarPolizasReliquidadas(polizasReliquidadas, fechaProceso, mesAnterior
         cursor.close()
         db.close()
 
+def definirEstadoRetencionCampana(nombreCampana):
+    if nombreCampana == 'CO RET - Cobranza':
+        estadoRetencionValido = mantieneSuProducto
+    elif nombreCampana == 'CO RET - Fallo en Instalacion de Mandato':
+        estadoRetencionValido = realizaActivacion
+    return estadoRetencionValido
+
+def actualizarEstadosRetencionAntiguos(campanasValidasRetencion, campanaId, idEmpleado):
+    for llave, valores in campanasValidasRetencion[campanaId].items():
+        estadoRetencionOriginal = campanasValidasRetencion[campanaId][llave]['ESTADO_ORIGINAL']
+        if estadoRetencionOriginal is None or estadoRetencionOriginal == '':
+            estadoRetencionValido = campanasValidasRetencion[campanaId][llave]['ESTADO_CAMBIO']
+        elif not listaValidaRetencion.get(estadoRetencionOriginal):
+            filaSalidaXls[llave]['ESTADO_RETENCION_PRO'] = estadoRetencionOriginal
+            filaSalidaXls[llave]['COBRANZA_PRO'] = 0
+            filaSalidaXls[llave]['PACPAT_PRO'] = 0
+            if campanasPorEjecutivos[idEmpleado].get(llave):
+                campanasPorEjecutivos[idEmpleado].pop(llave)
+    return True
+
+def estadoRetencionOriginalValido(campanasValidasRetencion, campanaId):
+    cambioAprobado = False
+    if campanasValidasRetencion.get(campanaId):
+        for llave, valores in campanasValidasRetencion[campanaId].items():
+            estadoRetencionOriginal = campanasValidasRetencion[campanaId][llave]['ESTADO_ORIGINAL']
+            if listaValidaRetencion.get(estadoRetencionOriginal):
+                cambioAprobado = True
+    return cambioAprobado
+
+def validarEstadoRetencionCampanaDuplicada(campanasValidasRetencion, campanaId, nombreCampana, estadoRetencion, estado, pk):
+    estadoRetencionValidoExiste = estadoRetencionOriginalValido(campanasValidasRetencion, campanaId)
+    estadoRetencionValido = definirEstadoRetencionCampana(nombreCampana)
+    if not campanasValidasRetencion.get(campanaId):
+        campanasValidasRetencion[campanaId] = {pk: {'PK':pk, 'CAMPAÑA_ID': campanaId, 'ESTADO_ORIGINAL': listaEstadoRetencion.get(estadoRetencion), 'ESTADO_CAMBIO': estadoRetencionValido}}
+    elif campanasValidasRetencion.get(campanaId):
+        valores = {'PK':pk, 'CAMPAÑA_ID': campanaId, 'ESTADO_ORIGINAL': listaEstadoRetencion.get(estadoRetencion), 'ESTADO_CAMBIO': estadoRetencionValido}
+        campanasValidasRetencion[campanaId].setdefault(pk, valores)
+    else:
+        if estadoRetencion is not None or estadoRetencion != '':
+            estadoRetencionValido = listaEstadoRetencion.get(estadoRetencion)
+        else:
+            estadoRetencionValido = validarEstadoRetencion(estado)
+    return estadoRetencionValido
+
 def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
 
     estadoRetencion = valoresEntrada['ESTADO_RETENCION']
@@ -338,7 +385,6 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
 
         archivo_correcto = validarEncabezadoXlsx(hoja[coordenadaEcabezado], encabezadoXls, archivoEntrada)
         if type(archivo_correcto) is not dict:
-            filaSalidaXls = dict()
 
             fechaIncioMes = primerDiaMes(periodo)
             fechaFinMes = ultimoDiaMes(periodo)
@@ -380,9 +426,9 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
                     fechaCreacion = setearFechaCelda(fila[columna['FECHA_CREACION']])
                     fechaCierre = None
                     fechaExpiracionCoret = None
-                    if fila[columna['EXPIRACION_CORET']].value is not None:
+                    if fila[columna['EXPIRACION_CORET']].value is not None or str(fila[columna['EXPIRACION_CORET']].value) != '':
                         fechaExpiracionCoret = setearFechaCelda(fila[columna['EXPIRACION_CORET']])
-                    if fila[columna['FECHA_CIERRE']].value is not None:
+                    if fila[columna['FECHA_CIERRE']].value is not None or str(fila[columna['FECHA_CIERRE']].value) != '':
                         fechaCierre = setearFechaCelda(fila[columna['FECHA_CIERRE']])
 
                     estadoValido = getEstado(fila[columna['ESTADO']])
@@ -477,21 +523,27 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
                         cobranzaPro = 0
                         pacpatPro = 0
 
-                        listaConsiderarRetencion = {'Mantiene su producto': mantieneSuProducto, 'Realiza pago en línea': realizaPagoEnLinea, 'Realiza Activación PAC/PAT': realizaActivacion}
+                        listaConsiderarRetencion = {'Mantiene su producto': mantieneSuProducto, 'Realiza pago en línea': realizaPagoEnLinea, 'Realiza Activación PAC/PAT': realizaActivacion,}
                         estadoRetencionValido = listaConsiderarRetencion.get(estadoRetencion)
                         if estado == 'Terminado con Exito':
 
-                            if complementoCliente.get(numeroPoliza):
-                                if estadoRetencionValido is None:
-                                    if nombreCampana == 'CO RET - Cobranza':
-                                        estadoRetencionValido = mantieneSuProducto
-                                    elif nombreCampana == 'CO RET - Fallo en Instalacion de Mandato':
-                                        estadoRetencionValido = realizaActivacion
+                            if estadoRetencionValido is None:
+                                estadoRetencionValido = validarEstadoRetencionCampanaDuplicada(campanasValidasRetencion, campanaId, nombreCampana, str(estadoRetencion).strip(), estado, pk)
 
+                            else:
+                                if campanasValidasRetencion.get(campanaId):
+                                    valores = {'PK':pk, 'CAMPAÑA_ID': campanaId, 'ESTADO_ORIGINAL': estadoRetencionValido, 'ESTADO_CAMBIO': 0}
+                                    campanasValidasRetencion[campanaId].setdefault(pk, valores)
+                                else:
+                                    campanasValidasRetencion[campanaId] = {pk: {'PK':pk, 'CAMPAÑA_ID': campanaId, 'ESTADO_ORIGINAL': estadoRetencionValido, 'ESTADO_CAMBIO': 0}}
+
+                            if complementoCliente.get(numeroPoliza) and listaValidaRetencion.get(estadoRetencionValido):
+                                
                                 valoresEntrada = {'ESTADO_RETENCION': estadoRetencionValido, 'NOMBRE_CAMPAÑA': nombreCampana, 'NUMERO_POLIZA': numeroPoliza, 'FECHA_CIERRE': fechaCierre, 'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'CAMPAÑA_ID': campanaId, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'CELDA_NROPOLIZA': fila[columna['NRO_POLIZA']]}
                                 cobranzaPro, pacpatPro, noAprobada = validarRetencionesPolizas(valoresEntrada, complementoCliente)
                                 polizasNoAprobadas += noAprobada
                                 cantidadCampanasValidas += 1
+
                         else:
                             if estadoRetencionValido is not None:
                                 celdaCoordenada = setearCelda2(fila[0:columna['ESTADO']+1], len(fila[0:columna['ESTADO']])-1, i)
@@ -504,6 +556,10 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
                                 estadoRetencionValido = validarEstadoRetencion(estado)
 
                         filaSalidaXls[pk] = {'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': pacpatPro, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'REPETICIONES': repeticionPorCampana, 'ESTADO_RETENCION_PRO': estadoRetencionValido, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana[0:30].rstrip(), 'POLIZA': numeroPoliza}
+
+                        validarEstadoRetencionExistente = estadoRetencionOriginalValido(campanasValidasRetencion, campanaId)
+                        if validarEstadoRetencionExistente:
+                            actualizarEstadosRetencionAntiguos(campanasValidasRetencion, campanaId, idEmpleado)
 
             if insertarPeriodoCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
                 if insertarCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
@@ -529,3 +585,9 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
         LOG_PROCESO_PROACTIVA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_PROACTIVA)+1: errorMsg})
         LOG_PROCESO_PROACTIVA.setdefault('PROCESO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
         return False, False, False, False
+        # raise
+
+
+# x = leerArchivoProactiva(r'.\PROACTIVA\INPUTS\202108_Gestion_CoRet_Proactiva.xlsx', 202108, r'.\PROACTIVA\INPUTS\202108_Complemento_Cliente_Coret.xlsx')
+# for x, y in x[0].items():
+#     print(y)

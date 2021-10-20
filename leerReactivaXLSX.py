@@ -286,7 +286,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                     LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LLAMADA_SALIENTE': '%s;Campaña InBound/OutBound NULL;%s' % (celdaCoordenada, numeroPoliza)})
                     continue
 
-                if fila[columna['NRO_POLIZA']].value is None:
+                if fila[columna['NRO_POLIZA']].value is None or str(fila[columna['NRO_POLIZA']].value) == '':
                     celdaCoordenada = setearCelda2(fila[0:columna['NRO_POLIZA']+1], len(fila[0:columna['NRO_POLIZA']])-1, i)
                     LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'POLIZA_NULO': '%s;Numero de poliza NULL;%s' % (celdaCoordenada, numeroPoliza)})
                     continue
@@ -432,3 +432,5 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
         return False
+
+# print(leerArchivoReactiva('..\ANALISIS\REACTIVA\AGOSTO\_202108_Gestion_CoRet_Reactiva.xlsx', '202108', '20210728', '20210826', '..\ANALISIS\REACTIVA\AGOSTO\_202108_Base_Certificacion_Reactiva.xlsx', '.\CRO\INPUTS\_202108_Complemento_Cliente_Coret.xlsx'))

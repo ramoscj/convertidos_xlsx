@@ -1,4 +1,5 @@
 import unicodedata
+import datetime
 
 from openpyxl import load_workbook
 from tqdm import tqdm
@@ -8,6 +9,7 @@ from config_xlsx import ASISTENCIA_CONFIG_XLSX
 from validaciones_texto import (formatearRut, primerDiaMes, setearCelda,
                                 setearCelda2, ultimoDiaMes,
                                 validarEncabezadoXlsx, convertirALista)
+from diccionariosDB import buscarRutEjecutivosDb
 
 LOG_PROCESO_ASISTENCIA = dict()
 
@@ -16,8 +18,22 @@ def updateEjecutivoFechaDesv(periodo):
         db = conectorDB()
         cursor = db.cursor()
         ultimoDia = ultimoDiaMes(periodo)
-        sql = """UPDATE ejecutivos SET fecha_desvinculacion= ? WHERE fecha_desvinculacion is NULL"""
+        sql = """UPDATE ejecutivos SET fecha_desvinculacion = ? WHERE fecha_desvinculacion is NULL"""
         cursor.execute(sql, (ultimoDia,))
+        db.commit()
+        return True
+    except Exception as e:
+        raise Exception('Error al actualizar tabla de ejecutivos | %s' %e)
+    finally:
+        cursor.close()
+        db.close()
+
+def updateEjecutivoFechaIngreso(ejecutivosExistentes):
+    try:
+        db = conectorDB()
+        cursor = db.cursor()
+        sql = """UPDATE ejecutivos SET fecha_ingreso = ? WHERE id_empleado = ? AND fecha_ingreso > ?"""
+        cursor.executemany(sql, ejecutivosExistentes)
         db.commit()
         return True
     except Exception as e:
@@ -56,7 +72,8 @@ def calcularDiasHablies(columnas):
         for celda in columna:
             nfkd_form = unicodedata.normalize('NFKD', str(celda.value).upper())
             diaSinAcento = nfkd_form.encode('ASCII', 'ignore')
-            if diasDeSemana.get(diaSinAcento.decode('utf-8')):
+            diaFormateado = str(diaSinAcento.decode('utf-8')).strip()
+            if diasDeSemana.get(diaFormateado):
                 diasHabiles += 1
     return diasHabiles
 
@@ -76,8 +93,11 @@ def leerArchivoAsistencia(archivo, periodo):
         LOG_PROCESO_ASISTENCIA.setdefault(len(LOG_PROCESO_ASISTENCIA)+1, {'ENCABEZADO_ASISTENCIA': 'Encabezado del Archivo: %s OK' % archivo})
         filaSalidaXls = dict()
         empleadosLista = dict()
-        primerDia = primerDiaMes(periodo)
-        totalColumnas = calcularDiasHablies(hoja.iter_rows(min_row=1, min_col=2, max_row=1))
+        ejecutivosExistentes = []
+        fechaIncioMes = primerDiaMes(periodo)
+        fechaFinMes = ultimoDiaMes(periodo)
+        ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
+        totalColumnas = calcularDiasHablies(hoja.iter_rows(min_row=1, min_col=3, max_row=1))
         totalFilas = len(tuple(hoja.iter_rows(min_row=3, min_col=1)))
         LOG_PROCESO_ASISTENCIA.setdefault(len(LOG_PROCESO_ASISTENCIA)+1, {'INICIO_CELDAS_ASISTENCIA': 'Iniciando lectura de Celdas del Archivo: %s' % archivo})
 
@@ -91,8 +111,13 @@ def leerArchivoAsistencia(archivo, periodo):
                 idEmpleado = fila[columna['ID_EMPLEADO']].value
                 plataforma = str(fila[columna['PLATAFORMA']].value).upper()
 
+                if ejecutivosExistentesDb.get(str(idEmpleado)):
+                    fechaIngreso = datetime.datetime.strptime(ejecutivosExistentesDb[str(idEmpleado)]['FECHA_INGRESO'], '%d-%m-%Y')
+                    if fechaIngreso.date() > fechaIncioMes:
+                        ejecutivosExistentes.append([fechaIncioMes, str(idEmpleado), fechaIncioMes])
+
                 if not empleadosLista.get(idEmpleado):
-                    empleadosLista[idEmpleado] = {'ID_EMPLEADO': idEmpleado, 'PLATAFORMA': plataforma, 'ID_EMPLEADO2': idEmpleado, 'PLATAFORMA2': plataforma, 'PRIMER_DIA': primerDia}
+                    empleadosLista[idEmpleado] = {'ID_EMPLEADO': idEmpleado, 'PLATAFORMA': plataforma, 'ID_EMPLEADO2': idEmpleado, 'PLATAFORMA2': plataforma, 'PRIMER_DIA': fechaIncioMes}
 
                 if not filaSalidaXls.get(idEmpleado):
                     conteoVhcAplica = 0
@@ -125,6 +150,8 @@ def leerArchivoAsistencia(archivo, periodo):
         if len(empleadosLista) > 0:
             listaEmpleadosFormateada = convertirALista(empleadosLista)
             insertarEjecutivo(listaEmpleadosFormateada)
+        if len(ejecutivosExistentes) > 0:
+            updateEjecutivoFechaIngreso(ejecutivosExistentes)
         return filaSalidaXls, encabezadoTxt
 
     except Exception as e:
@@ -132,6 +159,3 @@ def leerArchivoAsistencia(archivo, periodo):
         LOG_PROCESO_ASISTENCIA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_ASISTENCIA)+1: errorMsg})
         LOG_PROCESO_ASISTENCIA.setdefault('PROCESO_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Error al procesar Archivo: %s' % archivo})
         return False, False
-
-# leerArchivoAsistencia('PROACTIVA/INPUTS/202012_Asistencia Plataforma.xlsx', '202012')
-# print(LOG_PROCESO_ASISTENCIA)

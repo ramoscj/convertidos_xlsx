@@ -92,7 +92,7 @@ def setearCelda(celda):
 
 def setearCelda2(celda, cantidad, *nroRegistro):
     if cantidad > 0:
-        if celda[cantidad].value is None:
+        if celda[cantidad].value is None or str(celda[cantidad].value) == '':
             cantidad -= 1
             setearCelda2(celda, cantidad, nroRegistro[0])
         if cantidad == len(celda) -1:
