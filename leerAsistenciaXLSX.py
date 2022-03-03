@@ -124,7 +124,9 @@ def leerArchivoAsistencia(archivo, periodo):
                     vhcAplica = 0
                     filaSalidaXls[idEmpleado] = {'CRR': correlativo}
                     for celda in range(2, totalColumnas + columnasAdicionales):
-                        if str(fila[celda].value).upper() == 'V' or str(fila[celda].value).upper() == 'VAC':
+                        textoAsistecia = str(fila[celda].value).upper()
+                        estadoAsistencia = textoAsistecia.strip()
+                        if estadoAsistencia == 'V' or estadoAsistencia == 'VAC':
                             diasVacaciones += 1
                             conteoVhcAplica += 1
                         else:
@@ -134,7 +136,7 @@ def leerArchivoAsistencia(archivo, periodo):
                             vhcAplica = 1
                             conteoVhcAplica = 0
 
-                        if type(fila[celda].value) is int and fila[celda].value == 1:
+                        if estadoAsistencia == '1':
                             ausentismoMes = 0
                     filaSalidaXls[idEmpleado].setdefault('VHC_MES', diasVacaciones)
                     filaSalidaXls[idEmpleado].setdefault('DIAS_HABILES_MES', totalColumnas)

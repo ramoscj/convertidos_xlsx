@@ -7,14 +7,11 @@ from validaciones_texto import validarEncabezadoXlsx, setearFechaCelda
 LOG_COMPLEMENTO_CLIENTE = dict()
 
 def extraerComplementoCliente(registrosLog, pathXlsxEntrada):
-    # archivo = '.\COMPLEMENTO_CLIENTE\COMPLEMENTO CLIENT vLite 202101.xlsx'
     archivo = pathXlsxEntrada
     registrosLog += 1
     LOG_COMPLEMENTO_CLIENTE.setdefault(registrosLog, {'INICIO_COMPLEMENTO_CLIENTE': 'Iniciando proceso de lectura del Archivo: %s' % archivo})
     try:
-        encabezadoXls = COMPLEMENTO_CLIENTE_XLSX['ENCABEZADO']
         celda = COMPLEMENTO_CLIENTE_XLSX['COLUMNAS']
-        coordenadaEcabezado = COMPLEMENTO_CLIENTE_XLSX['COORDENADA_ENCABEZADO']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]

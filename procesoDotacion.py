@@ -7,7 +7,7 @@ from escribir_txt import salidaArchivoTxt, salidaLogTxt
 from leerAsistenciaXLSX import LOG_PROCESO_ASISTENCIA, leerArchivoAsistencia
 from leerDotacionXLSX import LOG_PROCESO_DOTACION, leerArchivoDotacion
 from validaciones_texto import (compruebaEncabezado, encontrarArchivo,
-                                encontrarDirectorio, validaFechaInput)
+                                encontrarDirectorio, validaFechaInput, sacarNombreArchivo)
 
 
 hora = datetime.datetime.now()
@@ -17,17 +17,20 @@ def procesoAsistencia(fechaInput, archivoXlsxInput, pathArchivoTxt):
     procesoInput = 'ASISTENCIA'
     pathLogSalida = "CRO/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, procesoInput, fechaInput, hora.strftime("%Y%m%d%H%M"))
 
-    print("Iniciando Lectura del archivo de {0}...".format(archivoXlsxInput))
+    print("<strong>Iniciando Lectura del archivo {0}</strong>".format(sacarNombreArchivo(archivoXlsxInput)))
     try:
-        dataXlsx, encabezadoXlsx = leerArchivoAsistencia(archivoXlsxInput, fechaInput)
+        dataTxt, encabezadoXlsx = leerArchivoAsistencia(archivoXlsxInput, fechaInput)
         salidaTxtAsistencia = "{0}/{1}{2}.txt".format(pathArchivoTxt, ASISTENCIA_CONFIG_XLSX['SALIDA_TXT'], fechaInput)
         logProceso = LOG_PROCESO_ASISTENCIA
 
-        if dataXlsx:
-            salidaArchivoTxt(salidaTxtAsistencia, dataXlsx, encabezadoXlsx)
+        if dataTxt:
+            salidaArchivoTxt(salidaTxtAsistencia, dataTxt, encabezadoXlsx)
+            print("<a>&#128221;</a> Archivo TXT: {0} creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaTxtAsistencia), len(dataTxt)))
 
         if salidaLogTxt(pathLogSalida, logProceso):
-            print("Archivo: {0}\{1} Creado!".format(PATH_RAIZ, pathLogSalida))
+            print("Archivo: {0} Creado!".format(pathLogSalida))
+            print("-----------------------------------------------------")
+            
     except Exception as e:
         print(e)
 
@@ -37,15 +40,16 @@ def procesoDotacion(fechaInput, pathArchivoTxt):
     pathLogSalidaDotacion = "CRO/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, procesoInput, fechaInput, hora.strftime("%Y%m%d%H%M"))
     salidaTxtDotacion = "{0}/{1}{2}.txt".format(pathArchivoTxt, DOTACION_CONFIG_XLSX['SALIDA_TXT'], fechaInput)
 
-    print("Iniciando proceso de Archivo DOTACION")
-    dataXlsx, encabezadoXlsxDotacion = leerArchivoDotacion(fechaInput)
+    print("<strong>Iniciando proceso de Archivo DOTACION</strong>")
+    dataTxt, encabezadoXlsxDotacion = leerArchivoDotacion(fechaInput)
     try:
-        if dataXlsx:
-            salidaArchivoTxt(salidaTxtDotacion, dataXlsx, encabezadoXlsxDotacion)
-
+        if dataTxt:
+            salidaArchivoTxt(salidaTxtDotacion, dataTxt, encabezadoXlsxDotacion)
+            print("<a>&#128221;</a> Archivo TXT: {0} creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaTxtDotacion), len(dataTxt)))
+            
         logProceso = LOG_PROCESO_DOTACION
         if salidaLogTxt(pathLogSalidaDotacion, logProceso):
-            print("Archivo: {0}\{1} Creado!".format(PATH_RAIZ, pathLogSalidaDotacion))
+            print("Archivo: {0} Creado!".format(pathLogSalidaDotacion))
     except Exception as e:
         print(e)
 
@@ -56,23 +60,21 @@ def validarArchivosEntrada(archivosEntrada: []):
     encabezadosArchivos = [ASISTENCIA_CONFIG_XLSX['ENCABEZADO_XLSX']]
     coordenadasEncabezado = [ASISTENCIA_CONFIG_XLSX['COORDENADA_ENCABEZADO']]
     i = 0
-    print("-----------------------------------------------------")
     for archivo in archivosEntrada:
         if encontrarArchivo(archivo):
-            print("Archivo: {0} Encontrado!".format(archivo))
+            print("<strong>Validando encabezado de {0}</strong>".format(sacarNombreArchivo(archivo)))
             archivoCorrecto = compruebaEncabezado(archivo, encabezadosArchivos[i], coordenadasEncabezado[i])
 
             if type(archivoCorrecto) is not dict:
-                print(".- Encabezado de Archivo: {0} OK!".format(archivo))
+                print("<a>&#9989;</a> Encabezado de Archivo: {0} OK!".format(sacarNombreArchivo(archivo)))
             else:
                 encabezadosValidos = False
                 for llave, valores in archivoCorrecto.items():
-                    print('.- {0}'.format(valores))
+                    print('<a>&#10060;</a> {0}'.format(valores))
         else:
             print("Archivo: {0} NO Encontrado.".format(archivo))
             archivosValidos = False
         i += 1
-    print("-----------------------------------------------------")
     return archivosValidos, encabezadosValidos
 
 def main():
@@ -118,14 +120,13 @@ def main():
                 print('Error no tiene permisos de escritura en el directorio: {0}'.format(permisos))
             exit(1)
 
-        procesoDotacion(fechaEntrada, pathArchivoTxtDotacion)
-        print("-----------------------------------------------------")
-
         archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsAsistencia])
         if archivosValidos and encabezadosValidos:
             procesoAsistencia(fechaEntrada, archivoXlsAsistencia, pathArchivoTxtAsistencia)
         else:
             print("Error en Archivo: {0}".format(archivoXlsAsistencia))
+
+        procesoDotacion(fechaEntrada, pathArchivoTxtDotacion)
 
     else:
         print("Error: El programa CRO necesita {0} parametros para su ejecucion".format(PROCESOS_GENERALES['DOTACION']['ARGUMENTOS_PROCESO']))

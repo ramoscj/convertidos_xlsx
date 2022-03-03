@@ -5,6 +5,8 @@ import os.path
 from dateutil.relativedelta import relativedelta
 
 from openpyxl import load_workbook
+import re
+
 
 def validaFechaInput(fecha_x):
     try:
@@ -71,7 +73,7 @@ def validarEncabezadoXlsx(filasXlsx: [], encabezadoXls: [], nombreArchivo):
         for celda in fila:
             if str(celda.value).upper() != encabezadoXls[i]:
                 celda = setearCelda(str(fila[i]))
-                error = 'Celda%s - %s;Encabezado incorrecto;%s' % (celda, nombreArchivo, encabezadoXls[i])
+                error = 'Celda%s <strong>%s</strong> <a style="color:red">Encabezado incorrecto:</a> %s' % (celda,  sacarNombreArchivo(nombreArchivo), encabezadoXls[i])
                 columnasError.setdefault(len(columnasError)+1, error)
             i += 1
     if len(columnasError) > 0:
@@ -233,7 +235,7 @@ def convertirListaReactiva(dataLista: dict, ejecutivosExistentes, fechaPeriodo):
 def setearCampanasProactiva(dataLista: dict, idEjecutivo):
     lista = []
     nombreCampana = str(dataLista['NOMBRE_CAMPAÑA'])[0:30].rstrip()
-    data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['CAMPAÑA_ID'], nombreCampana, dataLista['ESTADO_RETENCION'], dataLista['RETENCION_COBRANZA'], dataLista['RETENCION_ACTIVACION'], dataLista['RETENCION_RL_COBRANZA'], dataLista['RETENCION_RL_ACTIVACION'],dataLista['ESTADO_VALIDO'], dataLista['ESTADO_VALIDOUT'], dataLista['FECHA_CIERRE'], dataLista['RELIQUIDACION'], dataLista['NUMERO_POLIZA_CERTIFICADO']]
+    data = [idEjecutivo, dataLista['NUMERO_POLIZA'], dataLista['CAMPAÑA_ID'], nombreCampana, dataLista['ESTADO_RETENCION'], dataLista['RETENCION_COBRANZA'], dataLista['RETENCION_ACTIVACION'], dataLista['RETENCION_RL_COBRANZA'], dataLista['RETENCION_RL_ACTIVACION'],dataLista['ESTADO_VALIDO'], dataLista['ESTADO_VALIDOUT'], dataLista['FECHA_CIERRE'], dataLista['RELIQUIDACION'], dataLista['NUMERO_POLIZA_CERTIFICADO'], dataLista['POLIZAS_CAMPANA'], dataLista['NOMBRE_CAMPAÑA'], dataLista['FECHA_CREACION'], dataLista['FECHA_EXPIRACION_CORET'], dataLista['FECHA_ULTIMO_PAGO'], dataLista['FECHA_MANDATO'], dataLista['ESTADO_MANDATO']]
     lista.append(data)
     return lista
 
@@ -255,7 +257,7 @@ def fechaMesAnterior(fecha):
         fechaSalida = fecha-relativedelta(months=1)
         return fechaSalida
     except Exception as e:
-        errorMsg = "Error %s, formato correcto YYYYMM | %s" % (fecha, e)
+        errorMsg = "Error %s, fechaMesAnterior | %s" % (fecha, e)
         raise Exception(errorMsg)
 
 def fechaUnida(celdaFila):
@@ -278,3 +280,9 @@ def encontrarDirectorio(pathDestino):
     if os.path.isdir(pathDestino):
         valor = True
     return valor
+
+def sacarNombreArchivo(cadena):
+    cadenaFormateada = str(cadena).replace("\\", "-")
+    cadenaFormateada = str(cadenaFormateada).replace("/", "-")
+    cadenaSalida = re.split("-", cadenaFormateada)
+    return cadenaSalida[len(cadenaSalida)-1]

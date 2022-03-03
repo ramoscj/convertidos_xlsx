@@ -3,13 +3,11 @@ import datetime
 from openpyxl import load_workbook
 from tqdm import tqdm
 
-from conexio_db import conectorDB
-from config_xlsx import CODM_XLSX, PATH_XLSX
-from diccionariosDB import buscarCamphnasDb, buscarRutEjecutivosDb, listaEstadoUtCro
-from escribir_txt import salidaArchivoTxt
+from config_xlsx import CODM_XLSX
+from diccionariosDB import buscarRutEjecutivosDb, listaEstadoUtCro, listaEstadoUtContactoCro
 from validaciones_texto import (primerDiaMes, setearCelda, setearFechaCelda,
                                 setearFechaInput, ultimoDiaMes, primerDiaMes,
-                                validarEncabezadoXlsx, setearCelda2)
+                                setearCelda2)
 
 LOG_PROCESO_CODM = dict()
 
@@ -35,43 +33,38 @@ def getEstadoUt(celdaFila, listaEstadoUt):
         error = 'Celda%s;No existe estadoUt;%s' % (celdaCoordenada, celdaFila.value)
         return error
 
-def campanasValidas(campana):
-    listaCampanasNoValidas = {9: 'NÚMERO EQUIVOCADO', 10: 'NUMERO INVALIDO', 16: 'SIN TELÉFONO REGISTRADO'}
-    campanaValida = False
-    if not listaCampanasNoValidas.get(campana):
-        print('ok')
-        campanaValida = True
-    return campanaValida
-    
+def definirEstadoValido(estado, estadoUt):
+    noGestionable = {9: 'Número equivocado', 10: 'Numero invalido', 11: 'Solicita renuncia', 13: 'Cliente desconoce venta', 16: 'Sin telefono registrado'}
+    if noGestionable.get(estadoUt):
+        estadoValido = 'No gestionable'
+    else:
+        estadoValido = estado
+    return estadoValido
 
 def leerArchivoCoDm(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada):
     try:
         LOG_PROCESO_CODM.setdefault(len(LOG_PROCESO_CODM)+1, {'INICIO_LECTURA_GESTION': 'Iniciando proceso de lectura del Archivo: %s' % archivoEntrada})
-        encabezadoXls = CODM_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = CODM_XLSX['ENCABEZADO_TXT']
         columna = CODM_XLSX['COLUMNAS_PROCESO_XLSX']
-        coordenadaEcabezado = CODM_XLSX['COORDENADA_ENCABEZADO']
         xls = load_workbook(archivoEntrada, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
 
 
         LOG_PROCESO_CODM.setdefault(len(LOG_PROCESO_CODM)+1, {'ENCABEZADO_GESTION': 'Encabezado del Archivo: %s OK' % archivoEntrada})
-        filaSalidaXls = dict()
-        campanasNuevas = []
-        campahnasExistentesDb = buscarCamphnasDb()
+        filaSalidaTxt = dict()
+        filaSalidaXlsx = dict()
         ejecutivosExistentesDb = buscarRutEjecutivosDb(ultimoDiaMes(periodo), primerDiaMes(periodo))
         listaEstadoUt = listaEstadoUtCro()
+        listaEstadoContactado = listaEstadoUtContactoCro()
 
         fechaInicioPeriodo = setearFechaInput(fechaInicioEntrada)
         fechaFinPeriodo = setearFechaInput(fechaFinEntrada)
-        fechaIncioMes = primerDiaMes(periodo)
-        fechaFinMes = ultimoDiaMes(periodo)
         i = 0
         correlativo = 1
         LOG_PROCESO_CODM.setdefault(len(LOG_PROCESO_CODM)+1, {'INICIO_CELDAS_GESTION': 'Iniciando lectura de Celdas del Archivo: %s' % archivoEntrada})
 
-        for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo GestionCRO' , unit=' Fila'):
+        for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo CODM' , unit=' Fila'):
 
             if i >= 1:
 
@@ -106,7 +99,17 @@ def leerArchivoCoDm(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada
                 if ejecutivosExistentesDb.get(idEmpleado):
 
                     if fechaCreacion >= fechaInicioPeriodo and fechaCreacion <= fechaFinPeriodo:
-                        filaSalidaXls[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampana[0:30], 'ID_EMPLEADO': idEmpleado}
+                        filaSalidaTxt[correlativo] = {'CRR': correlativo, 'ESTADO': estado, 'ESTADO_UT': estadoUt, 'ID_CAMPANHA': campanhaId, 'CAMPANA': nombreCampana[0:30], 'ID_EMPLEADO': idEmpleado}
+                        
+                        contacto = 'NO'
+                        if listaEstadoContactado.get(str(fila[columna['ESTADO_UT']].value).upper()) or estado == 2:
+                            contacto = 'SI'
+                            
+                        fechaCierre = setearFechaCelda(fila[columna['FECHA_CIERRE']])
+                        if type(fechaCierre) is not datetime.date:
+                            fechaCierre = None
+                            
+                        filaSalidaXlsx[correlativo] = {'CAMPANA_ID': campanhaId, 'FECHA_CREACION': fechaCreacion, 'NOMBRE_CAMPANA': nombreCampana, 'ESTADO_UT': fila[columna['ESTADO_UT']].value, 'ESTADO': fila[columna['ESTADO']].value, 'FECHA_CIERRE': fechaCierre, 'ID_EMPLEADO': idEmpleado, 'ESTADO_VALIDO': definirEstadoValido(fila[columna['ESTADO']].value, estadoUt), 'CONTACTO': contacto}
                         correlativo += 1
 
                 else:
@@ -115,7 +118,8 @@ def leerArchivoCoDm(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada
             i += 1
         LOG_PROCESO_CODM.setdefault(len(LOG_PROCESO_CODM)+1, {'FIN_CELDAS_GESTION': 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivoEntrada, len(tuple(hoja.rows)))})
         LOG_PROCESO_CODM.setdefault(len(LOG_PROCESO_CODM)+1, {'PROCESO_GESTION': 'Proceso del Archivo: %s Finalizado' % archivoEntrada})
-        return filaSalidaXls, encabezadoTxt
+
+        return filaSalidaTxt, encabezadoTxt, filaSalidaXlsx
 
     except Exception as e:
         errorMsg = 'Error: %s | %s' % (archivoEntrada, e)

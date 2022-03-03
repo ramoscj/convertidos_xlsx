@@ -5,24 +5,30 @@ from config_xlsx import PATH_LOG, REACTIVA_CONFIG_XLSX, PROCESOS_GENERALES, PATH
 from complementoCliente import COMPLEMENTO_CLIENTE_XLSX
 from escribir_txt import salidaArchivoTxtProactiva, salidaLogTxt
 from leerReactivaXLSX import LOG_PROCESO_REACTIVA, leerArchivoReactiva
-from validaciones_texto import validaFechaInput, encontrarDirectorio, encontrarArchivo, compruebaEncabezado
+from validaciones_texto import validaFechaInput, encontrarDirectorio, encontrarArchivo, compruebaEncabezado, sacarNombreArchivo
+
+from crearXlsx import crearArchivoXlsx
 
 def procesoReactiva(fechaInput, fechaRangoUno, fechaRangoDos, archivoXlsxInput, archivoCertificacionXls, archivoComplementoCliente, pathArchivoTxt):
     
     hora = datetime.datetime.now()
     pathLogSalida = "REACTIVA/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, 'REACTIVA', fechaInput, hora.strftime("%Y%m%d%H%M"))
-    print("Iniciando proceso REACTIVA...")
     try:
-        dataReactivaTxt = leerArchivoReactiva(archivoXlsxInput, fechaInput, fechaRangoUno, fechaRangoDos, archivoCertificacionXls, archivoComplementoCliente)
+        dataReactivaTxt, dataXlsx = leerArchivoReactiva(archivoXlsxInput, fechaInput, fechaRangoUno, fechaRangoDos, archivoCertificacionXls, archivoComplementoCliente)
+        salidaXlsx = "{0}/{1}_{2}".format(pathArchivoTxt, fechaInput, REACTIVA_CONFIG_XLSX['SALIDA_XLSX'])
         logProceso = LOG_PROCESO_REACTIVA
         
         if dataReactivaTxt:
             for data in dataReactivaTxt:
                 salidaTxt = "{0}/{1}{2}.txt".format(pathArchivoTxt, data['NOMBRE_ARCHIVO'], fechaInput)
-                salidaArchivoTxtProactiva(salidaTxt, data['DATA'], data['ENCABEZADO'])
+                if salidaArchivoTxtProactiva(salidaTxt, data['DATA'], data['ENCABEZADO']):
+                    print("<a>&#128221;</a> Archivo TXT: {0} creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaTxt), len(data['DATA'])))
+            archivoProduccionXslx = ['PRODUCCION_{0}'.format(fechaInput), REACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX_PERIODO'], dataXlsx]
+            if crearArchivoXlsx(salidaXlsx, [archivoProduccionXslx]):
+                print("<a>&#128221;</a> Archivo XLSX: {0}.xlsx creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaXlsx), len(dataXlsx)))
 
         if salidaLogTxt(pathLogSalida, logProceso):
-            print("Archivo: {0}\{1} Creado!".format(PATH_RAIZ, pathLogSalida))
+            print("Archivo: {0} Creado!".format(pathLogSalida))
 
     except Exception as e:
         print(e)
@@ -34,23 +40,21 @@ def validarArchivosEntrada(archivosEntrada: []):
     encabezadosArchivos = [REACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX'], COMPLEMENTO_CLIENTE_XLSX['ENCABEZADO'], REACTIVA_CONFIG_XLSX['ARCHIVO_BASE_CERTIFICACION']['ENCABEZADO']]
     coordenadasEncabezado = [REACTIVA_CONFIG_XLSX['COORDENADA_ENCABEZADO'], COMPLEMENTO_CLIENTE_XLSX['COORDENADA_ENCABEZADO'], REACTIVA_CONFIG_XLSX['ARCHIVO_BASE_CERTIFICACION']['COORDENADA_ENCABEZADO']]
     i = 0
-    print("-----------------------------------------------------")
     for archivo in archivosEntrada:
         if encontrarArchivo(archivo):
-            print("Archivo: {0} Encontrado!".format(archivo))
+            print("<strong>Validando encabezado de {0}</strong>".format(sacarNombreArchivo(archivo)))
             archivoCorrecto = compruebaEncabezado(archivo, encabezadosArchivos[i], coordenadasEncabezado[i])
 
             if type(archivoCorrecto) is not dict:
-                print(".- Encabezado de Archivo: {0} OK!".format(archivo))
+                print("<a>&#9989;</a> Encabezado de Archivo: {0} OK!".format(sacarNombreArchivo(archivo)))
             else:
                 encabezadosValidos = False
                 for llave, valores in archivoCorrecto.items():
-                    print('.- {0}'.format(valores))
+                    print('<a>&#10060;</a> {0}'.format(valores))
         else:
             print("Archivo: {0} NO Encontrado.".format(archivo))
             archivosValidos = False
         i += 1
-    print("-----------------------------------------------------")
     return archivosValidos, encabezadosValidos
 
 def main():
@@ -85,7 +89,7 @@ def main():
         if archivosValidos and encabezadosValidos:
             procesoReactiva(fechaEntrada, fechaRangoUno, fechaRangoDos, archivoReactivaXls, archivoCertificacionXls, archivoComplementoXls, pathArchivoTxt)
         else:
-            print("Error en Archivos de entrada")
+            print('<a style="color:red">ERROR EN ARCHIVOS DE ENTRADA.!</a>')
     else:
         print("Error: El programa REACTIVA necesita {0} parametros para su ejecucion".format(PROCESOS_GENERALES['REACTIVA']['ARGUMENTOS_PROCESO']))
 

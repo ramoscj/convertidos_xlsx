@@ -224,8 +224,6 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
     try:
         archivoSalida = REACTIVA_CONFIG_XLSX['SALIDA_TXT']
-        encabezadoXls = REACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX']
-        coordenadaEncabezado = REACTIVA_CONFIG_XLSX['COORDENADA_ENCABEZADO']
         columna = REACTIVA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
         xls = load_workbook(archivoEntrada, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
@@ -247,12 +245,15 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'ENCABEZADO_REACTIVA': 'Encabezado del Archivo: %s OK' % archivoEntrada})
         campanaDescripcion = {inbound : 'Inbound', outbound: 'Outbound'}
-        campanaIdDuplicado = dict()
         gestionReactTxt = dict()
         polizaExitoRepetido = dict()
         polizaReactTxt = dict()
         certificacionReactTxt = dict()
-        dataCartolaDb = dict()
+        dataSalidaXlsx = dict()
+        certificacion = {0: "n.a", 1: "Grabación Certificada", 2: "No certificada"}
+        exitoRepetido = {0: "No", 1: "Si"}
+        estadoFinal = {0: "No Retenido/No Gestionado", 1: "Retenido"}
+        
 
         ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
         listaEstadoRetencionTexto = estadoRetencionReacDesc()
@@ -273,6 +274,8 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                 numeroPoliza, numeroPolizaCertificado = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
                 idEmpleado = str(fila[columna['ID_EMPLEADO']].value)
                 campanaId = str(fila[columna['CAMAPAÑA_ID']].value)
+                campanaEntrada = str(fila[columna['NOMBRE_DE_CAMPAÑA']].value)
+                polizasCampana = str(fila[columna['POLIZAS_CAMPANA']].value)
 
                 fechaCreacionUnida = fechaUnida(fila[columna['FECHA_CREACION']])
                 saliente = formatearSaliente(salienteEntrada)
@@ -280,6 +283,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
                 fechaCreacion = setearFechaCelda(fila[columna['FECHA_CREACION']])
                 fechaCierre = setearFechaCelda(fila[columna['FECHA_CIERRE']])
+                fechaUltimaActividad = setearFechaCelda(fila[columna['ULTIMA_ACTIVIDAD']])
 
                 if salienteEntrada is None:
                     celdaCoordenada = setearCelda2(fila[0:columna['LLAMADA_SALIENTE']+1], len(fila[0:columna['LLAMADA_SALIENTE']])-1, i)
@@ -300,6 +304,9 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
 
                 if type(fechaCierre) is not datetime.date:
                     fechaCierre = None
+                    
+                if type(fechaUltimaActividad) is not datetime.date:
+                    fechaUltimaActividad = None
 
                 if not ejecutivosExistentesDb.get(idEmpleado):
                     valorErroneo = fila[columna['ID_EMPLEADO']].value
@@ -323,15 +330,16 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         continue
 
                     if not gestionReactTxt.get(pk):
-                        gestionReactTxt[pk] = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': 1,'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
+                        gestionReactTxt[pk] = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': 1,'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre, 'IN_OUT': saliente}
                         cantidadCampanasValidas += 1
                     else:
 
                         controlCambioPk, indiceCambio = aprobarActualizarRegistro(estado, estadoValidoReact, contactoReact, gestionReactTxt[pk]['ESTADO_VALIDO_REACT'], gestionReactTxt[pk]['CONTACTO_REACT'])
                         celdaCoordenada = setearCelda2(fila[0:columna['ID_EMPLEADO']+1], len(fila[0:columna['ID_EMPLEADO']])-1, i)
                         if controlCambioPk:
-                            datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': gestionReactTxt[pk]['REPETICIONES'] + 1, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre}
+                            datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': gestionReactTxt[pk]['REPETICIONES'] + 1, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre, 'IN_OUT': saliente}
                             gestionReactTxt[pk].update(datosActualizados)
+                            dataSalidaXlsx.pop(pk)
                             mensaje = '{0};POLIZA_DUPLICADA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4},{5})_{6}'.format(celdaCoordenada, listaEstadoRetencionTexto.get(gestionReactTxt[pk]['ESTADO_VALIDO_REACT']), gestionReactTxt[pk]['CONTACTO_REACT'], listaEstadoRetencionTexto.get(estadoValidoReact), contactoReact, estadoRetencion, indiceCambio)
                             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'REGISTRO_DUPLICADA': mensaje})
                         else:
@@ -383,30 +391,73 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                                 continue
 
                             exitoDuplicadoPoliza = 1
-                            if saliente == inbound:
-                                if fechaCreacion >= gestionReactTxt[pkDataGestion]['FECHA_CREACION']:
-                                    gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
-
-                            elif saliente == outbound:
-                                if type(fechaCierre) is datetime.date and type(gestionReactTxt[pkDataGestion]['FECHA_CIERRE']) is datetime.date:
-                                    if fechaCierre >= gestionReactTxt[pkDataGestion]['FECHA_CIERRE']:
+                            
+                            if saliente == inbound and gestionReactTxt[pkDataGestion]['IN_OUT'] == outbound:
+                                if type(gestionReactTxt[pkDataGestion]['FECHA_CIERRE']) is datetime.date:
+                                    if fechaCreacion >= gestionReactTxt[pkDataGestion]['FECHA_CIERRE']:
                                         gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
-                                else:
-                                    valorErroneo =  '%s-VS-%s' % (fechaCierre, gestionReactTxt[pkDataGestion]['FECHA_CIERRE'])
-                                    celdaCoordenada = setearCelda2(fila[0:columna['FECHA_CIERRE']+1], len(fila[0:columna['FECHA_CIERRE']])-1, i)
-                                    mensaje = '%s;FECHA_CIERRE no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
-                                    LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'FECHA_CIERRE': mensaje})
+                                        campanasPorEjecutivos[idEmpleado][pkDataGestion]['EXITO_REPETIDO'] = 0
+                                        dataSalidaXlsx[pkDataGestion]['EXITO_REPETIDO'] = exitoRepetido.get(1)
+                                        dataSalidaXlsx[pkDataGestion]['ESTADO_FINAL'] = estadoFinal.get(0)
+                                        exitoDuplicadoPoliza = 0
+                                    else:
+                                        gestionReactTxt[pk]['EXITO_REPETIDO_REACT'] = 0
+                                        
+                            elif saliente == outbound and gestionReactTxt[pkDataGestion]['IN_OUT'] == inbound:
+                                if type(fechaCierre) is datetime.date:
+                                    if fechaCierre >= gestionReactTxt[pkDataGestion]['FECHA_CREACION']:
+                                        gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
+                                        campanasPorEjecutivos[idEmpleado][pkDataGestion]['EXITO_REPETIDO'] = 0
+                                        dataSalidaXlsx[pkDataGestion]['EXITO_REPETIDO'] = exitoRepetido.get(1)
+                                        dataSalidaXlsx[pkDataGestion]['ESTADO_FINAL'] = estadoFinal.get(0)
+                                        exitoDuplicadoPoliza = 0
+                                    else:
+                                        gestionReactTxt[pk]['EXITO_REPETIDO_REACT'] = 0
+                                        
+                            else:
+                                if saliente == inbound:
+                                    if fechaCreacion >= gestionReactTxt[pkDataGestion]['FECHA_CREACION']:
+                                        gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
+                                        campanasPorEjecutivos[idEmpleado][pkDataGestion]['EXITO_REPETIDO'] = 0
+                                        dataSalidaXlsx[pkDataGestion]['EXITO_REPETIDO'] = exitoRepetido.get(1)
+                                        dataSalidaXlsx[pkDataGestion]['ESTADO_FINAL'] = estadoFinal.get(0)
+                                        exitoDuplicadoPoliza = 0
+                                    else:
+                                        gestionReactTxt[pk]['EXITO_REPETIDO_REACT'] = 0
+
+
+                                elif saliente == outbound:
+                                    if type(fechaCierre) is datetime.date and type(gestionReactTxt[pkDataGestion]['FECHA_CIERRE']) is datetime.date:
+                                        if fechaCierre >= gestionReactTxt[pkDataGestion]['FECHA_CIERRE']:
+                                            gestionReactTxt[pkDataGestion]['EXITO_REPETIDO_REACT'] = 0
+                                            campanasPorEjecutivos[idEmpleado][pkDataGestion]['EXITO_REPETIDO'] = 0
+                                            dataSalidaXlsx[pkDataGestion]['EXITO_REPETIDO'] = exitoRepetido.get(1)
+                                            dataSalidaXlsx[pkDataGestion]['ESTADO_FINAL'] = estadoFinal.get(0)
+                                            exitoDuplicadoPoliza = 0
+                                        else:
+                                            gestionReactTxt[pk]['EXITO_REPETIDO_REACT'] = 0
+                                    else:
+                                        valorErroneo =  '%s-VS-%s' % (fechaCierre, gestionReactTxt[pkDataGestion]['FECHA_CIERRE'])
+                                        celdaCoordenada = setearCelda2(fila[0:columna['FECHA_CIERRE']+1], len(fila[0:columna['FECHA_CIERRE']])-1, i)
+                                        mensaje = '%s;FECHA_CIERRE no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
+                                        LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'FECHA_CIERRE': mensaje})
                             
                             if not polizaExitoRepetido[numeroPoliza].get(pk):
                                 polizaExitoRepetido[numeroPoliza].setdefault(pk, pk)
                         else:
                             polizaExitoRepetido[numeroPoliza] = {pk: pk}
-
+                  
                     estadoPoliza = complementoCliente[int(numeroPoliza)]['ESTADO_POLIZA']
                     estadoFinalDb = 0
                     if grabCertificadaReact == 1 and polizaReactTxt.get(numeroPoliza):
                         estadoFinalDb = 1
+                        if exitoDuplicadoPoliza == 1:
+                            estadoFinalDb = 0
+                        
+                    
 
+                    dataSalidaXlsx[pk] = {'FECHA_CREACION': fechaCreacion, 'CAMPANA': campanaEntrada, 'ESTADO': estado, 'POLIZAS_CAMPANA': polizasCampana, 'FECHA_CIERRE': fechaCierre, 'POLIZA': str(numeroPoliza), 'ESTADO_RETENCION': estadoRetencion, 'ULTIMA_ACTIVIDAD': fechaUltimaActividad, 'CAMPANA_ID': campanaId, 'ESTAD0_UT': estadoUt, 'IN_OUT': salienteEntrada, 'ID_EMPLEADO': idEmpleado, 'VALIDACION_CERTIFICACION': certificacion.get(ValidacionCertificacion), 'EXITO_REPETIDO': exitoRepetido.get(exitoDuplicadoPoliza), 'ESTADO_POLIZA': estadoPoliza, 'ESTADO_FINAL': estadoFinal.get(estadoFinalDb)}
+                    
                     valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'ESTADO_RETENCION': estadoRetencion, 'ESTAD0_UT': estadoUt, 'IN_OUT': nombreCampana, 'VALIDACION_CERTIFICACION': ValidacionCertificacion, 'EXITO_REPETIDO': exitoDuplicadoPoliza, 'ESTADO_POLIZA': estadoPoliza, 'ESTADO_FINAL': estadoFinalDb}
                     agregarCampanasPorEjecutivo(idEmpleado, pk, valoresPoliza)
                     
@@ -425,7 +476,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
             {'NOMBRE_ARCHIVO': archivoSalida['POLIZA']['NOMBRE_SALIDA'], 'DATA': polizaReactTxt, 'ENCABEZADO': archivoSalida['POLIZA']['ENCABEZADO']},
             {'NOMBRE_ARCHIVO': archivoSalida['CERTIFICACION']['NOMBRE_SALIDA'], 'DATA': certificacionReactTxt, 'ENCABEZADO': archivoSalida['CERTIFICACION']['ENCABEZADO']}
         ]
-        return dataSalida
+        return dataSalida, dataSalidaXlsx
 
     except Exception as e:
         errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
@@ -433,4 +484,11 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
         return False
 
-# print(leerArchivoReactiva('..\ANALISIS\REACTIVA\AGOSTO\_202108_Gestion_CoRet_Reactiva.xlsx', '202108', '20210728', '20210826', '..\ANALISIS\REACTIVA\AGOSTO\_202108_Base_Certificacion_Reactiva.xlsx', '.\CRO\INPUTS\_202108_Complemento_Cliente_Coret.xlsx'))
+# uno = '202112'
+# dos = '20211126'
+# tres = '20211228'
+# x = r'REACTIVA\INPUTS\202112_Gestion_CoRet_Reactiva.xlsx'
+# y = r'REACTIVA\INPUTS\202112_Base_Certificacion_Reactiva.xlsx'
+# z = r'REACTIVA\INPUTS\202112_Complemento_Cliente_Coret.xlsx'
+# rep = r'REACTIVA\OUTPUTS'
+# print(leerArchivoReactiva(x, uno, dos, tres, y, z))
