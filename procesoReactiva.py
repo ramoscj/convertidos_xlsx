@@ -9,7 +9,7 @@ from validaciones_texto import validaFechaInput, encontrarDirectorio, encontrarA
 
 from crearXlsx import crearArchivoXlsx
 
-def procesoReactiva(fechaInput, fechaRangoUno, fechaRangoDos, archivoXlsxInput, archivoCertificacionXls, archivoComplementoCliente, pathArchivoTxt):
+def procesoReactiva(fechaInput, fechaRangoUno, fechaRangoDos, archivoXlsxInput, archivoCertificacionXls, archivoComplementoCliente, pathArchivoTxt, pathArchivoXlsx):
     
     hora = datetime.datetime.now()
     pathLogSalida = "REACTIVA/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, 'REACTIVA', fechaInput, hora.strftime("%Y%m%d%H%M"))
@@ -20,7 +20,7 @@ def procesoReactiva(fechaInput, fechaRangoUno, fechaRangoDos, archivoXlsxInput, 
         
         if dataReactivaTxt:
             for data in dataReactivaTxt:
-                salidaTxt = "{0}/{1}{2}.txt".format(pathArchivoTxt, data['NOMBRE_ARCHIVO'], fechaInput)
+                salidaTxt = "{0}/{1}{2}.txt".format(pathArchivoXlsx, data['NOMBRE_ARCHIVO'], fechaInput)
                 if salidaArchivoTxtProactiva(salidaTxt, data['DATA'], data['ENCABEZADO']):
                     print("<a>&#128221;</a> Archivo TXT: {0} creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaTxt), len(data['DATA'])))
             archivoProduccionXslx = ['PRODUCCION_{0}'.format(fechaInput), REACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX_PERIODO'], dataXlsx]
@@ -67,6 +67,10 @@ def main():
         archivoCertificacionXls = str(sys.argv[5])
         archivoComplementoXls = str(sys.argv[6])
         pathArchivoTxt = str(sys.argv[7])
+        pathArchivoXlsx = str(sys.argv[8])
+        pathNoEncontrado = []
+        directorioNumero = []
+        pathNoPermisos = []
 
         if validaFechaInput(fechaEntrada):
             print("Fecha para el periodo %s OK!" % fechaEntrada)
@@ -75,19 +79,35 @@ def main():
             exit(1)
 
         salidaTxtDirectorio = encontrarDirectorio(pathArchivoTxt)
-        if not salidaTxtDirectorio:
-            print('Error Directorio: {0} no existe!'.format(str(pathArchivoTxt)))
+        salidaXlsxDirectorio = encontrarDirectorio(pathArchivoXlsx)
+        if not salidaTxtDirectorio or not salidaXlsxDirectorio:
+            if not salidaTxtDirectorio:
+                pathNoEncontrado.append(pathArchivoTxt)
+                directorioNumero.append(1)
+            if not salidaXlsxDirectorio:
+                pathNoEncontrado.append(pathArchivoXlsx)
+                directorioNumero.append(2)
+            i = 0
+            for path in pathNoEncontrado:
+                print('Error en el Directorio {0}: {1} no existe!'.format(directorioNumero[i], str(path)))
+                i += 1
             exit(1)
 
         permisoPath = bool(os.access(pathArchivoTxt, os.W_OK))
-        if not permisoPath:
-            print('Error no tiene permisos de escritura en el directorio: {0}'.format(pathArchivoTxt))
+        permisoPathXlsx = bool(os.access(pathArchivoXlsx, os.W_OK))
+        if not permisoPath or not permisoPathXlsx:
+            if not permisoPath:
+                pathNoPermisos.append(pathArchivoTxt)
+            if not permisoPathXlsx:
+                pathNoPermisos.append(pathArchivoXlsx)
+            for permisos in pathNoPermisos:
+                print('Error no tiene permisos de escritura en el directorio: {0}'.format(permisos))
             exit(1)
 
         archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoReactivaXls, archivoComplementoXls, archivoCertificacionXls])
 
         if archivosValidos and encabezadosValidos:
-            procesoReactiva(fechaEntrada, fechaRangoUno, fechaRangoDos, archivoReactivaXls, archivoCertificacionXls, archivoComplementoXls, pathArchivoTxt)
+            procesoReactiva(fechaEntrada, fechaRangoUno, fechaRangoDos, archivoReactivaXls, archivoCertificacionXls, archivoComplementoXls, pathArchivoTxt, pathArchivoXlsx)
         else:
             print('<a style="color:red">ERROR EN ARCHIVOS DE ENTRADA.!</a>')
     else:

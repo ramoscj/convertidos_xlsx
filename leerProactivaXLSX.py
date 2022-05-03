@@ -22,17 +22,41 @@ from validaciones_texto import (convertirListaProactiva,
                                 ultimoDiaMes, validarEncabezadoXlsx, fechaMesAnterior)
 
 from dataXlsxProactiva import (definirEstadoRetencionPro, definirEstadoPro,
-                                definirEstadoUtPro, definirBooleano)
+                                definirEstadoUtPro, definirBooleano, validarClienteContacto)
 
 LOG_PROCESO_PROACTIVA = dict()
 campanasPorEjecutivos = dict()
 listaEstadoRetencion = listaEstadoRetencionProactiva()
 campanasValidasRetencion = dict()
 filaSalidaTxt = dict()
+clienteDuplicadoContactado = dict()
+dataXlsx = dict()
 mantieneSuProducto = listaEstadoRetencion.get('Mantiene su producto')
 realizaPagoEnLinea = listaEstadoRetencion.get('Realiza pago en línea')
 realizaActivacion = listaEstadoRetencion.get('Realiza Activación PAC/PAT')
 listaValidaRetencion = {mantieneSuProducto: mantieneSuProducto, realizaPagoEnLinea: realizaPagoEnLinea, realizaActivacion: realizaActivacion}
+
+def validarClienteContactoDuplicado(estado, estadoUt, pkCliente, pk, idEmpleado):
+    clienteUnico = 'SI'
+    if clienteDuplicadoContactado.get(pkCliente):
+        clienteUnico = 'NO'
+        pkExistente = clienteDuplicadoContactado[pkCliente]['PK']
+        contactoCliente = validarClienteContacto(estado, estadoUt)
+        dataXlsx[pkExistente]['CLIENTE_UNICO'] = clienteUnico
+        if estado == 2:
+            if campanasPorEjecutivos[idEmpleado].get(pkExistente):
+                campanasPorEjecutivos[idEmpleado][pkExistente]['CONTACTO_CLIENTE'] = 'NO CONTACTADO'
+                campanasPorEjecutivos[idEmpleado][pkExistente]['CLIENTE_UNICO'] = 'NO'
+            dataXlsx[pkExistente]['CONTACTO_CLIENTE'] = 'NO CONTACTADO'
+            clienteDuplicadoContactado[pkCliente]['PK'] = pk
+        elif estado == 1 or estado == 3:
+            if contactoCliente == 'CONTACTADO':
+                dataXlsx[pkExistente]['CONTACTO_CLIENTE'] = 'NO CONTACTADO'
+                clienteDuplicadoContactado[pkCliente]['PK'] = pk
+    else:
+        contactoCliente = validarClienteContacto(estado, estadoUt)
+        clienteDuplicadoContactado[pkCliente] = {'PK' : pk}
+    return contactoCliente, clienteUnico
 
 def getEstado(celdaEstado):
     listaContactado = {'Pendiente': 1, 'Terminado con Exito': 2 , 'Terminado sin Exito': 3}
@@ -119,7 +143,7 @@ def insertarCampanaEjecutivos(campanasEjecutivos: dict, fechaProceso):
             LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'LIMPIAR_CAMAPAÑAS_EJECUTIVOS': 'EliminarCampanaEjecutivos;Se eliminaron {0} Camapaña(s) existentes'.format(campanasExistentes)})
 
         if len(campanasPorPeriodo) > 0:
-            sql = """INSERT INTO proactiva_campanas_ejecutivos (id_periodo_ejecutivo, numero_poliza, campana_id, nombre_campana, estado_retencion, cobranza_pro, pacpat_pro, cobranza_rel_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_cierre, reliquidacion, numero_poliza_certificado, polizas_campana, nombre_campana_completo, fecha_creacion, fecha_expiracion_coret, fecha_ultimo_pago, fecha_mandato, estado_mandato, fecha_reliquidacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL);"""
+            sql = """INSERT INTO proactiva_campanas_ejecutivos (id_periodo_ejecutivo, numero_poliza, campana_id, nombre_campana, estado_retencion, cobranza_pro, pacpat_pro, cobranza_rel_pro, pacpat_rel_pro, estado_pro, estado_ut_pro, fecha_cierre, reliquidacion, numero_poliza_certificado, polizas_campana, nombre_campana_completo,contacto_cliente, cliente_unico, fecha_creacion, fecha_expiracion_coret, fecha_ultimo_pago, fecha_mandato, estado_mandato, fecha_reliquidacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL);"""
             cursor.executemany(sql, campanasPorPeriodo)
             db.commit()
         return True
@@ -311,6 +335,8 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
     fechaCreacion = valoresEntrada['FECHA_CREACION']
     polizasCampanas = valoresEntrada['POLIZAS_CAMPANA']
     fechaExpiracionCoret = valoresEntrada['FECHA_EXPIRACION_CORET']
+    clienteUnico = valoresEntrada['CLIENTE_UNICO']
+    clienteContacto = valoresEntrada['CONTACTO_CLIENTE']
     cobranzaPro = 0
     pacpatPro = 0
     seReliquida = 0
@@ -336,7 +362,7 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
     numeroPolizaCliente = complementoCliente[numeroPoliza]['NRO_CERT']
     pk2 = '{0}_{1}_{2}'.format(campanaId, idEmpleado, numeroPoliza)
 
-    valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'CAMPAÑA_ID': campanaId, 'NOMBRE_CAMPAÑA': nombreCampana, 'ESTADO_RETENCION': estadoRetencion, 'RETENCION_COBRANZA': 0, 'RETENCION_ACTIVACION': 0, 'RETENCION_RL_COBRANZA': 0, 'RETENCION_RL_ACTIVACION': 0, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_CIERRE': fechaCierre, 'RELIQUIDACION': seReliquida, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'FECHA_CREACION': fechaCreacion, 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_EXPIRACION_CORET': fechaExpiracionCoret, 'FECHA_ULTIMO_PAGO': fecUltimoPago, 'ESTADO_MANDATO': estadoMandato, 'FECHA_MANDATO': fecMandato}
+    valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'CAMPAÑA_ID': campanaId, 'NOMBRE_CAMPAÑA': nombreCampana, 'ESTADO_RETENCION': estadoRetencion, 'RETENCION_COBRANZA': 0, 'RETENCION_ACTIVACION': 0, 'RETENCION_RL_COBRANZA': 0, 'RETENCION_RL_ACTIVACION': 0, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'FECHA_CIERRE': fechaCierre, 'RELIQUIDACION': seReliquida, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'FECHA_CREACION': fechaCreacion, 'POLIZAS_CAMPANA': polizasCampanas, 'CLIENTE_UNICO': clienteUnico, 'CONTACTO_CLIENTE': clienteContacto, 'FECHA_EXPIRACION_CORET': fechaExpiracionCoret, 'FECHA_ULTIMO_PAGO': fecUltimoPago, 'ESTADO_MANDATO': estadoMandato, 'FECHA_MANDATO': fecMandato}
     agregarCampanasPorEjecutivo(idEmpleado, pk2, valoresPoliza)
 
     if cobranzaPro > 0:
@@ -399,7 +425,6 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
             i = 0
             polizasNoAprobadas = 0
             cantidadCampanasValidas = 0
-            dataXlsx = dict()
             complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplementoCliente)
             LOG_PROCESO_PROACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
             ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
@@ -425,6 +450,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
                     numeroPoliza, numeroPolizaCertificado = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
                     polizasCampanas = str(fila[columna['POLIZAS_CAMPANAS']].value)
                     pk = '{0}_{1}_{2}'.format(campanaId, codigoEjecutivo, numeroPoliza)
+                    pkClienteContacto = '{0}_{1}'.format(campanaId, codigoEjecutivo)
 
                     if numeroPoliza is None:
                         celdaCoordenada = setearCelda2(fila[0:columna['NRO_POLIZA']+1], len(fila[0:columna['NRO_POLIZA']])-1, i)
@@ -489,6 +515,8 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
                                 
 
                         repeticionPorCampana = 1
+                        contactoCliente, clienteDuplicado = validarClienteContactoDuplicado(estadoValido, estadoUltimaTarea, pkClienteContacto, pk, idEmpleado)
+                        
                         if filaSalidaTxt.get(pk):
 
                             celdaCoordenada = setearCelda2(fila[0:columna['NRO_POLIZA']+1], len(fila[0:columna['NRO_POLIZA']])-1, i)
@@ -499,11 +527,13 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
                                     repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
                                     filaSalidaTxt.pop(pk)
                                     dataXlsx.pop(pk)
+                                    clienteDuplicadoContactado.pop(pkClienteContacto)
                                 elif listaConsiderarRetencion.get(estadoRetencion):
                                     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA(RetencionDoble);ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoRetencionTexto.get(filaSalidaTxt[pk]['ESTADO_RETENCION_PRO']), estado, estadoRetencion)})
                                     repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1
                                     filaSalidaTxt.pop(pk)
                                     dataXlsx.pop(pk)
+                                    clienteDuplicadoContactado.pop(pkClienteContacto)
                                     if campanasPorEjecutivos[idEmpleado].get(pk):
                                         if campanasPorEjecutivos[idEmpleado][pk]['RETENCION_ACTIVACION'] == 1 or campanasPorEjecutivos[idEmpleado][pk]['RETENCION_RL_COBRANZA'] == 1:
                                             polizasNoAprobadas -= 1
@@ -521,11 +551,13 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
                                     repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
                                     filaSalidaTxt.pop(pk)
                                     dataXlsx.pop(pk)
+                                    clienteDuplicadoContactado.pop(pkClienteContacto)
                                 elif filaSalidaTxt[pk]['ESTADO_PRO'] == 0:
                                     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoUtTexto.get(filaSalidaTxt[pk]['ESTADO_UT_PRO']), estado, estadoUltimaTarea)})
                                     repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
                                     filaSalidaTxt.pop(pk)
                                     dataXlsx.pop(pk)
+                                    clienteDuplicadoContactado.pop(pkClienteContacto)
                                 else:
                                     mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO({1},{2})_vs_PERMANECE({3},{4})'.format(celdaCoordenada, estado, estadoUltimaTarea, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoUtTexto.get(filaSalidaTxt[pk]['ESTADO_UT_PRO']))
                                     LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': mensaje})
@@ -551,7 +583,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
 
                             if complementoCliente.get(numeroPoliza) and listaValidaRetencion.get(estadoRetencionValido):
                                 
-                                valoresEntrada = {'ESTADO_RETENCION': estadoRetencionValido, 'NOMBRE_CAMPAÑA': nombreCampana, 'NUMERO_POLIZA': numeroPoliza, 'FECHA_CIERRE': fechaCierre, 'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'CAMPAÑA_ID': campanaId, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'CELDA_NROPOLIZA': fila[columna['NRO_POLIZA']], 'FECHA_CREACION': fechaCreacion, 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_EXPIRACION_CORET': fechaExpiracionCoret}
+                                valoresEntrada = {'ESTADO_RETENCION': estadoRetencionValido, 'NOMBRE_CAMPAÑA': nombreCampana, 'NUMERO_POLIZA': numeroPoliza, 'FECHA_CIERRE': fechaCierre, 'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'CAMPAÑA_ID': campanaId, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'CELDA_NROPOLIZA': fila[columna['NRO_POLIZA']], 'FECHA_CREACION': fechaCreacion, 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_EXPIRACION_CORET': fechaExpiracionCoret, 'CONTACTO_CLIENTE': contactoCliente, 'CLIENTE_UNICO': clienteDuplicado}
                                 cobranzaPro, pacpatPro, noAprobada = validarRetencionesPolizas(valoresEntrada, complementoCliente)
                                 polizasNoAprobadas += noAprobada
                                 cantidadCampanasValidas += 1
@@ -576,8 +608,10 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
                             fecUltimoPago = complementoCliente[numeroPoliza]['FEC_ULT_PAG']
                             estadoMandato = complementoCliente[numeroPoliza]['ESTADO_MANDATO']
                             fecMandato = complementoCliente[numeroPoliza]['FECHA_MANDATO']
-
-                        dataXlsx[pk] = {'FECHA_CREACION': fechaCreacion, 'NOMBRE_CAMPANA': nombreCampana, 'CODIGO_EMPLEADO': idEmpleado, 'ESTADO_PRO': definirEstadoPro(estadoValido), 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_CIERRE': fechaCierre, 'POLIZA': str(numeroPoliza), 'FECHA_EXPIRACION': fechaExpiracionCoret, 'ESTADO_RETENCION': definirEstadoRetencionPro(estadoRetencionValido), 'CAMPAÑA_ID': campanaId, 'ESTADO_UT_PRO': definirEstadoUtPro(estadoUtValido), 'FECHA_ULTPAGO': fecUltimoPago, 'ESTADO_MANDATO': estadoMandato, 'FECHA_MANDATO': fecMandato, 'PAGA_COBRANZA': definirBooleano(cobranzaPro), 'PAGA_MANDATO': definirBooleano(pacpatPro)}
+                            
+                        # contactoCliente, clienteDuplicado = validarClienteContactoDuplicado(estadoValido, estadoUltimaTarea, pkClienteContacto, pk)
+                        
+                        dataXlsx[pk] = {'FECHA_CREACION': fechaCreacion, 'NOMBRE_CAMPANA': nombreCampana, 'CODIGO_EMPLEADO': idEmpleado, 'ESTADO_PRO': definirEstadoPro(estadoValido), 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_CIERRE': fechaCierre, 'POLIZA': str(numeroPoliza), 'FECHA_EXPIRACION': fechaExpiracionCoret, 'ESTADO_RETENCION': definirEstadoRetencionPro(estadoRetencionValido), 'CAMPAÑA_ID': campanaId, 'ESTADO_UT_PRO': definirEstadoUtPro(estadoUtValido), 'FECHA_ULTPAGO': fecUltimoPago, 'ESTADO_MANDATO': estadoMandato, 'FECHA_MANDATO': fecMandato, 'CONTACTO_CLIENTE': contactoCliente, 'CLIENTE_UNICO': clienteDuplicado, 'PAGA_COBRANZA': definirBooleano(cobranzaPro), 'PAGA_MANDATO': definirBooleano(pacpatPro)}
 
                         validarEstadoRetencionExistente = estadoRetencionOriginalValido(campanasValidasRetencion, campanaId)
                         if validarEstadoRetencionExistente:
@@ -606,4 +640,7 @@ def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
         errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
         LOG_PROCESO_PROACTIVA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_PROACTIVA)+1: errorMsg})
         LOG_PROCESO_PROACTIVA.setdefault('PROCESO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
+        # raise
         return False, False, False, False, False
+        
+# print(leerArchivoProactiva(r'.\PROACTIVA\INPUTS\202201_Gestion_CoRet_Proactiva.xlsx', 202201, r'.\PROACTIVA\INPUTS\202201_Complemento_Cliente_Coret.xlsx'))

@@ -8,7 +8,7 @@ from validaciones_texto import validaFechaInput, encontrarDirectorio, encontrarA
 
 from crearXlsx import crearArchivoXlsx
 
-def procesoCoDm(fechaInput, archivoXlsxInput, pathArchivoTxt, fechaInicioEntrada, fechaFinEntrada):
+def procesoCoDm(fechaInput, archivoXlsxInput, pathArchivoTxt, fechaInicioEntrada, fechaFinEntrada, pathArchivoXlsx):
 
     hora = datetime.datetime.now()
     pathLogSalida = "CODM/{0}log_{1}{2}_{3}.txt".format(PATH_LOG, 'CODM', fechaInput, hora.strftime("%Y%m%d%H%M"))
@@ -23,7 +23,7 @@ def procesoCoDm(fechaInput, archivoXlsxInput, pathArchivoTxt, fechaInicioEntrada
             if salidaArchivoTxt(salidaTxt, dataTxt, encabezadoTxt):
                 print("<a>&#128221;</a> Archivo {0} creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaTxt), len(dataTxt)))
                 
-                salidaXlsx = "{0}/{1}_{2}".format(pathArchivoTxt, fechaInput, CODM_XLSX['SALIDA_XLSX'])
+                salidaXlsx = "{0}/{1}_{2}".format(pathArchivoXlsx, fechaInput, CODM_XLSX['SALIDA_XLSX'])
                 archivoProduccionXslx = ['PRODUCCION_{0}'.format(fechaInput), CODM_XLSX['ENCABEZADO_XLSX_PERIODO'], dataXlsx]
                 if crearArchivoXlsx(salidaXlsx, [archivoProduccionXslx]):
                     print("<a>&#128221;</a> Archivo XLSX: {0}.xlsx creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaXlsx), len(dataXlsx)))
@@ -66,8 +66,12 @@ def main():
         fechaRangoFin = str(sys.argv[3])
         archivoXlsCODM = str(sys.argv[4])
         pathArchivoTxt = str(sys.argv[5])
+        pathArchivoXlsx = str(sys.argv[6])
         setearFechaInput(fechaRangoInicio)
         setearFechaInput(fechaRangoFin)
+        pathNoEncontrado = []
+        directorioNumero = []
+        pathNoPermisos = []
 
         if validaFechaInput(fechaEntrada):
             print("Fecha para el periodo %s OK!" % fechaEntrada)
@@ -76,19 +80,35 @@ def main():
             exit(1)
 
         salidaTxtDirectorio = encontrarDirectorio(pathArchivoTxt)
-        if not salidaTxtDirectorio:
-            print('Error Directorio: {0} no existe!'.format(str(pathArchivoTxt)))
+        salidaXlsxDirectorio = encontrarDirectorio(pathArchivoXlsx)
+        if not salidaTxtDirectorio or not salidaXlsxDirectorio:
+            if not salidaTxtDirectorio:
+                pathNoEncontrado.append(pathArchivoTxt)
+                directorioNumero.append(1)
+            if not salidaXlsxDirectorio:
+                pathNoEncontrado.append(pathArchivoXlsx)
+                directorioNumero.append(2)
+            i = 0
+            for path in pathNoEncontrado:
+                print('Error en el Directorio {0}: {1} no existe!'.format(directorioNumero[i], str(path)))
+                i += 1
             exit(1)
 
         permisoPath = bool(os.access(pathArchivoTxt, os.W_OK))
-        if not permisoPath:
-            print('Error no tiene permisos de escritura en el directorio: {0}'.format(pathArchivoTxt))
+        permisoPathXlsx = bool(os.access(pathArchivoXlsx, os.W_OK))
+        if not permisoPath or not permisoPathXlsx:
+            if not permisoPath:
+                pathNoPermisos.append(pathArchivoTxt)
+            if not permisoPathXlsx:
+                pathNoPermisos.append(pathArchivoXlsx)
+            for permisos in pathNoPermisos:
+                print('Error no tiene permisos de escritura en el directorio: {0}'.format(permisos))
             exit(1)
         
 
         archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsCODM])
         if archivosValidos and encabezadosValidos:
-            procesoCoDm(fechaEntrada, archivoXlsCODM, pathArchivoTxt, fechaRangoInicio, fechaRangoFin)
+            procesoCoDm(fechaEntrada, archivoXlsCODM, pathArchivoTxt, fechaRangoInicio, fechaRangoFin, pathArchivoXlsx)
         else:
             print('<a style="color:red">Error en Archivo:</a> {0}'.format(sacarNombreArchivo(archivoXlsCODM)))
 

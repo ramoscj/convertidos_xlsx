@@ -75,16 +75,14 @@ def procesoGenerico(fechaInput, archivoXlsxInput, pathArchivoTxt, procesoInput, 
             dataTxt, encabezadoTxt = leerArchivoFuga(archivoXlsxInput, fechaMesAnterior.strftime("%Y%m"))
             formatoSalidaTxt = FUGA_CONFIG_XLSX['SALIDA_TXT']
             logProceso = LOG_PROCESO_FUGA
-        # elif procesoInput == 'CODM':
-        #     dataTxt, encabezadoTxt = leerArchivoCoDm(archivoXlsxInput, fechaInput, valoresExtraGestion[0], valoresExtraGestion[1])
-        #     formatoSalidaTxt = CODM_XLSX['SALIDA_TXT']
-        #     logProceso = LOG_PROCESO_CODM
         elif procesoInput == 'GESTION':
             dataTxt, encabezadoTxt, dataXlsx = leerArchivoGestion(archivoXlsxInput, fechaInput, valoresExtraGestion[0], valoresExtraGestion[1], valoresExtraGestion[2])
             formatoSalidaTxt = GESTION_CONFIG_XLSX['SALIDA_TXT']
             logProceso = LOG_PROCESO_GESTION
         elif procesoInput == 'CAMPANHA_PRIORITARIA':
-            dataTxt, encabezadoTxt = leerArchivoPrioritarias(archivoXlsxInput)
+            # dataTxt, encabezadoTxt = leerArchivoPrioritarias(archivoXlsxInput)
+            dataTxt = {1: {}}
+            encabezadoTxt = CAMPANHAS_PRIORITARIAS['ENCABEZADO_TXT']
             formatoSalidaTxt = CAMPANHAS_PRIORITARIAS['SALIDA_TXT']
             logProceso = LOG_PROCESO_PRIORITARIAS
 
@@ -135,19 +133,17 @@ def main(procesoInput):
 
         fechaEntrada = str(sys.argv[2])
         proceso = 0
+        pathNoEncontrado = []
+        directorioNumero = []
+        pathNoPermisos = []
+        pathArchivoXlsx = ''
+        salidaXlsxDirectorio = True
+        permisoPathXlsx = True
 
         if procesoInput == 'CALIDAD' or procesoInput == 'CAMPANHA_ESPECIAL' or procesoInput == 'FUGA' or procesoInput == 'CAMPANHA_PRIORITARIA':
             archivoXlsEntrada = str(sys.argv[3])
             pathArchivosTxt = str(sys.argv[4])
             proceso = 1
-        # elif procesoInput == 'CODM':
-        #     fechaRangoInicio = str(sys.argv[3])
-        #     fechaRangoFin = str(sys.argv[4])
-        #     archivoXlsCODM = str(sys.argv[5])
-        #     pathArchivosTxt = str(sys.argv[6])
-        #     setearFechaInput(fechaRangoInicio)
-        #     setearFechaInput(fechaRangoFin)
-        #     proceso = 2
         elif procesoInput == 'GESTION':
             fechaRangoInicio = str(sys.argv[3])
             fechaRangoFin = str(sys.argv[4])
@@ -166,13 +162,31 @@ def main(procesoInput):
             exit(1)
             
         salidaTxtDirectorio = encontrarDirectorio(pathArchivosTxt)
-        if not salidaTxtDirectorio:
-            print('Error Directorio: {0} no existe!'.format(str(pathArchivosTxt)))
+        if len(pathArchivoXlsx) > 0:
+            salidaXlsxDirectorio = encontrarDirectorio(pathArchivoXlsx)
+        if not salidaTxtDirectorio or not salidaXlsxDirectorio:
+            if not salidaTxtDirectorio:
+                pathNoEncontrado.append(pathArchivosTxt)
+                directorioNumero.append(1)
+            if len(pathArchivoXlsx) > 0 and not salidaXlsxDirectorio:
+                pathNoEncontrado.append(pathArchivoXlsx)
+                directorioNumero.append(2)
+            i = 0
+            for path in pathNoEncontrado:
+                print('Error en el Directorio {0}: {1} no existe!'.format(directorioNumero[i], str(path)))
+                i += 1
             exit(1)
 
         permisoPath = bool(os.access(pathArchivosTxt, os.W_OK))
-        if not permisoPath:
-            print('Error no tiene permisos de escritura en el directorio: {0}'.format(pathArchivosTxt))
+        if len(pathArchivoXlsx) > 0:
+            permisoPathXlsx = bool(os.access(pathArchivoXlsx, os.W_OK))
+        if not permisoPath or not permisoPathXlsx:
+            if not permisoPath:
+                pathNoPermisos.append(pathArchivosTxt)
+            if len(pathArchivoXlsx) > 0 and not permisoPathXlsx:
+                pathNoPermisos.append(pathArchivoXlsx)
+            for permisos in pathNoPermisos:
+                print('Error no tiene permisos de escritura en el directorio: {0}'.format(permisos))
             exit(1)
 
         if proceso == 1:
@@ -181,12 +195,6 @@ def main(procesoInput):
                 procesoGenerico(fechaEntrada, archivoXlsEntrada, pathArchivosTxt, procesoInput)
             else:
                 print('<a style="color:red">Error en Archivo:</a> {0}'.format(sacarNombreArchivo(archivoXlsEntrada)))
-        # elif proceso == 2:
-        #     archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsCODM], [procesos[procesoInput]['ENCABEZADO']], [procesos[procesoInput]['COORDENADA_ENCABEZADO']])
-        #     if archivosValidos and encabezadosValidos:
-        #         procesoGenerico(fechaEntrada, archivoXlsCODM, pathArchivosTxt, procesoInput, fechaRangoInicio, fechaRangoFin)
-        #     else:
-        #         print('<a style="color:red">Error en Archivo:</a> {0}'.format(sacarNombreArchivo(archivoXlsCODM)))
         elif proceso == 2:
             archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsGestion, archivoXlsPropietarios], [procesos[procesoInput]['ENCABEZADO'], procesos[procesoInput]['ENCABEZADO_PROPIETARIOS']], [procesos[procesoInput]['COORDENADA_ENCABEZADO'], procesos[procesoInput]['COORDENADA_PROPIETARIOS']])
             if archivosValidos and encabezadosValidos:

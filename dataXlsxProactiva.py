@@ -1,5 +1,5 @@
 from conexio_db import conectorDB
-from diccionariosDB import listaEstadoUtDesc, estadoRetencionProDesc
+from diccionariosDB import listaEstadoUtDesc, estadoRetencionProDesc, listaEstadoUtContacto
 
 def definirEstadoPro(estado):
     listaContactado = {1: 'Pendiente', 2: 'Terminado con Exito', 3: 'Terminado sin Exito'}
@@ -7,6 +7,18 @@ def definirEstadoPro(estado):
     if listaContactado.get(estado):
         salidaEstado = listaContactado.get(estado)
     return salidaEstado
+
+def validarClienteContacto(estado, estadoUt):
+    listaEstadoContactado = listaEstadoUtContacto()
+    contacto = 'NO CONTACTADO'
+    if estado >= 1:
+        if estado == 2:
+            contacto = 'CONTACTADO'
+        else:
+            if listaEstadoContactado.get(estadoUt):
+                contacto = 'CONTACTADO'
+    
+    return contacto
 
 def definirEstadoUtPro(estadoUt):
     listaEstadoUt = listaEstadoUtDesc()

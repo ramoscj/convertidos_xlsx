@@ -11,8 +11,7 @@ from diccionariosDB import (buscarRutEjecutivosDb,
                             listaEstadoRetencionReactiva,
                             listaEstadoUtContacto, listaEstadoUtNoContacto,
                             periodoCampanasReactiva, CampanasPorPeriodoReactiva, estadoRetencionReacDesc)
-from escribir_txt import (salidaArchivoTxt, salidaArchivoTxtProactiva,
-                          salidaLogTxt)
+
 from validaciones_texto import (convertirDataReact,
                                 convertirListaReactiva,
                                 formatearFechaMesAnterior, formatearIdCliente,
@@ -24,9 +23,31 @@ from validaciones_texto import (convertirDataReact,
 
 LOG_PROCESO_REACTIVA = dict()
 campanasPorEjecutivos = dict()
+clienteDuplicadoContactado = dict()
+dataSalidaXlsx = dict()
 inbound = REACTIVA_CONFIG_XLSX['INBOUND_VALOR']
 outbound = REACTIVA_CONFIG_XLSX['OUTBOUND_VALOR']
 listaEstadoRetencion = listaEstadoRetencionReactiva()
+
+def validarClienteContactoDuplicado(contacto, nivelContacto, pkCliente, pk):
+    clienteUnico = 'SI'
+    contactoCliente = 'NO CONTACTADO'
+    if clienteDuplicadoContactado.get(pkCliente):
+        clienteUnico = 'NO'
+        pkExistente = clienteDuplicadoContactado[pkCliente]['PK']
+        nivelContactoExistente = clienteDuplicadoContactado[pkCliente]['NIVEL_CONTACTO']
+        dataSalidaXlsx[pkExistente]['CLIENTE_UNICO'] = clienteUnico
+        if contacto == 1:
+            if nivelContacto <= nivelContactoExistente:
+                contactoCliente = 'CONTACTADO'
+                dataSalidaXlsx[pkExistente]['CONTACTO_CLIENTE'] = 'NO CONTACTADO'
+                clienteDuplicadoContactado[pkCliente]['PK'] = pk
+                clienteDuplicadoContactado[pkCliente]['NIVEL_CONTACTO'] = nivelContacto
+    else:
+        if contacto == 1:
+            contactoCliente = 'CONTACTADO'
+        clienteDuplicadoContactado[pkCliente] = {'PK' : pk, 'NIVEL_CONTACTO': nivelContacto}
+    return contactoCliente, clienteUnico
 
 def extraerBaseCertificacion(archivoCertificacionXls, fechaInicioPeriodo, fechaFinMes):
     archivo = archivoCertificacionXls
@@ -102,24 +123,31 @@ def validarEstadoReact(estadoRetencion, estado):
 def validarContactoReact(saliente, estadoRetencion, estado, estadoUt, listaEstadoContactado):
 
     contactoReact = 0
+    nivelContacto = 0
     if saliente == inbound:
         contactoReact = 1
+        nivelContacto = 1
     elif saliente == outbound:
         if estadoRetencion == 'Mantiene su producto':
             contactoReact = 1
+            nivelContacto = 1
         elif estadoRetencion is None:
             if estadoUt is not None:
                 if listaEstadoContactado.get(estadoUt):
                     contactoReact = 1
+                    nivelContacto = 2
             elif estado != 'Sin Gestion':
                 contactoReact = 1
+                nivelContacto = 2
         elif estadoRetencion != 'Mantiene su producto':
             if estadoUt is None:
                 if estado != 'Sin Gestion':
                     contactoReact = 1
+                    nivelContacto = 3
             elif listaEstadoContactado.get(estadoUt):
                 contactoReact = 1
-    return contactoReact
+                nivelContacto = 3
+    return contactoReact, nivelContacto
 
 def exitoRepetidoPk(numeroPoliza, polizaExitoRepetido, gestionReactTxt):
     pkSalida = 0
@@ -135,8 +163,8 @@ def aprobarActualizarRegistro(estado, estadoValidoReact, contactoReact, estadoVa
         controlCambioPk = True
         indiceCambio = 'EstadoRetencion'
     elif contactoReact == 1 and contactoReactData == 0:
-        controlCambioPk = 'Contactabilidad'
-        indiceCambio = 2
+        controlCambioPk = True
+        indiceCambio = 'Contactabilidad'
     elif estado != 'Sin Gestion' and estadoValidoReactData == 4:
         controlCambioPk = True
         indiceCambio = 'Estado'
@@ -249,7 +277,6 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         polizaExitoRepetido = dict()
         polizaReactTxt = dict()
         certificacionReactTxt = dict()
-        dataSalidaXlsx = dict()
         certificacion = {0: "n.a", 1: "Grabación Certificada", 2: "No certificada"}
         exitoRepetido = {0: "No", 1: "Si"}
         estadoFinal = {0: "No Retenido/No Gestionado", 1: "Retenido"}
@@ -280,6 +307,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                 fechaCreacionUnida = fechaUnida(fila[columna['FECHA_CREACION']])
                 saliente = formatearSaliente(salienteEntrada)
                 pk = '{0}_{1}_{2}_{3}'.format(fechaCreacionUnida, numeroPoliza, saliente, idEmpleado)
+                pkClienteContacto = '{0}_{1}'.format(campanaId, salienteEntrada)
 
                 fechaCreacion = setearFechaCelda(fila[columna['FECHA_CREACION']])
                 fechaCierre = setearFechaCelda(fila[columna['FECHA_CIERRE']])
@@ -320,7 +348,7 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                 if saliente == inbound and fechaCreacion >= fechaIncioMes and fechaCreacion <= fechaFinMes or saliente == outbound and fechaCreacion >= fechaInicioPeriodo and fechaCreacion <= fechaFinPeriodo:
 
                     estadoValidoReact = validarEstadoReact(estadoRetencion, estado)
-                    contactoReact = validarContactoReact(saliente, estadoRetencion, estado, estadoUt, listaEstadoContactado)
+                    contactoReact, nivelContactoCampana = validarContactoReact(saliente, estadoRetencion, estado, estadoUt, listaEstadoContactado)
 
                     if type(contactoReact) is not int:
                         valorErroneo = str(fila[columna['ESTADO_ULTIMA_TAREA']].value)
@@ -339,7 +367,13 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         if controlCambioPk:
                             datosActualizados = {'ESTADO_VALIDO_REACT': estadoValidoReact, 'CONTACTO_REACT': contactoReact, 'EXITO_REPETIDO_REACT': 0, 'ID_EMPLEADO': idEmpleado, 'ID_CAMPANA': campanaId, 'CAMPANA': nombreCampana, 'POLIZA': numeroPoliza, 'REPETICIONES': gestionReactTxt[pk]['REPETICIONES'] + 1, 'FECHA_CREACION': fechaCreacion, 'FECHA_CIERRE': fechaCierre, 'IN_OUT': saliente}
                             gestionReactTxt[pk].update(datosActualizados)
+                            polizaClienteDiferente = '{0}_{1}'.format(dataSalidaXlsx[pk]['CAMPANA_ID'], dataSalidaXlsx[pk]['IN_OUT'])
                             dataSalidaXlsx.pop(pk)
+                            if clienteDuplicadoContactado.get(pkClienteContacto):
+                                clienteDuplicadoContactado.pop(pkClienteContacto)
+                            else:
+                                clienteDuplicadoContactado.pop(polizaClienteDiferente)
+                                LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'POLIZA_CLIENTES_DIFERENTES': '{0};POLIZA_CLIENTES_DIFERENTES;ESTADO_ANTERIOR:({1}):NUEVO_VALOR:({2}'.format(celdaCoordenada, polizaClienteDiferente, pkClienteContacto)})
                             mensaje = '{0};POLIZA_DUPLICADA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4},{5})_{6}'.format(celdaCoordenada, listaEstadoRetencionTexto.get(gestionReactTxt[pk]['ESTADO_VALIDO_REACT']), gestionReactTxt[pk]['CONTACTO_REACT'], listaEstadoRetencionTexto.get(estadoValidoReact), contactoReact, estadoRetencion, indiceCambio)
                             LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'REGISTRO_DUPLICADA': mensaje})
                         else:
@@ -453,10 +487,10 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
                         estadoFinalDb = 1
                         if exitoDuplicadoPoliza == 1:
                             estadoFinalDb = 0
-                        
-                    
-
-                    dataSalidaXlsx[pk] = {'FECHA_CREACION': fechaCreacion, 'CAMPANA': campanaEntrada, 'ESTADO': estado, 'POLIZAS_CAMPANA': polizasCampana, 'FECHA_CIERRE': fechaCierre, 'POLIZA': str(numeroPoliza), 'ESTADO_RETENCION': estadoRetencion, 'ULTIMA_ACTIVIDAD': fechaUltimaActividad, 'CAMPANA_ID': campanaId, 'ESTAD0_UT': estadoUt, 'IN_OUT': salienteEntrada, 'ID_EMPLEADO': idEmpleado, 'VALIDACION_CERTIFICACION': certificacion.get(ValidacionCertificacion), 'EXITO_REPETIDO': exitoRepetido.get(exitoDuplicadoPoliza), 'ESTADO_POLIZA': estadoPoliza, 'ESTADO_FINAL': estadoFinal.get(estadoFinalDb)}
+                            
+                            
+                    contactoCliente, clienteUnico = validarClienteContactoDuplicado(contactoReact, nivelContactoCampana, pkClienteContacto, pk)
+                    dataSalidaXlsx[pk] = {'FECHA_CREACION': fechaCreacion, 'CAMPANA': campanaEntrada, 'ESTADO': estado, 'POLIZAS_CAMPANA': polizasCampana, 'FECHA_CIERRE': fechaCierre, 'POLIZA': str(numeroPoliza), 'ESTADO_RETENCION': estadoRetencion, 'ULTIMA_ACTIVIDAD': fechaUltimaActividad, 'CAMPANA_ID': campanaId, 'ESTAD0_UT': estadoUt, 'CONTACTO_CLIENTE': contactoCliente, 'CLIENTE_UNICO': clienteUnico, 'IN_OUT': salienteEntrada, 'ID_EMPLEADO': idEmpleado, 'VALIDACION_CERTIFICACION': certificacion.get(ValidacionCertificacion), 'EXITO_REPETIDO': exitoRepetido.get(exitoDuplicadoPoliza), 'ESTADO_POLIZA': estadoPoliza, 'ESTADO_FINAL': estadoFinal.get(estadoFinalDb)}
                     
                     valoresPoliza = {'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA': numeroPoliza, 'ESTADO_RETENCION': estadoRetencion, 'ESTAD0_UT': estadoUt, 'IN_OUT': nombreCampana, 'VALIDACION_CERTIFICACION': ValidacionCertificacion, 'EXITO_REPETIDO': exitoDuplicadoPoliza, 'ESTADO_POLIZA': estadoPoliza, 'ESTADO_FINAL': estadoFinalDb}
                     agregarCampanasPorEjecutivo(idEmpleado, pk, valoresPoliza)
@@ -482,13 +516,14 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
         LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
+        # raise
         return False
 
-# uno = '202112'
-# dos = '20211126'
-# tres = '20211228'
-# x = r'REACTIVA\INPUTS\202112_Gestion_CoRet_Reactiva.xlsx'
-# y = r'REACTIVA\INPUTS\202112_Base_Certificacion_Reactiva.xlsx'
-# z = r'REACTIVA\INPUTS\202112_Complemento_Cliente_Coret.xlsx'
+# uno = '202202'
+# dos = '20220201'
+# tres = '20220228'
+# x = r'REACTIVA\INPUTS\202202_Gestion_CoRet_Reactiva.xlsx'
+# y = r'REACTIVA\INPUTS\202202_Base_Certificacion_Reactiva.xlsx'
+# z = r'REACTIVA\INPUTS\202202_Complemento_Cliente_Coret.xlsx'
 # rep = r'REACTIVA\OUTPUTS'
 # print(leerArchivoReactiva(x, uno, dos, tres, y, z))
