@@ -1,4 +1,4 @@
-from openpyxl import load_workbook
+import traceback
 from tqdm import tqdm
 
 from conexio_db import conectorDB
@@ -23,6 +23,6 @@ def leerArchivoDotacion(periodo):
         LOG_PROCESO_DOTACION.setdefault('PROCESO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: 'Proceso del Archivo: DOTACION Finalizado - %s filas escritas' % len(ejecutivosDB)})
         return filaSalidaXls, encabezadoTxt
     except Exception as e:
-        errorMsg = 'Error: Al escribir Archivo de DOTACION | %s' % (str(e))
+        errorMsg = 'Error: Al escribir Archivo de DOTACION | %s' % (traceback.format_exc())
         LOG_PROCESO_DOTACION.setdefault('LECTURA_ARCHIVO_DOTACION', {len(LOG_PROCESO_DOTACION)+1: errorMsg})
         return False, False

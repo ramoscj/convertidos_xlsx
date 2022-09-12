@@ -1,5 +1,6 @@
 from openpyxl import load_workbook
 from tqdm import tqdm
+import traceback
 
 from config_xlsx import CAMPANHAS_CONFIG_XLSX
 from diccionariosDB import buscarRutEjecutivosDb
@@ -41,7 +42,7 @@ def leerArchivoCampanhasEsp(archivo, periodo):
         LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'PROCESO_CAMPANHAS': 'Proceso del Archivo: %s Finalizado' % archivo})
         return filaSalidaXls, encabezadoTxt
     except Exception as e:
-        errorMsg = 'Error: %s | %s' % (archivo, e)
-        LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'LECTURA_ARCHIVO': errorMsg})
+        # errorMsg = 'Error: %s | %s' % (archivo, e)
+        LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'LECTURA_ARCHIVO': traceback.format_exc()})
         LOG_PROCESO_CAMPANHAS.setdefault(len(LOG_PROCESO_CAMPANHAS)+1, {'PROCESO_CAMPANHAS': 'Error al procesar Archivo: %s' % archivo})
         return False, False

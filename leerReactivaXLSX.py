@@ -1,4 +1,5 @@
 import datetime
+import traceback
 
 from openpyxl import load_workbook
 from tqdm import tqdm
@@ -513,17 +514,15 @@ def leerArchivoReactiva(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEnt
         return dataSalida, dataSalidaXlsx
 
     except Exception as e:
-        errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
-        LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'LECTURA_ARCHIVO': errorMsg})
-        LOG_PROCESO_REACTIVA.setdefault(len(LOG_PROCESO_REACTIVA)+1, {'PROCESO_REACTIVA': 'Error al procesar Archivo: %s' % archivoEntrada})
-        # raise
-        return False
+        LOG_PROCESO_REACTIVA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_REACTIVA)+1: traceback.format_exc()})
+        LOG_PROCESO_REACTIVA.setdefault('PROCESO_PROACTIVA', {len(LOG_PROCESO_REACTIVA)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
+        return False, False
 
-# uno = '202202'
-# dos = '20220201'
-# tres = '20220228'
-# x = r'REACTIVA\INPUTS\202202_Gestion_CoRet_Reactiva.xlsx'
-# y = r'REACTIVA\INPUTS\202202_Base_Certificacion_Reactiva.xlsx'
-# z = r'REACTIVA\INPUTS\202202_Complemento_Cliente_Coret.xlsx'
+# uno = '202205'
+# dos = '20220501'
+# tres = '20220531'
+# x = r'REACTIVA\INPUTS\202205_Gestion_CoRet_Reactiva.xlsx'
+# y = r'REACTIVA\INPUTS\202205_Base_Certificacion_Reactiva.xlsx'
+# z = r'REACTIVA\INPUTS\202205_Complemento_Cliente_Coret.xlsx'
 # rep = r'REACTIVA\OUTPUTS'
 # print(leerArchivoReactiva(x, uno, dos, tres, y, z))

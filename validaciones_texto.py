@@ -101,9 +101,9 @@ def setearCelda2(celda, cantidad, *nroRegistro):
             resto, separador, celdaN = str(celda[cantidad]).partition(".")
             coordenada = 'Celda<%s' % celdaN
         else:
-            resto, separador, celdaN = str(celda[cantidad]).partition(".")
+            # resto, separador, celdaN = str(celda[cantidad]).partition(".")
             letrasAbecedario = list(string.ascii_uppercase)
-            coordenada = 'Celda<%s%s>' % (letrasAbecedario[len(celda)-1], nroRegistro[0])
+            coordenada = 'Celda<%s%s>' % (letrasAbecedario[len(celda)], nroRegistro[0])
     else:
         resto, separador, celdaN = str(celda).partition(".")
         coordenada = 'Celda<%s' % celdaN

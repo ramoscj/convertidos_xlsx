@@ -1,5 +1,6 @@
 import unicodedata
 import datetime
+import traceback
 
 from openpyxl import load_workbook
 from tqdm import tqdm
@@ -80,10 +81,8 @@ def calcularDiasHablies(columnas):
 def leerArchivoAsistencia(archivo, periodo):
     try:
         LOG_PROCESO_ASISTENCIA.setdefault('INICIO_LECTURA_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
-        encabezadoXls = ASISTENCIA_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = ASISTENCIA_CONFIG_XLSX['ENCABEZADO_TXT']
         columna = ASISTENCIA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
-        coordenadaEcabezado = ASISTENCIA_CONFIG_XLSX['COORDENADA_ENCABEZADO']
         columnasAdicionales = ASISTENCIA_CONFIG_XLSX['COLUMNAS_ADICIONALES']
         xls = load_workbook(archivo, data_only=True)
         nombre_hoja = xls.sheetnames
@@ -106,10 +105,13 @@ def leerArchivoAsistencia(archivo, periodo):
         # for fila in hoja.iter_rows(min_row=3, min_col=1):
             diasVacaciones = 0
             ausentismoMes = 1
+            beneficioMes = 0
+            ajusteReintegro = 0
             if fila[columna['ID_EMPLEADO']].value is not None and fila[columna['PLATAFORMA']].value is not None:
 
                 idEmpleado = fila[columna['ID_EMPLEADO']].value
                 plataforma = str(fila[columna['PLATAFORMA']].value).upper()
+                fugaCartera = str(fila[columna['FUGA_CARTERA']].value).strip().upper()
 
                 if ejecutivosExistentesDb.get(str(idEmpleado)):
                     fechaIngreso = datetime.datetime.strptime(ejecutivosExistentesDb[str(idEmpleado)]['FECHA_INGRESO'], '%d-%m-%Y')
@@ -122,8 +124,8 @@ def leerArchivoAsistencia(archivo, periodo):
                 if not filaSalidaXls.get(idEmpleado):
                     conteoVhcAplica = 0
                     vhcAplica = 0
-                    filaSalidaXls[idEmpleado] = {'CRR': correlativo}
-                    for celda in range(2, totalColumnas + columnasAdicionales):
+                    
+                    for celda in range(columnasAdicionales, totalColumnas + columnasAdicionales):
                         textoAsistecia = str(fila[celda].value).upper()
                         estadoAsistencia = textoAsistecia.strip()
                         if estadoAsistencia == 'V' or estadoAsistencia == 'VAC':
@@ -131,6 +133,9 @@ def leerArchivoAsistencia(archivo, periodo):
                             conteoVhcAplica += 1
                         else:
                             conteoVhcAplica = 0
+                            
+                        if estadoAsistencia == 'B':
+                            beneficioMes += 1
 
                         if conteoVhcAplica == 5:
                             vhcAplica = 1
@@ -138,11 +143,11 @@ def leerArchivoAsistencia(archivo, periodo):
 
                         if estadoAsistencia == '1':
                             ausentismoMes = 0
-                    filaSalidaXls[idEmpleado].setdefault('VHC_MES', diasVacaciones)
-                    filaSalidaXls[idEmpleado].setdefault('DIAS_HABILES_MES', totalColumnas)
-                    filaSalidaXls[idEmpleado].setdefault('CARGA', vhcAplica)
-                    filaSalidaXls[idEmpleado].setdefault('AUSENTISMO_MES', ausentismoMes)
-                    filaSalidaXls[idEmpleado].setdefault('ID_EMPLEADO', idEmpleado)
+
+                    if fugaCartera == '1':
+                        ajusteReintegro = 1
+                    
+                    filaSalidaXls[idEmpleado] = {'CRR': correlativo, 'VHC_MES': diasVacaciones, 'DIAS_HABILES_MES': totalColumnas, 'CARGA': vhcAplica, 'AUSENTISMO_MES': ausentismoMes, 'BENEFICIO_MES': beneficioMes, 'FUGA_CARTERA': ajusteReintegro, 'ID_EMPLEADO': idEmpleado}
                     correlativo += 1
                 else:
                     errorRut = '%s - Ejecutivo duplicado: %s' % (setearCelda2(fila[columna['ID_EMPLEADO']],0), idEmpleado)
@@ -157,7 +162,7 @@ def leerArchivoAsistencia(archivo, periodo):
         return filaSalidaXls, encabezadoTxt
 
     except Exception as e:
-        errorMsg = 'Error: %s | %s' % (archivo, e)
-        LOG_PROCESO_ASISTENCIA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_ASISTENCIA)+1: errorMsg})
+        # errorMsg = 'Error: %s | %s' % (archivo, e)
+        LOG_PROCESO_ASISTENCIA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_ASISTENCIA)+1: traceback.format_exc()})
         LOG_PROCESO_ASISTENCIA.setdefault('PROCESO_ASISTENCIA', {len(LOG_PROCESO_ASISTENCIA)+1: 'Error al procesar Archivo: %s' % archivo})
         return False, False

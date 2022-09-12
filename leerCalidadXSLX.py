@@ -1,5 +1,6 @@
 from openpyxl import load_workbook
 from tqdm import tqdm
+import traceback
 
 from config_xlsx import CALIDAD_CONFIG_XLSX
 from diccionariosDB import buscarRutEjecutivosDb
@@ -11,10 +12,8 @@ LOG_PROCESO_CALIDAD = dict()
 def leerArchivoCalidad(archivo, periodo):
     try:
         LOG_PROCESO_CALIDAD.setdefault('INICIO_LECTURA', {len(LOG_PROCESO_CALIDAD)+1: 'Iniciando proceso de lectura del Archivo: %s' % archivo})
-        encabezadoXls = CALIDAD_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = CALIDAD_CONFIG_XLSX['ENCABEZADO_TXT']
         celda = CALIDAD_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
-        coordenadaEcabezado = CALIDAD_CONFIG_XLSX['COORDENADA_ENCABEZADO']
         xls = load_workbook(archivo, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
@@ -42,8 +41,7 @@ def leerArchivoCalidad(archivo, periodo):
         return filaSalidaXls, encabezadoTxt
 
     except Exception as e:
-        errorMsg = 'Error: %s | %s' % (archivo, e)
-        LOG_PROCESO_CALIDAD.setdefault(len(LOG_PROCESO_CALIDAD)+1, {'LECTURA_ARCHIVO_ERROR': errorMsg})
+        LOG_PROCESO_CALIDAD.setdefault(len(LOG_PROCESO_CALIDAD)+1, {'LECTURA_ARCHIVO_ERROR': traceback.format_exc()})
         LOG_PROCESO_CALIDAD.setdefault(len(LOG_PROCESO_CALIDAD)+1, {'PROCESO_ARCHIVO': 'Error al procesar Archivo: %s' % archivo})
         return False, False
 

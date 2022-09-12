@@ -50,3 +50,15 @@ def salidaInsertBulkCampanas(ArchivoSalidaTxt, dataXlsx, encabezado):
         return True
     except Exception as e:
         raise Exception('Error al escribir archivo: %s | %s' % (ArchivoSalidaTxt, e))
+    
+    
+def escribirArchivoTxt(ArchivoSalidaTxt, data, encabezado):
+    try:
+        with open(ArchivoSalidaTxt, 'w', newline='', encoding='UTF-8') as txt:
+            writer = csv.writer(txt, delimiter=';')
+            writer.writerow(encabezado)
+            for registro in data:
+                writer.writerow(registro)
+        return True
+    except Exception as e:
+        raise Exception('Error al escribir archivo: %s | %s' % (ArchivoSalidaTxt, e))

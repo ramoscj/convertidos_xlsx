@@ -41,7 +41,7 @@ PROCESOS_GENERALES = {
                 },
     'GESTION' : {   
                 # Argumentos que necesita el proceso para funcionar
-                'ARGUMENTOS_PROCESO': 8
+                'ARGUMENTOS_PROCESO': 9
                 },
     'PROACTIVA' : {
                 # Argumentos que necesita el proceso para funcionar
@@ -53,7 +53,7 @@ PROCESOS_GENERALES = {
                 },
     'CODM' : {
                 # Argumentos que necesita el proceso para funcionar
-                'ARGUMENTOS_PROCESO': 6
+                'ARGUMENTOS_PROCESO': 5
                 },
     'CAMPANHA_PRIORITARIA' : {
                 # Argumentos que necesita el proceso para funcionar
@@ -63,15 +63,15 @@ PROCESOS_GENERALES = {
 
 FUGA_CONFIG_XLSX = {
     # Coordenadas encabezado
-    'COORDENADA_ENCABEZADO': 'A1:P1',
+    'COORDENADA_ENCABEZADO': 'A1:O1',
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': 'FUGA',
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'TIPO_FUGA', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'NUMEROEMPLEADO', 'CODIGOPLAN', 'TIPOPRODUCTO', 'PRODUCTO', 'FECHAPROCESO', 'CONSIDERAR'],
+    'ENCABEZADO_XLSX': ['LPATTR_PER_RES', 'LLAVEA', 'LPATTR_COD_POLI', 'LPATTR_COD_ORIGEN', 'TIPO', 'LPATTR_COD_STAT', 'TIPO_FUGA', 'NRO_POLIZA', 'ESTADOPOLIZA', 'FECHAINICIOVIGENCIA', 'NUMEROEMPLEADO', 'CODIGOPLAN', 'TIPOPRODUCTO', 'PRODUCTO', 'FECHAPROCESO'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
     'ENCABEZADO_FUGA_TXT': ['CRR', 'FUGA_MES_ANTERIOR', 'STOCK', 'RUT', 'UNIDAD'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
-    'COLUMNAS_PROCESO_XLSX': {'LPATTR_PER_RES': 0, 'TIPO': 4, 'LPATTR_COD_STAT': 5, 'ID_EMPLEADO': 10, 'CONSIDERAR_FUGA': 15}
+    'COLUMNAS_PROCESO_XLSX': {'LPATTR_PER_RES': 0, 'TIPO': 4, 'LPATTR_COD_STAT': 5, 'ID_EMPLEADO': 10}
 }
 
 ASISTENCIA_CONFIG_XLSX = {
@@ -82,13 +82,13 @@ ASISTENCIA_CONFIG_XLSX = {
     # Nombre del archivo TXT que el proceso generara
     'SALIDA_TXT': 'ASISTENCIA',
     # Nombre de las columnas del encabezado que tendra el archivo (se usa para validar que el archivo este correcto)
-    'ENCABEZADO_XLSX': ['ID EJECUTIVO', 'PLATAFORMA'],
+    'ENCABEZADO_XLSX': ['ID EJECUTIVO', 'CARTERA FUGA', 'PLATAFORMA'],
     # Nombre de las columnas de encabezado que tendra el archivo de salida TXT
-    'ENCABEZADO_TXT': ['CRR', 'VHC_MES', 'DIAS_HABILES_MES', 'VHC_APLICA', 'AUSENTISMO_MES', 'RUT'],
+    'ENCABEZADO_TXT': ['CRR', 'VHC_MES', 'DIAS_HABILES_MES', 'VHC_APLICA', 'AUSENTISMO_MES', 'BENEFICIO_MES', 'AJUSTE_REINTEGRO', 'RUT'],
     # Columnas que se utilizaran durante el procesamiento del archivo XLSX
-    'COLUMNAS_PROCESO_XLSX': {'ID_EMPLEADO': 0, 'PLATAFORMA': 1},
+    'COLUMNAS_PROCESO_XLSX': {'ID_EMPLEADO': 0, 'FUGA_CARTERA': 1,'PLATAFORMA': 2},
     # Numero de columnas adicionales que contienen valores que no son dias
-    'COLUMNAS_ADICIONALES': 2
+    'COLUMNAS_ADICIONALES': 3
 }
 
 GESTION_CONFIG_XLSX = {

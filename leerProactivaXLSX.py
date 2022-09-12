@@ -1,4 +1,4 @@
-import contextlib
+import traceback
 import datetime
 
 from openpyxl import load_workbook
@@ -406,241 +406,233 @@ def validarRetencionesPolizas(valoresEntrada: dict, complementoCliente: dict):
         
 def leerArchivoProactiva(archivoEntrada, periodo, archivoComplementoCliente):
     try:
-        encabezadoXls = PROACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX']
         encabezadoTxt = PROACTIVA_CONFIG_XLSX['ENCABEZADO_TXT']
         encabezadoReliquidacionesTxt = PROACTIVA_CONFIG_XLSX['ENCABEZADO_RELIQUIDACIONES']
         columna = PROACTIVA_CONFIG_XLSX['COLUMNAS_PROCESO_XLSX']
-        coordenadaEcabezado = PROACTIVA_CONFIG_XLSX['COORDENADA_ENCABEZADO']
         xls = load_workbook(archivoEntrada, read_only=True, data_only=True)
         nombre_hoja = xls.sheetnames
         hoja = xls[nombre_hoja[0]]
 
-        archivo_correcto = validarEncabezadoXlsx(hoja[coordenadaEcabezado], encabezadoXls, archivoEntrada)
-        if type(archivo_correcto) is not dict:
 
-            fechaIncioMes = primerDiaMes(periodo)
-            fechaFinMes = ultimoDiaMes(periodo)
-            fechaFinMesSiguiente = mesSiguienteUltimoDia(periodo)
-            listaConsiderarRetencion = {'Mantiene su producto': mantieneSuProducto, 'Realiza pago en línea': realizaPagoEnLinea, 'Realiza Activación PAC/PAT': realizaActivacion}
-            i = 0
-            polizasNoAprobadas = 0
-            cantidadCampanasValidas = 0
-            complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplementoCliente)
-            LOG_PROCESO_PROACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
-            ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
-            listaEstadoContactado = listaEstadoUtContacto()
-            listaEstadoRetencionTexto = estadoRetencionProDesc()
-            listaEstadoUtTexto = listaEstadoUtDesc()
-            listaEstadoUt = listaEstadoUtAll()
-            LOG_PROCESO_PROACTIVA.setdefault('INICIO_LECTURA_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: '-----------------------------------------------------' })
-            LOG_PROCESO_PROACTIVA.setdefault('ENCABEZADO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Encabezado del Archivo: %s OK' % archivoEntrada})
-            LOG_PROCESO_PROACTIVA.setdefault('INICIO_CELDAS_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Iniciando lectura de Celdas del Archivo: %s' % archivoEntrada})
+        fechaIncioMes = primerDiaMes(periodo)
+        fechaFinMes = ultimoDiaMes(periodo)
+        fechaFinMesSiguiente = mesSiguienteUltimoDia(periodo)
+        listaConsiderarRetencion = {'Mantiene su producto': mantieneSuProducto, 'Realiza pago en línea': realizaPagoEnLinea, 'Realiza Activación PAC/PAT': realizaActivacion}
+        i = 0
+        polizasNoAprobadas = 0
+        cantidadCampanasValidas = 0
+        complementoCliente = extraerComplementoCliente(len(LOG_PROCESO_PROACTIVA), archivoComplementoCliente)
+        LOG_PROCESO_PROACTIVA.update(LOG_COMPLEMENTO_CLIENTE)
+        ejecutivosExistentesDb = buscarRutEjecutivosDb(fechaFinMes, fechaIncioMes)
+        listaEstadoContactado = listaEstadoUtContacto()
+        listaEstadoRetencionTexto = estadoRetencionProDesc()
+        listaEstadoUtTexto = listaEstadoUtDesc()
+        listaEstadoUt = listaEstadoUtAll()
+        LOG_PROCESO_PROACTIVA.setdefault('INICIO_LECTURA_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: '-----------------------------------------------------' })
+        LOG_PROCESO_PROACTIVA.setdefault('ENCABEZADO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Encabezado del Archivo: %s OK' % archivoEntrada})
+        LOG_PROCESO_PROACTIVA.setdefault('INICIO_CELDAS_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Iniciando lectura de Celdas del Archivo: %s' % archivoEntrada})
 
-            for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo Proactiva' , unit=' Fila'):
+        for fila in tqdm(iterable=hoja.rows, total = len(tuple(hoja.rows)), desc='Leyendo Proactiva' , unit=' Fila'):
 
-                i += 1
-                if i >= 2:
+            i += 1
+            if i >= 2:
 
-                    nombreCampana = str(fila[columna['NOMBRE_DE_CAMPAÑA']].value)
-                    codigoEjecutivo = str(fila[columna['ID_EMPLEADO']].value)
-                    estado = str(fila[columna['ESTADO']].value)
-                    estadoRetencion = fila[columna['ESTADO_RETENCION']].value
-                    campanaId = str(fila[columna['CAMAPAÑA_ID']].value)
-                    estadoUltimaTarea = fila[columna['ESTADO_ULTIMA_TAREA']].value
-                    numeroPoliza, numeroPolizaCertificado = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
-                    polizasCampanas = str(fila[columna['POLIZAS_CAMPANAS']].value)
-                    pk = '{0}_{1}_{2}'.format(campanaId, codigoEjecutivo, numeroPoliza)
-                    pkClienteContacto = '{0}_{1}'.format(campanaId, codigoEjecutivo)
+                nombreCampana = str(fila[columna['NOMBRE_DE_CAMPAÑA']].value)
+                codigoEjecutivo = str(fila[columna['ID_EMPLEADO']].value)
+                estado = str(fila[columna['ESTADO']].value)
+                estadoRetencion = fila[columna['ESTADO_RETENCION']].value
+                campanaId = str(fila[columna['CAMAPAÑA_ID']].value)
+                estadoUltimaTarea = fila[columna['ESTADO_ULTIMA_TAREA']].value
+                numeroPoliza, numeroPolizaCertificado = formatearNumeroPoliza(fila[columna['NRO_POLIZA']].value)
+                polizasCampanas = str(fila[columna['POLIZAS_CAMPANAS']].value)
+                pk = '{0}_{1}_{2}'.format(campanaId, codigoEjecutivo, numeroPoliza)
+                pkClienteContacto = '{0}_{1}'.format(campanaId, codigoEjecutivo)
 
-                    if numeroPoliza is None:
+                if numeroPoliza is None:
+                    celdaCoordenada = setearCelda2(fila[0:columna['NRO_POLIZA']+1], len(fila[0:columna['NRO_POLIZA']])-1, i)
+                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_NULO': '%s;Numero de poliza NULL;%s' % (celdaCoordenada, numeroPoliza)})
+                    continue
+
+                fechaCreacion = setearFechaCelda(fila[columna['FECHA_CREACION']])
+                fechaCierre = None
+                fechaExpiracionCoret = None
+                if fila[columna['EXPIRACION_CORET']].value is not None and str(fila[columna['EXPIRACION_CORET']].value) != '':
+                    fechaExpiracionCoret = setearFechaCelda(fila[columna['EXPIRACION_CORET']])
+                if fila[columna['FECHA_CIERRE']].value is not None and str(fila[columna['FECHA_CIERRE']].value) != '':
+                    fechaCierre = setearFechaCelda(fila[columna['FECHA_CIERRE']])
+
+                estadoValido = getEstado(fila[columna['ESTADO']])
+                estadoUtValido = getEstadoUt(fila[columna['ESTADO_ULTIMA_TAREA']], listaEstadoUt)
+
+                if type(fechaCreacion) is not datetime.date:
+                    valorErroneo = str(fila[columna['FECHA_CREACION']].value)
+                    celdaCoordenada = setearCelda2(fila[0:columna['FECHA_CREACION']+1], len(fila[0:columna['FECHA_CREACION']])-1, i)
+                    mensaje = '%s;FECHA_CREACION no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
+                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'FECHA_CREACION': mensaje})
+                    continue
+
+                if estado != 'Sin Gestion' and  type(fechaCierre) is not datetime.date:
+                    valorErroneo = str(fila[columna['FECHA_CIERRE']].value)
+                    celdaCoordenada = setearCelda2(fila[0:columna['FECHA_CIERRE']+1], len(fila[0:columna['FECHA_CIERRE']])-1, i)
+                    mensaje = '%s;FECHA_CIERRE no es una fecha valida;%s' % (celdaCoordenada,valorErroneo)
+                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'FECHA_CIERRE': mensaje})
+                    continue
+
+                if estado == 'Sin Gestion' and type(fechaExpiracionCoret) is not datetime.date:
+                    valorErroneo = str(fila[columna['EXPIRACION_CORET']].value)
+                    celdaCoordenada = setearCelda2(fila[0:columna['EXPIRACION_CORET']+1], len(fila[0:columna['EXPIRACION_CORET']])-1, i)
+                    mensaje = '%s;FECHA_EXPIRACION_CORET no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
+                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'FECHA_EXPIRACION': mensaje})
+                    continue
+
+                if type(estadoValido) is not int:
+                    valorErroneo = str(fila[columna['ESTADO']].value)
+                    celdaCoordenada = setearCelda2(fila[0:columna['ESTADO']+1], len(fila[0:columna['ESTADO']])-1, i)
+                    mensaje = '%s;No existe Estado;%s' % (celdaCoordenada, valorErroneo)
+                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'ERROR_ESTADO': mensaje})
+                    continue
+
+                if type(estadoUtValido) is not int:
+                    valorErroneo = str(fila[columna['ESTADO_ULTIMA_TAREA']].value)
+                    celdaCoordenada = setearCelda2(fila[0:columna['ESTADO_ULTIMA_TAREA']+1], len(fila[0:columna['ESTADO_ULTIMA_TAREA']])-1, i)
+                    mensaje = '%s;No existe EstadoUltimaTarea;%s' % (celdaCoordenada, valorErroneo)
+                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'ERROR_ESTADOUT': mensaje})
+                    continue
+
+                if estado != 'Sin Gestion' and fechaCierre >= fechaIncioMes and fechaCierre <= fechaFinMes or estado == 'Sin Gestion' and fechaExpiracionCoret >= fechaIncioMes and fechaExpiracionCoret <= fechaFinMesSiguiente:
+
+                    if ejecutivosExistentesDb.get(codigoEjecutivo):
+                        idEmpleado = ejecutivosExistentesDb[codigoEjecutivo]['ID_EMPLEADO']
+                    else:
+                        celdaCoordenada = setearCelda2(fila[0:columna['ID_EMPLEADO']+1], len(fila[0:columna['ID_EMPLEADO']])-1, i)
+                        mensaje = '%s;Ejecutivo no existe en la DB;%s' % (celdaCoordenada, codigoEjecutivo)
+                        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'RUT_NO_EXISTE': mensaje})
+                        continue
+                            
+
+                    repeticionPorCampana = 1
+                    contactoCliente, clienteDuplicado = validarClienteContactoDuplicado(estadoValido, estadoUltimaTarea, pkClienteContacto, pk, idEmpleado)
+                    
+                    if filaSalidaTxt.get(pk):
+
                         celdaCoordenada = setearCelda2(fila[0:columna['NRO_POLIZA']+1], len(fila[0:columna['NRO_POLIZA']])-1, i)
-                        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_NULO': '%s;Numero de poliza NULL;%s' % (celdaCoordenada, numeroPoliza)})
-                        continue
-
-                    fechaCreacion = setearFechaCelda(fila[columna['FECHA_CREACION']])
-                    fechaCierre = None
-                    fechaExpiracionCoret = None
-                    if fila[columna['EXPIRACION_CORET']].value is not None and str(fila[columna['EXPIRACION_CORET']].value) != '':
-                        fechaExpiracionCoret = setearFechaCelda(fila[columna['EXPIRACION_CORET']])
-                    if fila[columna['FECHA_CIERRE']].value is not None and str(fila[columna['FECHA_CIERRE']].value) != '':
-                        fechaCierre = setearFechaCelda(fila[columna['FECHA_CIERRE']])
-
-                    estadoValido = getEstado(fila[columna['ESTADO']])
-                    estadoUtValido = getEstadoUt(fila[columna['ESTADO_ULTIMA_TAREA']], listaEstadoUt)
-
-                    if type(fechaCreacion) is not datetime.date:
-                        valorErroneo = str(fila[columna['FECHA_CREACION']].value)
-                        celdaCoordenada = setearCelda2(fila[0:columna['FECHA_CREACION']+1], len(fila[0:columna['FECHA_CREACION']])-1, i)
-                        mensaje = '%s;FECHA_CREACION no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
-                        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'FECHA_CREACION': mensaje})
-                        continue
-
-                    if estado != 'Sin Gestion' and  type(fechaCierre) is not datetime.date:
-                        valorErroneo = str(fila[columna['FECHA_CIERRE']].value)
-                        celdaCoordenada = setearCelda2(fila[0:columna['FECHA_CIERRE']+1], len(fila[0:columna['FECHA_CIERRE']])-1, i)
-                        mensaje = '%s;FECHA_CIERRE no es una fecha valida;%s' % (celdaCoordenada,valorErroneo)
-                        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'FECHA_CIERRE': mensaje})
-                        continue
-
-                    if estado == 'Sin Gestion' and type(fechaExpiracionCoret) is not datetime.date:
-                        valorErroneo = str(fila[columna['EXPIRACION_CORET']].value)
-                        celdaCoordenada = setearCelda2(fila[0:columna['EXPIRACION_CORET']+1], len(fila[0:columna['EXPIRACION_CORET']])-1, i)
-                        mensaje = '%s;FECHA_EXPIRACION_CORET no es una fecha valida;%s' % (celdaCoordenada, valorErroneo)
-                        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'FECHA_EXPIRACION': mensaje})
-                        continue
-
-                    if type(estadoValido) is not int:
-                        valorErroneo = str(fila[columna['ESTADO']].value)
-                        celdaCoordenada = setearCelda2(fila[0:columna['ESTADO']+1], len(fila[0:columna['ESTADO']])-1, i)
-                        mensaje = '%s;No existe Estado;%s' % (celdaCoordenada, valorErroneo)
-                        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'ERROR_ESTADO': mensaje})
-                        continue
-
-                    if type(estadoUtValido) is not int:
-                        valorErroneo = str(fila[columna['ESTADO_ULTIMA_TAREA']].value)
-                        celdaCoordenada = setearCelda2(fila[0:columna['ESTADO_ULTIMA_TAREA']+1], len(fila[0:columna['ESTADO_ULTIMA_TAREA']])-1, i)
-                        mensaje = '%s;No existe EstadoUltimaTarea;%s' % (celdaCoordenada, valorErroneo)
-                        LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'ERROR_ESTADOUT': mensaje})
-                        continue
-
-                    if estado != 'Sin Gestion' and fechaCierre >= fechaIncioMes and fechaCierre <= fechaFinMes or estado == 'Sin Gestion' and fechaExpiracionCoret >= fechaIncioMes and fechaExpiracionCoret <= fechaFinMesSiguiente:
-
-                        if ejecutivosExistentesDb.get(codigoEjecutivo):
-                            idEmpleado = ejecutivosExistentesDb[codigoEjecutivo]['ID_EMPLEADO']
-                        else:
-                            celdaCoordenada = setearCelda2(fila[0:columna['ID_EMPLEADO']+1], len(fila[0:columna['ID_EMPLEADO']])-1, i)
-                            mensaje = '%s;Ejecutivo no existe en la DB;%s' % (celdaCoordenada, codigoEjecutivo)
-                            LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'RUT_NO_EXISTE': mensaje})
-                            continue
-                                
-
-                        repeticionPorCampana = 1
-                        contactoCliente, clienteDuplicado = validarClienteContactoDuplicado(estadoValido, estadoUltimaTarea, pkClienteContacto, pk, idEmpleado)
-                        
-                        if filaSalidaTxt.get(pk):
-
-                            celdaCoordenada = setearCelda2(fila[0:columna['NRO_POLIZA']+1], len(fila[0:columna['NRO_POLIZA']])-1, i)
-                            if estado == 'Terminado con Exito':
-    
-                                if filaSalidaTxt[pk]['ESTADO_PRO'] != 2:
-                                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA;ESTADO_ANTERIOR: {1}:NUEVO_VALOR:{2}'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), estado)})
-                                    repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
-                                    filaSalidaTxt.pop(pk)
-                                    dataXlsx.pop(pk)
-                                    clienteDuplicadoContactado.pop(pkClienteContacto)
-                                elif listaConsiderarRetencion.get(estadoRetencion):
-                                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA(RetencionDoble);ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoRetencionTexto.get(filaSalidaTxt[pk]['ESTADO_RETENCION_PRO']), estado, estadoRetencion)})
-                                    repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1
-                                    filaSalidaTxt.pop(pk)
-                                    dataXlsx.pop(pk)
-                                    clienteDuplicadoContactado.pop(pkClienteContacto)
-                                    if campanasPorEjecutivos[idEmpleado].get(pk):
-                                        if campanasPorEjecutivos[idEmpleado][pk]['RETENCION_ACTIVACION'] == 1 or campanasPorEjecutivos[idEmpleado][pk]['RETENCION_RL_COBRANZA'] == 1:
-                                            polizasNoAprobadas -= 1
-                                        campanasPorEjecutivos[idEmpleado].pop(pk)
-                                    cantidadCampanasValidas -= 1
-                                else:
-                                    mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO({1},{2})_vs_PERMANECE({3},{4})'.format(celdaCoordenada, estado, estadoRetencion, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoRetencionTexto.get(filaSalidaTxt[pk]['ESTADO_RETENCION_PRO']))
-                                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': mensaje})
-                                    filaSalidaTxt[pk]['REPETICIONES'] += 1
-                                    continue
-
-                            elif estado == 'Pendiente' or estado == 'Terminado sin Exito':
-                                if filaSalidaTxt[pk]['ESTADO_PRO'] != 2 and listaEstadoContactado.get(estadoUltimaTarea):
-                                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoUtTexto.get(filaSalidaTxt[pk]['ESTADO_UT_PRO']), estado, estadoUltimaTarea)})
-                                    repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
-                                    filaSalidaTxt.pop(pk)
-                                    dataXlsx.pop(pk)
-                                    clienteDuplicadoContactado.pop(pkClienteContacto)
-                                elif filaSalidaTxt[pk]['ESTADO_PRO'] == 0:
-                                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoUtTexto.get(filaSalidaTxt[pk]['ESTADO_UT_PRO']), estado, estadoUltimaTarea)})
-                                    repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
-                                    filaSalidaTxt.pop(pk)
-                                    dataXlsx.pop(pk)
-                                    clienteDuplicadoContactado.pop(pkClienteContacto)
-                                else:
-                                    mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO({1},{2})_vs_PERMANECE({3},{4})'.format(celdaCoordenada, estado, estadoUltimaTarea, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoUtTexto.get(filaSalidaTxt[pk]['ESTADO_UT_PRO']))
-                                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': mensaje})
-                                    filaSalidaTxt[pk]['REPETICIONES'] += 1
-                                    continue
-
-                        cobranzaPro = 0
-                        pacpatPro = 0
-
-                        listaConsiderarRetencion = {'Mantiene su producto': mantieneSuProducto, 'Realiza pago en línea': realizaPagoEnLinea, 'Realiza Activación PAC/PAT': realizaActivacion,}
-                        estadoRetencionValido = listaConsiderarRetencion.get(estadoRetencion)
                         if estado == 'Terminado con Exito':
 
-                            if estadoRetencionValido is None:
-                                estadoRetencionValido = validarEstadoRetencionCampanaDuplicada(campanasValidasRetencion, campanaId, nombreCampana, str(estadoRetencion).strip(), estado, pk)
-
+                            if filaSalidaTxt[pk]['ESTADO_PRO'] != 2:
+                                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA;ESTADO_ANTERIOR: {1}:NUEVO_VALOR:{2}'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), estado)})
+                                repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
+                                filaSalidaTxt.pop(pk)
+                                dataXlsx.pop(pk)
+                                clienteDuplicadoContactado.pop(pkClienteContacto)
+                            elif listaConsiderarRetencion.get(estadoRetencion):
+                                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA(RetencionDoble);ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoRetencionTexto.get(filaSalidaTxt[pk]['ESTADO_RETENCION_PRO']), estado, estadoRetencion)})
+                                repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1
+                                filaSalidaTxt.pop(pk)
+                                dataXlsx.pop(pk)
+                                clienteDuplicadoContactado.pop(pkClienteContacto)
+                                if campanasPorEjecutivos[idEmpleado].get(pk):
+                                    if campanasPorEjecutivos[idEmpleado][pk]['RETENCION_ACTIVACION'] == 1 or campanasPorEjecutivos[idEmpleado][pk]['RETENCION_RL_COBRANZA'] == 1:
+                                        polizasNoAprobadas -= 1
+                                    campanasPorEjecutivos[idEmpleado].pop(pk)
+                                cantidadCampanasValidas -= 1
                             else:
-                                if campanasValidasRetencion.get(campanaId):
-                                    valores = {'PK':pk, 'CAMPAÑA_ID': campanaId, 'ESTADO_ORIGINAL': estadoRetencionValido, 'ESTADO_CAMBIO': 0}
-                                    campanasValidasRetencion[campanaId].setdefault(pk, valores)
-                                else:
-                                    campanasValidasRetencion[campanaId] = {pk: {'PK':pk, 'CAMPAÑA_ID': campanaId, 'ESTADO_ORIGINAL': estadoRetencionValido, 'ESTADO_CAMBIO': 0}}
+                                mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO({1},{2})_vs_PERMANECE({3},{4})'.format(celdaCoordenada, estado, estadoRetencion, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoRetencionTexto.get(filaSalidaTxt[pk]['ESTADO_RETENCION_PRO']))
+                                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': mensaje})
+                                filaSalidaTxt[pk]['REPETICIONES'] += 1
+                                continue
 
-                            if complementoCliente.get(numeroPoliza) and listaValidaRetencion.get(estadoRetencionValido):
-                                
-                                valoresEntrada = {'ESTADO_RETENCION': estadoRetencionValido, 'NOMBRE_CAMPAÑA': nombreCampana, 'NUMERO_POLIZA': numeroPoliza, 'FECHA_CIERRE': fechaCierre, 'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'CAMPAÑA_ID': campanaId, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'CELDA_NROPOLIZA': fila[columna['NRO_POLIZA']], 'FECHA_CREACION': fechaCreacion, 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_EXPIRACION_CORET': fechaExpiracionCoret, 'CONTACTO_CLIENTE': contactoCliente, 'CLIENTE_UNICO': clienteDuplicado}
-                                cobranzaPro, pacpatPro, noAprobada = validarRetencionesPolizas(valoresEntrada, complementoCliente)
-                                polizasNoAprobadas += noAprobada
-                                cantidadCampanasValidas += 1
+                        elif estado == 'Pendiente' or estado == 'Terminado sin Exito':
+                            if filaSalidaTxt[pk]['ESTADO_PRO'] != 2 and listaEstadoContactado.get(estadoUltimaTarea):
+                                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoUtTexto.get(filaSalidaTxt[pk]['ESTADO_UT_PRO']), estado, estadoUltimaTarea)})
+                                repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
+                                filaSalidaTxt.pop(pk)
+                                dataXlsx.pop(pk)
+                                clienteDuplicadoContactado.pop(pkClienteContacto)
+                            elif filaSalidaTxt[pk]['ESTADO_PRO'] == 0:
+                                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': '{0};CAMBIO_POLIZA;ESTADO_ANTERIOR:({1},{2}):NUEVO_VALOR:({3},{4})'.format(celdaCoordenada, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoUtTexto.get(filaSalidaTxt[pk]['ESTADO_UT_PRO']), estado, estadoUltimaTarea)})
+                                repeticionPorCampana = filaSalidaTxt[pk]['REPETICIONES'] + 1 
+                                filaSalidaTxt.pop(pk)
+                                dataXlsx.pop(pk)
+                                clienteDuplicadoContactado.pop(pkClienteContacto)
+                            else:
+                                mensaje = '{0};POLIZA_DUPLICADA;ELIMINADO({1},{2})_vs_PERMANECE({3},{4})'.format(celdaCoordenada, estado, estadoUltimaTarea, getInversaEstado(filaSalidaTxt[pk]['ESTADO_PRO']), listaEstadoUtTexto.get(filaSalidaTxt[pk]['ESTADO_UT_PRO']))
+                                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZA_DUPLICADA': mensaje})
+                                filaSalidaTxt[pk]['REPETICIONES'] += 1
+                                continue
+
+                    cobranzaPro = 0
+                    pacpatPro = 0
+
+                    listaConsiderarRetencion = {'Mantiene su producto': mantieneSuProducto, 'Realiza pago en línea': realizaPagoEnLinea, 'Realiza Activación PAC/PAT': realizaActivacion,}
+                    estadoRetencionValido = listaConsiderarRetencion.get(estadoRetencion)
+                    if estado == 'Terminado con Exito':
+
+                        if estadoRetencionValido is None:
+                            estadoRetencionValido = validarEstadoRetencionCampanaDuplicada(campanasValidasRetencion, campanaId, nombreCampana, str(estadoRetencion).strip(), estado, pk)
 
                         else:
-                            if estadoRetencionValido is not None:
-                                celdaCoordenada = setearCelda2(fila[0:columna['ESTADO']+1], len(fila[0:columna['ESTADO']])-1, i)
-                                mensaje = '{0};ESTADO no corresponde con la RETENCION;{1}/{2}'.format(celdaCoordenada, estado, estadoRetencion)
-                                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'ESTADO_RETENCION_NO_VALIDO': mensaje})
-
-                            if estadoRetencion is not None:
-                                estadoRetencionValido = listaEstadoRetencion.get(estadoRetencion)
+                            if campanasValidasRetencion.get(campanaId):
+                                valores = {'PK':pk, 'CAMPAÑA_ID': campanaId, 'ESTADO_ORIGINAL': estadoRetencionValido, 'ESTADO_CAMBIO': 0}
+                                campanasValidasRetencion[campanaId].setdefault(pk, valores)
                             else:
-                                estadoRetencionValido = validarEstadoRetencion(estado)
+                                campanasValidasRetencion[campanaId] = {pk: {'PK':pk, 'CAMPAÑA_ID': campanaId, 'ESTADO_ORIGINAL': estadoRetencionValido, 'ESTADO_CAMBIO': 0}}
 
-                        filaSalidaTxt[pk] = {'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': pacpatPro, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'REPETICIONES': repeticionPorCampana, 'ESTADO_RETENCION_PRO': estadoRetencionValido, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana[0:30].rstrip(), 'POLIZA': numeroPoliza}
-                        
-                        fecUltimoPago = None
-                        estadoMandato = None
-                        fecMandato = None
-                        if complementoCliente.get(numeroPoliza):
-                            fecUltimoPago = complementoCliente[numeroPoliza]['FEC_ULT_PAG']
-                            estadoMandato = complementoCliente[numeroPoliza]['ESTADO_MANDATO']
-                            fecMandato = complementoCliente[numeroPoliza]['FECHA_MANDATO']
+                        if complementoCliente.get(numeroPoliza) and listaValidaRetencion.get(estadoRetencionValido):
                             
-                        # contactoCliente, clienteDuplicado = validarClienteContactoDuplicado(estadoValido, estadoUltimaTarea, pkClienteContacto, pk)
+                            valoresEntrada = {'ESTADO_RETENCION': estadoRetencionValido, 'NOMBRE_CAMPAÑA': nombreCampana, 'NUMERO_POLIZA': numeroPoliza, 'FECHA_CIERRE': fechaCierre, 'ID_EMPLEADO': idEmpleado, 'NUMERO_POLIZA_CERTIFICADO': numeroPolizaCertificado, 'CAMPAÑA_ID': campanaId, 'ESTADO_VALIDO': estadoValido, 'ESTADO_VALIDOUT': estadoUtValido, 'CELDA_NROPOLIZA': fila[columna['NRO_POLIZA']], 'FECHA_CREACION': fechaCreacion, 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_EXPIRACION_CORET': fechaExpiracionCoret, 'CONTACTO_CLIENTE': contactoCliente, 'CLIENTE_UNICO': clienteDuplicado}
+                            cobranzaPro, pacpatPro, noAprobada = validarRetencionesPolizas(valoresEntrada, complementoCliente)
+                            polizasNoAprobadas += noAprobada
+                            cantidadCampanasValidas += 1
+
+                    else:
+                        if estadoRetencionValido is not None:
+                            celdaCoordenada = setearCelda2(fila[0:columna['ESTADO']+1], len(fila[0:columna['ESTADO']])-1, i)
+                            mensaje = '{0};ESTADO no corresponde con la RETENCION;{1}/{2}'.format(celdaCoordenada, estado, estadoRetencion)
+                            LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'ESTADO_RETENCION_NO_VALIDO': mensaje})
+
+                        if estadoRetencion is not None:
+                            estadoRetencionValido = listaEstadoRetencion.get(estadoRetencion)
+                        else:
+                            estadoRetencionValido = validarEstadoRetencion(estado)
+
+                    filaSalidaTxt[pk] = {'COBRANZA_PRO': cobranzaPro, 'PACPAT_PRO': pacpatPro, 'ESTADO_PRO': estadoValido, 'ESTADO_UT_PRO': estadoUtValido, 'REPETICIONES': repeticionPorCampana, 'ESTADO_RETENCION_PRO': estadoRetencionValido, 'ID_EMPLEADO': idEmpleado, 'CAMPAÑA_ID': campanaId, 'CAMPANA': nombreCampana[0:30].rstrip(), 'POLIZA': numeroPoliza}
+                    
+                    fecUltimoPago = None
+                    estadoMandato = None
+                    fecMandato = None
+                    if complementoCliente.get(numeroPoliza):
+                        fecUltimoPago = complementoCliente[numeroPoliza]['FEC_ULT_PAG']
+                        estadoMandato = complementoCliente[numeroPoliza]['ESTADO_MANDATO']
+                        fecMandato = complementoCliente[numeroPoliza]['FECHA_MANDATO']
                         
-                        dataXlsx[pk] = {'FECHA_CREACION': fechaCreacion, 'NOMBRE_CAMPANA': nombreCampana, 'CODIGO_EMPLEADO': idEmpleado, 'ESTADO_PRO': definirEstadoPro(estadoValido), 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_CIERRE': fechaCierre, 'POLIZA': str(numeroPoliza), 'FECHA_EXPIRACION': fechaExpiracionCoret, 'ESTADO_RETENCION': definirEstadoRetencionPro(estadoRetencionValido), 'CAMPAÑA_ID': campanaId, 'ESTADO_UT_PRO': definirEstadoUtPro(estadoUtValido), 'FECHA_ULTPAGO': fecUltimoPago, 'ESTADO_MANDATO': estadoMandato, 'FECHA_MANDATO': fecMandato, 'CONTACTO_CLIENTE': contactoCliente, 'CLIENTE_UNICO': clienteDuplicado, 'PAGA_COBRANZA': definirBooleano(cobranzaPro), 'PAGA_MANDATO': definirBooleano(pacpatPro)}
+                    
+                    dataXlsx[pk] = {'FECHA_CREACION': fechaCreacion, 'NOMBRE_CAMPANA': nombreCampana, 'CODIGO_EMPLEADO': idEmpleado, 'ESTADO_PRO': definirEstadoPro(estadoValido), 'POLIZAS_CAMPANA': polizasCampanas, 'FECHA_CIERRE': fechaCierre, 'POLIZA': str(numeroPoliza), 'FECHA_EXPIRACION': fechaExpiracionCoret, 'ESTADO_RETENCION': definirEstadoRetencionPro(estadoRetencionValido), 'CAMPAÑA_ID': campanaId, 'ESTADO_UT_PRO': definirEstadoUtPro(estadoUtValido), 'FECHA_ULTPAGO': fecUltimoPago, 'ESTADO_MANDATO': estadoMandato, 'FECHA_MANDATO': fecMandato, 'CONTACTO_CLIENTE': contactoCliente, 'CLIENTE_UNICO': clienteDuplicado, 'PAGA_COBRANZA': definirBooleano(cobranzaPro), 'PAGA_MANDATO': definirBooleano(pacpatPro)}
 
-                        validarEstadoRetencionExistente = estadoRetencionOriginalValido(campanasValidasRetencion, campanaId)
-                        if validarEstadoRetencionExistente:
-                            actualizarEstadosRetencionAntiguos(campanasValidasRetencion, campanaId, idEmpleado)
+                    validarEstadoRetencionExistente = estadoRetencionOriginalValido(campanasValidasRetencion, campanaId)
+                    if validarEstadoRetencionExistente:
+                        actualizarEstadosRetencionAntiguos(campanasValidasRetencion, campanaId, idEmpleado)
 
-            if insertarPeriodoCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
-                if insertarCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
-                    mensaje = 'InsertarCampanaEjecutivos;Se insertaron correctamente: %s Campaña(s)' % (cantidadCampanasValidas)
-                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'INSERTAR_CAMPANAS_EJECUTIVOS': mensaje})
-                    LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'INSERTAR_CAMPANAS_EJECUTIVOS': '-----------------------------------------------------' })
+        if insertarPeriodoCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
+            if insertarCampanaEjecutivos(campanasPorEjecutivos, fechaIncioMes):
+                mensaje = 'InsertarCampanaEjecutivos;Se insertaron correctamente: %s Campaña(s)' % (cantidadCampanasValidas)
+                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'INSERTAR_CAMPANAS_EJECUTIVOS': mensaje})
+                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'INSERTAR_CAMPANAS_EJECUTIVOS': '-----------------------------------------------------' })
 
-            if polizasNoAprobadas > 0:
-                mensaje = 'InsertPolizasReliquidar;Se insertaron correctamente: %s Poliza(s)' % (polizasNoAprobadas)
-                LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZAS_RELIQUIDAR': mensaje})
+        if polizasNoAprobadas > 0:
+            mensaje = 'InsertPolizasReliquidar;Se insertaron correctamente: %s Poliza(s)' % (polizasNoAprobadas)
+            LOG_PROCESO_PROACTIVA.setdefault(len(LOG_PROCESO_PROACTIVA)+1, {'POLIZAS_RELIQUIDAR': mensaje})
 
-            polizasReliquidadaTxt = polizasReliquidadas(periodo, complementoCliente)
+        polizasReliquidadaTxt = polizasReliquidadas(periodo, complementoCliente)
 
-            LOG_PROCESO_PROACTIVA.setdefault('FIN_CELDAS_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivoEntrada, len(tuple(hoja.rows)))})
-            LOG_PROCESO_PROACTIVA.setdefault('PROCESO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Proceso del Archivo: %s Finalizado' % archivoEntrada})
+        LOG_PROCESO_PROACTIVA.setdefault('FIN_CELDAS_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Lectura de Celdas del Archivo: %s Finalizada - %s filas' % (archivoEntrada, len(tuple(hoja.rows)))})
+        LOG_PROCESO_PROACTIVA.setdefault('PROCESO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Proceso del Archivo: %s Finalizado' % archivoEntrada})
 
-            return filaSalidaTxt, encabezadoTxt, polizasReliquidadaTxt, encabezadoReliquidacionesTxt, dataXlsx
-        else:
-            LOG_PROCESO_PROACTIVA.setdefault('ENCABEZADO_PROACTIVA', archivo_correcto)
-            raise
+        return filaSalidaTxt, encabezadoTxt, polizasReliquidadaTxt, encabezadoReliquidacionesTxt, dataXlsx
+
+        
     except Exception as e:
-        errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
-        LOG_PROCESO_PROACTIVA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_PROACTIVA)+1: errorMsg})
+        LOG_PROCESO_PROACTIVA.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_PROACTIVA)+1: traceback.format_exc()})
         LOG_PROCESO_PROACTIVA.setdefault('PROCESO_PROACTIVA', {len(LOG_PROCESO_PROACTIVA)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
-        # raise
         return False, False, False, False, False
         
-# print(leerArchivoProactiva(r'.\PROACTIVA\INPUTS\202201_Gestion_CoRet_Proactiva.xlsx', 202201, r'.\PROACTIVA\INPUTS\202201_Complemento_Cliente_Coret.xlsx'))
+# print(leerArchivoProactiva(r'.\PROACTIVA\INPUTS\202205_Gestion_CoRet_Proactiva.xlsx', 202205, r'.\PROACTIVA\INPUTS\202205_Complemento_Cliente_Coret.xlsx'))

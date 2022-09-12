@@ -26,6 +26,9 @@ def procesoAsistencia(fechaInput, archivoXlsxInput, pathArchivoTxt):
         if dataTxt:
             salidaArchivoTxt(salidaTxtAsistencia, dataTxt, encabezadoXlsx)
             print("<a>&#128221;</a> Archivo TXT: {0} creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaTxtAsistencia), len(dataTxt)))
+            
+        else:
+            print('<a style="color:red">Error no se creo el Archivo:</a> {0}'.format(sacarNombreArchivo(salidaTxtAsistencia)))
 
         if salidaLogTxt(pathLogSalida, logProceso):
             print("Archivo: {0} Creado!".format(pathLogSalida))
@@ -46,6 +49,9 @@ def procesoDotacion(fechaInput, pathArchivoTxt):
         if dataTxt:
             salidaArchivoTxt(salidaTxtDotacion, dataTxt, encabezadoXlsxDotacion)
             print("<a>&#128221;</a> Archivo TXT: {0} creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaTxtDotacion), len(dataTxt)))
+            
+        else:
+            print('<a style="color:red">Error no se creo el Archivo:</a> {0}'.format(sacarNombreArchivo(salidaTxtDotacion)))
             
         logProceso = LOG_PROCESO_DOTACION
         if salidaLogTxt(pathLogSalidaDotacion, logProceso):
@@ -123,10 +129,10 @@ def main():
         archivosValidos, encabezadosValidos = validarArchivosEntrada([archivoXlsAsistencia])
         if archivosValidos and encabezadosValidos:
             procesoAsistencia(fechaEntrada, archivoXlsAsistencia, pathArchivoTxtAsistencia)
+            procesoDotacion(fechaEntrada, pathArchivoTxtDotacion)
         else:
             print("Error en Archivo: {0}".format(archivoXlsAsistencia))
 
-        procesoDotacion(fechaEntrada, pathArchivoTxtDotacion)
 
     else:
         print("Error: El programa CRO necesita {0} parametros para su ejecucion".format(PROCESOS_GENERALES['DOTACION']['ARGUMENTOS_PROCESO']))

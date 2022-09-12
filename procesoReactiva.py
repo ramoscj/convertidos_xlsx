@@ -26,6 +26,9 @@ def procesoReactiva(fechaInput, fechaRangoUno, fechaRangoDos, archivoXlsxInput, 
             archivoProduccionXslx = ['PRODUCCION_{0}'.format(fechaInput), REACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX_PERIODO'], dataXlsx]
             if crearArchivoXlsx(salidaXlsx, [archivoProduccionXslx]):
                 print("<a>&#128221;</a> Archivo XLSX: {0}.xlsx creado con <strong> {1} registros</strong>".format(sacarNombreArchivo(salidaXlsx), len(dataXlsx)))
+                
+        else:
+            print('<a style="color:red">Error no se crearon los Archivos para CORET REACTIVA</a>')
 
         if salidaLogTxt(pathLogSalida, logProceso):
             print("Archivo: {0} Creado!".format(pathLogSalida))

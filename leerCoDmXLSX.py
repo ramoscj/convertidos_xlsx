@@ -1,4 +1,5 @@
 import datetime
+import traceback
 
 from openpyxl import load_workbook
 from tqdm import tqdm
@@ -122,7 +123,7 @@ def leerArchivoCoDm(archivoEntrada, periodo, fechaInicioEntrada, fechaFinEntrada
         return filaSalidaTxt, encabezadoTxt, filaSalidaXlsx
 
     except Exception as e:
-        errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
-        LOG_PROCESO_CODM.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_CODM)+1: errorMsg})
+        # errorMsg = 'Error: %s | %s' % (archivoEntrada, e)
+        LOG_PROCESO_CODM.setdefault('LECTURA_ARCHIVO', {len(LOG_PROCESO_CODM)+1: traceback.format_exc()})
         LOG_PROCESO_CODM.setdefault('PROCESO_GESTION', {len(LOG_PROCESO_CODM)+1: 'Error al procesar Archivo: %s' % archivoEntrada})
         return False, False

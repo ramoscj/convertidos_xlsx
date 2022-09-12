@@ -35,6 +35,9 @@ def procesoProactiva(fechaInput, archivoXlsxInput, archivoComplementoCliente, pa
             archivoReliquidaciones = ['RELIQUIDACIONES_{0}'.format(mesAnterior.strftime("%Y%m")), PROACTIVA_CONFIG_XLSX['ENCABEZADO_XLSX_REL'], reliquidacionesXlsx]
             if crearArchivoXlsx(salidaXlsx, [archivoProduccionPeriodo, archivoReliquidaciones]):
                 print("<a>&#128221;</a> Archivo XLSX: {0}.xlsx creado con <strong> {1} registros y {2} reliquidaciones</strong>".format(sacarNombreArchivo(salidaXlsx), len(dataArchivoXlsx), len(reliquidacionesXlsx)))
+                
+        else:
+            print('<a style="color:red">Error no se creo el Archivo:</a> {0}'.format(sacarNombreArchivo(salidaTxt)))
 
         if salidaLogTxt(pathLogSalida, logProceso):
             print("Archivo LOG: {0} Creado!".format(pathLogSalida))
